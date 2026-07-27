@@ -105,6 +105,7 @@ export function ProductsClient({
     category: string;
     occasion: string;
     stock: string;
+    repository: string;
     isTrending: boolean;
     isNewArrival: boolean;
     showInDiscountSection: boolean;
@@ -185,19 +186,7 @@ export function ProductsClient({
     }
   };
 
-  const groupedProducts = useMemo(() => {
-    if (!hasStockAdmin) return null;
-    const groups: Record<string, { name: string; products: ProductData[] }> = {};
-    products.forEach((p) => {
-      const repoId = p.repository?.id || "unassigned";
-      const repoName = p.repository?.name || "Unassigned Repository";
-      if (!groups[repoId]) {
-        groups[repoId] = { name: repoName, products: [] };
-      }
-      groups[repoId].products.push(p);
-    });
-    return groups;
-  }, [products, hasStockAdmin]);
+
 
   const hasHydratedPreferences = useRef(false);
 
@@ -692,26 +681,7 @@ export function ProductsClient({
       <ProductFilters initialFilters={initialFilters} />
 
       <div className="mt-6">
-        {hasStockAdmin && groupedProducts ? (
-          <div className="space-y-8">
-            {Object.entries(groupedProducts).map(([repoId, group]) => (
-              <div key={repoId} className="bg-white rounded-xl shadow-xs border border-gray-200 overflow-hidden">
-                <div className="bg-slate-50 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                  <h2 className="text-md font-bold text-gray-900 flex items-center gap-2">
-                    <Package className="w-4 h-4 text-[#2563EB]" />
-                    Repository: {group.name}
-                    <span className="text-xs font-semibold px-2 py-0.5 bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/25 rounded-md ml-2">
-                      {group.products.length} Products
-                    </span>
-                  </h2>
-                </div>
-                {renderProductsList(group.products)}
-              </div>
-            ))}
-          </div>
-        ) : (
-          renderProductsList(products)
-        )}
+        {renderProductsList(products)}
       </div>
 
       {/* Reusable Pagination UI */}

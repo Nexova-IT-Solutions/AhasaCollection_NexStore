@@ -24,6 +24,7 @@ type AdminProductsQueryInput = {
   category: string;
   occasion: string;
   stock: string;
+  repository: string;
   isTrending: boolean;
   isNewArrival: boolean;
   showInDiscountSection: boolean;
@@ -42,7 +43,7 @@ function normalizeTab(value: unknown): ProductsTab {
 
 function buildBaseWhere(input: Omit<AdminProductsQueryInput, "tab" | "page" | "pageSize">): Prisma.ProductWhereInput {
   const { 
-    q, category, occasion, stock, 
+    q, category, occasion, stock, repository,
     isTrending, isNewArrival, showInDiscountSection,
     isTopRated, isBestSeller, showInChocolateSection, showInSoftToysSection
   } = input;
@@ -76,6 +77,10 @@ function buildBaseWhere(input: Omit<AdminProductsQueryInput, "tab" | "page" | "p
   if (isBestSeller) where.isBestSeller = true;
   if (showInChocolateSection) where.showInChocolateSection = true;
   if (showInSoftToysSection) where.showInSoftToysSection = true;
+
+  if (repository) {
+    where.repositoryId = repository;
+  }
 
   return where;
 }
@@ -174,6 +179,7 @@ type PageProps = {
     category?: string;
     occasion?: string;
     stock?: string;
+    repository?: string;
     trending?: string;
     newArrival?: string;
     discount?: string;
@@ -194,6 +200,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   const category = params.category || "";
   const occasion = params.occasion || "";
   const stock = params.stock || "all";
+  const repository = params.repository || "";
   const isTrending = params.trending === "true";
   const isNewArrival = params.newArrival === "true";
   const showInDiscountSection = params.discount === "true";
@@ -222,6 +229,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     category,
     occasion,
     stock,
+    repository,
     isTrending,
     isNewArrival,
     showInDiscountSection,
@@ -243,6 +251,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     if (category) qp.set("category", category);
     if (occasion) qp.set("occasion", occasion);
     if (stock !== "all") qp.set("stock", stock);
+    if (repository) qp.set("repository", repository);
     if (isTrending) qp.set("trending", "true");
     if (isNewArrival) qp.set("newArrival", "true");
     if (showInDiscountSection) qp.set("discount", "true");
@@ -306,6 +315,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
               category,
               occasion,
               stock,
+              repository,
               isTrending,
               isNewArrival,
               showInDiscountSection,

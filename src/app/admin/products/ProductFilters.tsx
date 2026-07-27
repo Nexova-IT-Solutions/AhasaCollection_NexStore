@@ -25,6 +25,7 @@ interface ProductFiltersProps {
     category: string;
     occasion: string;
     stock: string;
+    repository: string;
     isTrending: boolean;
     isNewArrival: boolean;
     showInDiscountSection: boolean;
@@ -43,6 +44,8 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
   const [q, setQ] = useState(initialFilters.q);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [repositories, setRepositories] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
 
 
 
@@ -72,6 +75,25 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  const fetchRepositories = useCallback(async () => {
+    setIsLoadingRepositories(true);
+    try {
+      const res = await fetch("/api/admin/repositories");
+      if (res.ok) {
+        const json = await res.json();
+        setRepositories(Array.isArray(json) ? json : []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch repositories", error);
+    } finally {
+      setIsLoadingRepositories(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRepositories();
+  }, [fetchRepositories]);
 
   const updateSearchParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -155,6 +177,26 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Repository Dropdown */}
+        <div className="w-full sm:w-[220px]">
+          <Select
+            value={initialFilters.repository || "all"}
+            onValueChange={(value) => updateSearchParams({ repository: value })}
+          >
+            <SelectTrigger className="h-11 rounded-xl border-brand-border">
+              <SelectValue placeholder="All Repositories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Repositories</SelectItem>
+              {repositories.map((repo) => (
+                <SelectItem key={repo.id} value={repo.id}>
+                  {repo.name}
                 </SelectItem>
               ))}
             </SelectContent>
