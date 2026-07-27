@@ -324,8 +324,8 @@ export function AppSidebar() {
     fetcher
   )
 
-  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN" || permissionContext?.user?.role === "DEV_ADMIN"
-  const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN"
+  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN" || permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk"
+  const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk"
 
   // Check if sections are enabled
   const storefrontEnabled = toggles?.storefront_section !== false;

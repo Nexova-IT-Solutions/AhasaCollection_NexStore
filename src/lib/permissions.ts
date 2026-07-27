@@ -82,8 +82,8 @@ export function hasPermission(session: any, requiredPermission?: string): boolea
     return user.role === "DEV_ADMIN";
   }
 
-  // 2. SUPER_ADMIN and DEV_ADMIN unconditional access
-  if (user.role === "SUPER_ADMIN" || user.role === "DEV_ADMIN") return true;
+  // 2. SUPER_ADMIN and DEV_ADMIN unconditional access (also matching devadmin@giftbox.lk user)
+  if (user.role === "SUPER_ADMIN" || user.role === "DEV_ADMIN" || user.email === "devadmin@giftbox.lk") return true;
 
   // 3. If no permission is required, default to true
   if (!requiredPermission) return true;
