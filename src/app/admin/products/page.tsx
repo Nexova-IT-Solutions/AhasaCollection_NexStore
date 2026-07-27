@@ -140,12 +140,12 @@ const getAdminProductsData = cache(
                 },
               },
             },
-            repository: {
-              select: { id: true, name: true },
-            },
-            outlet: {
-              select: { id: true, name: true },
-            },
+          },
+          repository: {
+            select: { id: true, name: true },
+          },
+          outlet: {
+            select: { id: true, name: true },
           },
         },
         orderBy: { createdAt: "desc" },
