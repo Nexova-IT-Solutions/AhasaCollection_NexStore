@@ -908,7 +908,7 @@ export function UsersClient({ initialUsers, templates }: { initialUsers: UserDat
                     <div className="flex flex-col gap-1">
                       <Badge variant="outline" className={cn(
                         "w-fit rounded-lg px-2 text-[10px] uppercase font-black tracking-widest border-none",
-                        user.role === "SUPER_ADMIN", "DEV_ADMIN" ? "bg-purple-100 text-purple-700" : 
+                        (user.role === "SUPER_ADMIN" || user.role === "DEV_ADMIN") ? "bg-purple-100 text-purple-700" : 
                         user.role.includes("ADMIN") ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-700"
                       )}>
                         {user.role.replace("_", " ")}
