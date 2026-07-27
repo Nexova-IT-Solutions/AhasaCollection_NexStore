@@ -728,9 +728,9 @@ export function AppSidebar() {
     <nav className="flex flex-col h-full bg-white border-r border-brand-border shadow-sm overflow-hidden">
       {/* Header */}
       <div className="h-16 flex items-center justify-center border-b border-brand-border px-4 shrink-0">
-        <Link href={`/${isLocale ? localePrefix : "en"}`} className="flex items-center gap-2 font-bold text-xl text-[#A7066A] overflow-hidden truncate">
-          <Image src="/logo/logo.png" alt="SPC" width={38} height={38} className="h-[38px] w-[38px] shrink-0 object-contain" priority />
-          <span className="truncate">SPC Admin</span>
+        <Link href={`/${isLocale ? localePrefix : "en"}`} className="flex items-center gap-2 font-bold text-xl text-[#2563EB] overflow-hidden truncate">
+          <Image src="/logo/logo.png" alt="Ahasa" width={38} height={38} className="h-[38px] w-[38px] shrink-0 object-contain" priority />
+          <span className="truncate">Ahasa Admin</span>
         </Link>
       </div>
 
@@ -757,6 +757,18 @@ export function AppSidebar() {
           {
             title: "Company Details",
             url: "/admin/company-details",
+            icon: Building2,
+            requiredPermission: "",
+          },
+          {
+            title: "Repositories",
+            url: "/admin/devadmin/repositories",
+            icon: Building2,
+            requiredPermission: "",
+          },
+          {
+            title: "Outlets",
+            url: "/admin/devadmin/outlets",
             icon: Building2,
             requiredPermission: "",
           },
