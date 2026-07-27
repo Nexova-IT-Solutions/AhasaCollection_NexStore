@@ -287,6 +287,18 @@ export async function PATCH(req: Request, props: RouteProps) {
           ? { connect: { id: data.supplierId } }
           : { disconnect: true };
 
+      const repositoryRelation = data.repositoryId === undefined
+        ? undefined
+        : data.repositoryId
+          ? { connect: { id: data.repositoryId } }
+          : { disconnect: true };
+
+      const outletRelation = data.outletId === undefined
+        ? undefined
+        : data.outletId
+          ? { connect: { id: data.outletId } }
+          : { disconnect: true };
+
       const productRecord = await tx.product.update({
         where: { id },
         data: {
@@ -300,8 +312,8 @@ export async function PATCH(req: Request, props: RouteProps) {
           ...(categoryRelation ? { category: categoryRelation } : {}),
           sizes: data.sizes,
           colors: data.colors,
-          repositoryId: data.repositoryId !== undefined ? data.repositoryId : undefined,
-          outletId: data.outletId !== undefined ? data.outletId : undefined,
+          ...(repositoryRelation ? { repository: repositoryRelation } : {}),
+          ...(outletRelation ? { outlet: outletRelation } : {}),
           occasions: data.occasionIds
             ? {
                 set: data.occasionIds.map((occasionId) => ({ id: occasionId })),

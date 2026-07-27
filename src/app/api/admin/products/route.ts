@@ -348,8 +348,8 @@ export async function POST(req: Request) {
             costPrice: costPrice ?? null,
             ...(supplierId ? { supplier: { connect: { id: supplierId } } } : {}),
             ...(supplierId && supplyDate ? { lastSuppliedAt: new Date(supplyDate) } : {}),
-            repositoryId: repositoryId || null,
-            outletId: outletId || null,
+            ...(repositoryId ? { repository: { connect: { id: repositoryId } } } : {}),
+            ...(outletId ? { outlet: { connect: { id: outletId } } } : {}),
           },
           select: {
             id: true,
