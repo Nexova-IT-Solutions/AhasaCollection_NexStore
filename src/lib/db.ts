@@ -44,7 +44,7 @@ function createPrismaClient(): PrismaClient {
 //
 // Bump this key when there is a breaking schema change that would make a cached
 // client instance invalid (e.g. new model or renamed relation).
-const GLOBAL_KEY = "prisma_v12_sb" as const;
+const GLOBAL_KEY = "prisma_v13_sb" as const;
 
 type GlobalPrismaStore = {
   [GLOBAL_KEY]?: PrismaClient;
