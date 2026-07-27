@@ -376,6 +376,10 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [costPrice, setCostPrice] = useState<number | "">("");
   const [supplierId, setSupplierId] = useState("");
   const [supplyDate, setSupplyDate] = useState<Date | undefined>(undefined);
+  const [repositoryOptions, setRepositoryOptions] = useState<{ id: string; name: string }[]>([]);
+  const [outletOptions, setOutletOptions] = useState<{ id: string; name: string }[]>([]);
+  const [repositoryId, setRepositoryId] = useState("");
+  const [outletId, setOutletId] = useState("");
 
   const [sizeInput, setSizeInput] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
@@ -448,6 +452,8 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     setCategoryId(product.categoryId ?? "");
     setCostPrice(product.costPrice != null ? product.costPrice : "");
     setSupplierId(product.supplierId ?? "");
+    setRepositoryId((product as any).repositoryId ?? "");
+    setOutletId((product as any).outletId ?? "");
     setSupplyDate(product.lastSuppliedAt ? new Date(product.lastSuppliedAt) : undefined);
     setSelectedOccasionIds(product.occasions?.map((occasion) => occasion.id) ?? []);
     setSelectedRecipientIds(product.recipients?.map((recipient) => recipient.id) ?? []);
@@ -508,13 +514,15 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
       }
 
       try {
-        const [categoriesRes, occasionsRes, recipientsRes, moodsRes, discountsRes, suppliersRes] = await Promise.all([
+        const [categoriesRes, occasionsRes, recipientsRes, moodsRes, discountsRes, suppliersRes, repositoriesRes, outletsRes] = await Promise.all([
           categories ? Promise.resolve(null) : fetch("/api/admin/categories", { cache: "no-store" }),
           occasions ? Promise.resolve(null) : fetch("/api/admin/occasions", { cache: "no-store" }),
           recipients ? Promise.resolve(null) : fetch("/api/admin/recipients", { cache: "no-store" }),
           moods ? Promise.resolve(null) : fetch("/api/admin/moods", { cache: "no-store" }),
           discounts ? Promise.resolve(null) : fetch("/api/admin/discounts", { cache: "no-store" }),
           fetch("/api/admin/suppliers", { cache: "no-store" }),
+          fetch("/api/admin/repositories", { cache: "no-store" }),
+          fetch("/api/admin/outlets", { cache: "no-store" }),
         ]);
 
         if (!active) return;
@@ -589,6 +597,16 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                   .filter((item: SupplierOption) => item.id && item.name)
               : []
           );
+        }
+
+        if (repositoriesRes && repositoriesRes.ok) {
+          const reposJson = await repositoriesRes.json();
+          setRepositoryOptions(Array.isArray(reposJson) ? reposJson : []);
+        }
+
+        if (outletsRes && outletsRes.ok) {
+          const outletsJson = await outletsRes.json();
+          setOutletOptions(Array.isArray(outletsJson) ? outletsJson : []);
         }
       } finally {
         if (active) setOptionsLoading(false);
@@ -1004,6 +1022,8 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           costPrice: costPrice === "" ? null : Number(costPrice),
           supplierId: supplierId || null,
           supplyDate: supplierId && supplyDate ? supplyDate.toISOString() : null,
+          repositoryId: repositoryId || null,
+          outletId: outletId || null,
         }),
       });
 
@@ -1725,6 +1745,54 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                 )}
               />
               <p className="text-[11px] text-[#6B5A64]">Assign a supplier for inventory tracking.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Repository</Label>
+              <Select
+                value={repositoryId || "__none__"}
+                onValueChange={(val) => {
+                  const finalVal = val === "__none__" ? "" : val;
+                  setRepositoryId(finalVal);
+                }}
+              >
+                <SelectTrigger className="h-12 w-full border-brand-border">
+                  <SelectValue placeholder="Select a repository" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {repositoryOptions.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-[#6B5A64]">Assign this product to a repository/warehouse.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Outlet</Label>
+              <Select
+                value={outletId || "__none__"}
+                onValueChange={(val) => {
+                  const finalVal = val === "__none__" ? "" : val;
+                  setOutletId(finalVal);
+                }}
+              >
+                <SelectTrigger className="h-12 w-full border-brand-border">
+                  <SelectValue placeholder="Select an outlet" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {outletOptions.map((outlet) => (
+                    <SelectItem key={outlet.id} value={outlet.id}>
+                      {outlet.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-[#6B5A64]">Assign this product to a physical outlet.</p>
             </div>
 
             <div className="space-y-2">

@@ -85,6 +85,8 @@ model User {
   returnRequests    ReturnRequest[]
   statusHistories   OrderStatusHistory[]
   ledgerEntries     CustomerLedger[]
+  outletId          String?
+  outlet            Outlet?             @relation(fields: [outletId], references: [id])
 }
 
 enum LedgerTransactionType {
@@ -260,6 +262,10 @@ model Product {
   averageRating         Float           @default(0)
   reviewCount           Int             @default(0)
   orderItems            OrderItem[]
+  repositoryId          String?
+  outletId              String?
+  repository            Repository?     @relation(fields: [repositoryId], references: [id])
+  outlet                Outlet?         @relation(fields: [outletId], references: [id])
 
   @@index([categoryId])
   @@index([isNewArrival])
@@ -274,6 +280,8 @@ model Product {
   @@index([createdAt])
   @@index([name])
   @@index([stock])
+  @@index([repositoryId])
+  @@index([outletId])
 }
 
 model ProductSupply {
@@ -962,4 +970,21 @@ model EmailLog {
   status       String   // "SUCCESS", "FAILED"
   errorMessage String?  @db.Text
   createdAt    DateTime @default(now())
+}
+
+model Repository {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+}
+
+model Outlet {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+  staff     User[]
 }

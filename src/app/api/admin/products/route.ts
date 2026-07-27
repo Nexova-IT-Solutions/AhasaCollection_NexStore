@@ -53,6 +53,8 @@ const productCreateSchema = z.object({
   costPrice: z.coerce.number().min(0).optional().nullable(),
   supplierId: z.string().trim().optional().nullable(),
   supplyDate: z.string().optional().nullable(),
+  repositoryId: z.string().trim().optional().nullable(),
+  outletId: z.string().trim().optional().nullable(),
 });
 
 function revalidateHomePaths() {
@@ -87,6 +89,15 @@ export async function GET(req: Request) {
     const skip = (page - 1) * pageSize;
 
     const where: any = {};
+
+    const user = await db.user.findUnique({
+      where: { email: session.user.email as string },
+      select: { role: true, outletId: true },
+    });
+
+    if (user && user.outletId && !["SUPER_ADMIN", "DEV_ADMIN"].includes(user.role)) {
+      where.outletId = user.outletId;
+    }
 
     if (mood && moodClient) {
       where.moods = {
@@ -225,6 +236,8 @@ export async function POST(req: Request) {
       costPrice,
       supplierId,
       supplyDate,
+      repositoryId,
+      outletId,
     } = parsed.data;
 
     const normalizedGiftBoxItems = Array.from(
@@ -335,6 +348,8 @@ export async function POST(req: Request) {
             costPrice: costPrice ?? null,
             ...(supplierId ? { supplier: { connect: { id: supplierId } } } : {}),
             ...(supplierId && supplyDate ? { lastSuppliedAt: new Date(supplyDate) } : {}),
+            repositoryId: repositoryId || null,
+            outletId: outletId || null,
           },
           select: {
             id: true,

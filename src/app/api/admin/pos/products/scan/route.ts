@@ -26,6 +26,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const user = await db.user.findUnique({
+      where: { email: session.user.email as string },
+      select: { role: true, outletId: true },
+    });
+
+    const isStaff = user && user.outletId && !["SUPER_ADMIN", "DEV_ADMIN"].includes(user.role);
+
     // Search by SKU first (exact match), then by gift card barcode
     const product = await db.product.findFirst({
       where: {
@@ -34,6 +41,7 @@ export async function GET(req: NextRequest) {
           { sku: { equals: barcode, mode: "insensitive" } },
         ],
         isActive: true,
+        ...(isStaff ? { outletId: user.outletId } : {}),
       },
       select: {
         id: true,
@@ -118,6 +126,7 @@ export async function GET(req: NextRequest) {
           path: [],
           array_contains: [{ sku: barcode }],
         },
+        ...(isStaff ? { outletId: user.outletId } : {}),
       },
       select: {
         id: true,

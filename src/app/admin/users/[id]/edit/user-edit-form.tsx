@@ -48,6 +48,7 @@ type EditableUser = {
   templateId: string;
   customPermissions: Record<string, Record<string, boolean>> | null;
   privileges: string[];
+  outletId?: string | null;
 };
 
 type FormValues = EditableUser & { password?: string };
@@ -63,6 +64,16 @@ export function UserEditForm({ locale, user, templates }: UserEditFormProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [profileImage, setProfileImage] = useState<(string | File)[]>(user.image ? [user.image] : []);
+  const [outlets, setOutlets] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/outlets")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setOutlets(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   const { register, handleSubmit, reset, watch, setValue } = useForm<FormValues>({
     defaultValues: user,
@@ -126,6 +137,7 @@ export function UserEditForm({ locale, user, templates }: UserEditFormProps) {
       customPermissions: values.customPermissions || null,
       hireDate: values.hireDate || null,
       birthday: values.birthday || null,
+      outletId: values.outletId || null,
       ...(values.role === "USER"
         ? {
             templateId: null,
@@ -139,6 +151,7 @@ export function UserEditForm({ locale, user, templates }: UserEditFormProps) {
             maxDiscount: 0,
             commissionRate: 0,
             commissionMethod: null,
+            outletId: null,
           }
         : {}),
     };
@@ -282,6 +295,20 @@ export function UserEditForm({ locale, user, templates }: UserEditFormProps) {
                   <div className="space-y-2">
                     <label className="text-sm font-semibold">Login End Time</label>
                     <Input type="time" {...register("loginEndTime")} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">Assigned Outlet</label>
+                    <select
+                      className="w-full flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      {...register("outletId")}
+                    >
+                      <option value="">None / Not Tagged</option>
+                      {outlets.map((outlet) => (
+                        <option key={outlet.id} value={outlet.id}>
+                          {outlet.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </CardContent>
               </Card>

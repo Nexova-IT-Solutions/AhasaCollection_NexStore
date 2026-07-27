@@ -52,6 +52,8 @@ const productUpdateSchema = z.object({
   costPrice: z.coerce.number().min(0).optional().nullable(),
   supplierId: z.string().trim().optional().nullable(),
   supplyDate: z.string().optional().nullable(),
+  repositoryId: z.string().trim().optional().nullable(),
+  outletId: z.string().trim().optional().nullable(),
 });
 
 function revalidateHomePaths(id?: string) {
@@ -298,6 +300,8 @@ export async function PATCH(req: Request, props: RouteProps) {
           ...(categoryRelation ? { category: categoryRelation } : {}),
           sizes: data.sizes,
           colors: data.colors,
+          repositoryId: data.repositoryId !== undefined ? data.repositoryId : undefined,
+          outletId: data.outletId !== undefined ? data.outletId : undefined,
           occasions: data.occasionIds
             ? {
                 set: data.occasionIds.map((occasionId) => ({ id: occasionId })),

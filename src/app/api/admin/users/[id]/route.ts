@@ -116,6 +116,7 @@ const updateUserSchema = z
     maxDiscount: z.coerce.number().min(0).max(100).optional(),
     commissionRate: z.coerce.number().min(0).max(100).optional(),
     commissionMethod: z.string().trim().optional().nullable(),
+    outletId: z.string().trim().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     const isStaff = data.role !== CUSTOMER_ROLE;
@@ -332,6 +333,7 @@ export async function GET(
         templateId: true,
         customPermissions: true,
         phoneNumber: true,
+        outletId: true,
         comments: true,
         addressLine1: true,
         addressLine2: true,
@@ -391,7 +393,7 @@ export async function PATCH(
       phoneNumber, comments,
       billingAddress, isDeliveryAddressDifferent, deliveryAddress, staffPermanentAddress,
       loginStartTime, loginEndTime, hireDate, birthday, employeeNumber, language,
-      canOverridePrices, maxDiscount, commissionRate, commissionMethod
+      canOverridePrices, maxDiscount, commissionRate, commissionMethod, outletId
     } = bodyData;
     const normalizedEmployeeNumber =
       role === CUSTOMER_ROLE ? null : (employeeNumber?.trim() || null);
@@ -434,6 +436,7 @@ export async function PATCH(
       maxDiscount: maxDiscount,
       commissionRate: commissionRate,
       commissionMethod,
+      outletId: outletId !== undefined ? (outletId || null) : undefined,
     };
 
     if (password) {

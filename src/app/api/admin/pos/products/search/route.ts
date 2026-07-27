@@ -32,6 +32,15 @@ export async function GET(req: NextRequest) {
       stock: { gt: 0 },
     };
 
+    const user = await db.user.findUnique({
+      where: { email: session.user.email as string },
+      select: { role: true, outletId: true },
+    });
+
+    if (user && user.outletId && !["SUPER_ADMIN", "DEV_ADMIN"].includes(user.role)) {
+      where.outletId = user.outletId;
+    }
+
     if (query.length > 0) {
       where.OR = [
         { name: { contains: query, mode: "insensitive" } },
