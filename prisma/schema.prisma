@@ -988,3 +988,16 @@ model Outlet {
   products  Product[]
   staff     User[]
 }
+
+model StockTransferLog {
+  id             String   @id @default(cuid())
+  productId      String
+  productName    String
+  productSku     String?
+  sourceOutletId String?
+  targetOutletId String?
+  quantity       Int
+  reason         String
+  performedById  String
+  createdAt      DateTime @default(now())
+}

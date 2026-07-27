@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { hasPermission } from "@/lib/permissions";
 import { Prisma } from "@prisma/client";
 import { unstable_cache as cache } from "next/cache";
 import { Suspense } from "react";
@@ -139,6 +140,12 @@ const getAdminProductsData = cache(
                 },
               },
             },
+            repository: {
+              select: { id: true, name: true },
+            },
+            outlet: {
+              select: { id: true, name: true },
+            },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -204,6 +211,11 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
     redirect("/"); // unauthorized
   }
+
+  const hasStockAdmin = session && (
+    ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
+    hasPermission(session, "catalog.stock_admin")
+  );
 
   const { products, totalCount, standardCount, giftBoxesCount } = await getAdminProductsData({
     q,
@@ -283,11 +295,12 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
 
         <Suspense fallback={<AdminProductsLoading />}>
           <ProductsClient
-            initialProducts={products}
+            initialProducts={products as any}
             initialPage={page}
             initialPageSize={pageSize}
             initialTotal={totalCount}
             initialTab={tab}
+            hasStockAdmin={!!hasStockAdmin}
             initialFilters={{
               q,
               category,

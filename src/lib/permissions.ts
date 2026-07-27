@@ -42,6 +42,7 @@ export const PERMISSION_TREE_STRUCTURE = {
       manage_products: "Add/Edit/Delete Products",
       manage_categories: "Manage Categories",
       manage_inventory: "Count & Adjust Inventory",
+      stock_admin: "Stock Admin (Group by Repositories & Transfer Outlets)",
     },
   },
   customers: {
