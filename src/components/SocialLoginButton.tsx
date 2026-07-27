@@ -56,7 +56,7 @@ export function SocialLoginButton({ provider, label, callbackUrl = "/" }: Social
       type="button"
       disabled={isLoading}
       onClick={handleLogin}
-      className="w-full flex items-center justify-center border-brand-border hover:bg-[#FCEAF4]/30"
+      className="w-full flex items-center justify-center border-brand-border hover:bg-[#EFF6FF]/30"
     >
       {isLoading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

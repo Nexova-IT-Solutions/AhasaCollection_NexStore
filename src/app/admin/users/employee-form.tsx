@@ -59,6 +59,7 @@ export type EmployeeFormData = {
   customPermissions: Record<string, Record<string, boolean>> | null;
   privileges: string[];
   accounts?: { type: string; provider: string; providerAccountId: string }[];
+  outletId?: string | null;
 };
 
 type FormValues = EmployeeFormData & { password?: string; confirmPassword?: string };
@@ -172,6 +173,7 @@ function buildEmployeeFormSchema(isCreateMode: boolean, isSocialUser: boolean, h
       templateId: z.string().optional().nullable(),
       customPermissions: z.record(z.string(), z.record(z.string(), z.boolean())).nullable().optional(),
       privileges: z.array(z.string()).optional(),
+      outletId: z.string().optional().nullable(),
       password: isCreateMode
         ? z.string().trim().min(1, "Password is required").min(6, "Password must be at least 6 characters")
         : (isSocialUser || hidePasswordFields)
@@ -420,6 +422,7 @@ const EMPTY_DEFAULTS: EmployeeFormData = {
   templateId: "",
   customPermissions: null,
   privileges: [],
+  outletId: "",
 };
 
 type PermissionTreeProps = {
@@ -509,6 +512,17 @@ export function EmployeeForm({ locale, mode, user, templates, initialUserType = 
   const router = useRouter();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [outlets, setOutlets] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/outlets")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setOutlets(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   const socialAccountCount = user?.accounts?.length ?? 0;
   const isSocialUser = mode === "edit" && socialAccountCount > 0;
   const isEditMode = mode === "edit";
@@ -747,6 +761,7 @@ export function EmployeeForm({ locale, mode, user, templates, initialUserType = 
       maxDiscount: 0,
       commissionRate: 0,
       commissionMethod: null,
+      outletId: values.role === CUSTOMER_ROLE ? null : (values.outletId || null),
       ...(values.role === CUSTOMER_ROLE
         ? {
             privileges: [],
@@ -1200,6 +1215,20 @@ export function EmployeeForm({ locale, mode, user, templates, initialUserType = 
                     <Label required className="text-sm font-semibold">Employee Number</Label>
                     <Input {...register("employeeNumber")} placeholder="EMP-001" />
                     {errors.employeeNumber ? <p className="text-sm text-red-600">{errors.employeeNumber.message as string}</p> : null}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Assigned Outlet</Label>
+                    <select
+                      className="w-full flex h-10 items-center rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      {...register("outletId")}
+                    >
+                      <option value="">None / Not Tagged</option>
+                      {outlets.map((outlet) => (
+                        <option key={outlet.id} value={outlet.id}>
+                          {outlet.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </CardContent>
               </Card>

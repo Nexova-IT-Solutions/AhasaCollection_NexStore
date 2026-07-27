@@ -254,7 +254,7 @@
 }
 
 .prose-product a {
-  color: #A7066A;
+  color: #2563EB;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -284,7 +284,7 @@
 }
 
 .prose-product li::marker {
-  color: #A7066A;
+  color: #2563EB;
 }
 
 .prose-product blockquote {
@@ -297,8 +297,8 @@
 }
 
 .prose-product code {
-  background: #FCEAF4;
-  color: #A7066A;
+  background: #EFF6FF;
+  color: #2563EB;
   padding: 0.125em 0.375em;
   border-radius: 0.25rem;
   font-size: 0.875em;
@@ -341,7 +341,7 @@
 }
 
 .prose-product th {
-  background: #FCEAF4;
+  background: #EFF6FF;
   font-weight: 600;
   color: #1F1720;
 }

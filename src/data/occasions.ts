@@ -39,7 +39,7 @@ export const occasions: Occasion[] = [
     slug: "thank-you",
     description: "Show your appreciation with a thoughtful gift",
     image: "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=400&h=300&fit=crop",
-    color: "#A7066A",
+    color: "#2563EB",
   },
   {
     id: "occ-new-baby",

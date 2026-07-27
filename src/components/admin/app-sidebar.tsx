@@ -595,8 +595,8 @@ export function AppSidebar() {
               <button
                 className={`flex w-full items-center gap-3 mx-1 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors cursor-pointer group ${
                   isItemActive
-                    ? "bg-[#A7066A] text-white"
-                    : "text-[#1F1720] hover:bg-[#FCEAF4] hover:text-[#A7066A]"
+                    ? "bg-[#2563EB] text-white"
+                    : "text-[#1F1720] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
                 }`}
               >
                 {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
@@ -613,8 +613,8 @@ export function AppSidebar() {
                       href={toHref(child.url!)}
                       className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${
                         child.url && isActive(child.url)
-                          ? "bg-[#FCEAF4] text-[#A7066A]"
-                          : "text-[#6B5A64] hover:bg-[#FCEAF4] hover:text-[#A7066A]"
+                          ? "bg-[#EFF6FF] text-[#2563EB]"
+                          : "text-[#6B5A64] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
                       }`}
                     >
                       {child.icon && <child.icon className="h-3.5 w-3.5 shrink-0" />}
@@ -636,8 +636,8 @@ export function AppSidebar() {
           href={toHref(item.url!)}
           className={`flex items-center gap-3 mx-1 rounded-xl px-3 py-2.5 text-[14px] font-medium transition-colors ${
             isItemActive
-              ? "bg-[#A7066A] text-white"
-              : "text-[#1F1720] hover:bg-[#FCEAF4] hover:text-[#A7066A]"
+              ? "bg-[#2563EB] text-white"
+              : "text-[#1F1720] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
           }`}
         >
           {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
@@ -645,21 +645,21 @@ export function AppSidebar() {
           <span className="truncate">{item.title}</span>
           {item.url === "/admin/orders" && (
             <Badge className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold flex items-center justify-center min-w-[20px] ${
-              isItemActive ? "bg-white text-[#A7066A]" : (totalOrderCount > 0 ? "bg-[#FCEAF4] text-[#A7066A]" : "bg-slate-100 text-slate-600")
+              isItemActive ? "bg-white text-[#2563EB]" : (totalOrderCount > 0 ? "bg-[#EFF6FF] text-[#2563EB]" : "bg-slate-100 text-slate-600")
             }`}>
               {totalOrderCount}
             </Badge>
           )}
           {item.url === "/admin/reviews" && (
             <Badge className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold flex items-center justify-center min-w-[20px] ${
-              isItemActive ? "bg-white text-[#A7066A]" : (pendingReviewCount > 0 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600")
+              isItemActive ? "bg-white text-[#2563EB]" : (pendingReviewCount > 0 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600")
             }`}>
               {pendingReviewCount}
             </Badge>
           )}
           {item.url === "/admin/returns" && (
             <Badge className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold flex items-center justify-center min-w-[20px] ${
-              isItemActive ? "bg-white text-[#A7066A]" : (pendingReturnCount > 0 ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-600")
+              isItemActive ? "bg-white text-[#2563EB]" : (pendingReturnCount > 0 ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-600")
             }`}>
               {pendingReturnCount}
             </Badge>

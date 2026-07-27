@@ -626,7 +626,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     let currentY = 0;
 
     // Header Background
-    doc.setFillColor(167, 6, 106); // #A7066A (Brand color)
+    doc.setFillColor(37, 99, 235); // #A7066A (Brand color)
     doc.rect(0, 0, pageWidth, 40, "F");
 
     // Header text
@@ -731,7 +731,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description / وصف العنصر", "Qty / الكمية", "Unit Price / سعر الوحدة", "Discount / خصم", "Total / المجموع"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
+      headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
       styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
@@ -761,7 +761,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
-    doc.setTextColor(167, 6, 106);
+    doc.setTextColor(37, 99, 235);
     doc.text("Total / المجموع:", pageWidth - 110, totalY);
     doc.text(`OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
 
