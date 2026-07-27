@@ -1,0 +1,4 @@
+
+> nextjs_tailwind_shadcn_ts@1.0.3 build
+> next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/
+

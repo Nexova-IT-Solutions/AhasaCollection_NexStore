@@ -1,0 +1,14 @@
+ schemaname | tablename |             indexname             | tablespace |                                                  indexdef                                                  
+------------+-----------+-----------------------------------+------------+------------------------------------------------------------------------------------------------------------
+ public     | Product   | Product_pkey                      |            | CREATE UNIQUE INDEX "Product_pkey" ON public."Product" USING btree (id)
+ public     | Product   | Product_categoryId_idx            |            | CREATE INDEX "Product_categoryId_idx" ON public."Product" USING btree ("categoryId")
+ public     | Product   | Product_isNewArrival_idx          |            | CREATE INDEX "Product_isNewArrival_idx" ON public."Product" USING btree ("isNewArrival")
+ public     | Product   | Product_isTrending_idx            |            | CREATE INDEX "Product_isTrending_idx" ON public."Product" USING btree ("isTrending")
+ public     | Product   | Product_showInDiscountSection_idx |            | CREATE INDEX "Product_showInDiscountSection_idx" ON public."Product" USING btree ("showInDiscountSection")
+ public     | Product   | Product_isPremiumGiftBox_idx      |            | CREATE INDEX "Product_isPremiumGiftBox_idx" ON public."Product" USING btree ("isPremiumGiftBox")
+ public     | Product   | Product_isActive_idx              |            | CREATE INDEX "Product_isActive_idx" ON public."Product" USING btree ("isActive")
+ public     | Product   | Product_createdAt_idx             |            | CREATE INDEX "Product_createdAt_idx" ON public."Product" USING btree ("createdAt")
+ public     | Product   | Product_name_idx                  |            | CREATE INDEX "Product_name_idx" ON public."Product" USING btree (name)
+ public     | Product   | product_name_trgm_idx             |            | CREATE INDEX product_name_trgm_idx ON public."Product" USING gin (name gin_trgm_ops)
+(10 rows)
+

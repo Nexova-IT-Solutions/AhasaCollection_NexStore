@@ -1,0 +1,493 @@
+
+> nextjs_tailwind_shadcn_ts@1.1.2 dev
+> next dev -p 3000 2>&1 | tee dev.log
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.123.172:3000
+- Environments: .env.local, .env
+✓ Ready in 853ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+[next-auth][warn][DEBUG_ENABLED] 
+https://next-auth.js.org/warnings#debug_enabled
+ GET /api/admin/me 200 in 2.9s (next.js: 456ms, application-code: 2.4s)
+ GET /admin/pos 200 in 2.4s (next.js: 574ms, application-code: 1807ms)
+○ Compiling /admin/pos ...
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 1479ms (next.js: 155ms, application-code: 1324ms)
+ GET /api/admin/pos/shifts/close 200 in 1944ms (next.js: 74ms, application-code: 1869ms)
+ GET /api/auth/session 200 in 2.9s (next.js: 2.9s, application-code: 35ms)
+ GET /api/auth/session 200 in 93ms (next.js: 78ms, application-code: 15ms)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 1680ms (next.js: 9ms, application-code: 1671ms)
+ GET /api/admin/me 200 in 2.5s (next.js: 16ms, application-code: 2.5s)
+ GET /api/admin/returns/count?status=PENDING 200 in 2.5s (next.js: 261ms, application-code: 2.2s)
+ GET /api/admin/inventory/out-of-stock 200 in 2.5s (next.js: 202ms, application-code: 2.3s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 2.5s (next.js: 136ms, application-code: 2.4s)
+ GET /api/admin/orders/metrics 200 in 2.5s (next.js: 72ms, application-code: 2.4s)
+ GET /admin/products/cmp5jk5y20000l704o40cg22g/edit 200 in 8.7s (next.js: 5.6s, application-code: 3.2s)
+[browser] Image with src "https://kvglredjnqdqqbmmhivi.supabase.co/storage/v1/object/public/giftbox/products/b9qql2lg1p_1778752163023.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 4.3s (next.js: 15ms, application-code: 4.3s)
+ GET /api/admin/me 200 in 4.5s (next.js: 6ms, application-code: 4.5s)
+ GET /api/admin/orders/metrics 200 in 4.5s (next.js: 6ms, application-code: 4.5s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 4.5s (next.js: 14ms, application-code: 4.5s)
+ GET /api/admin/returns/count?status=PENDING 200 in 4.5s (next.js: 13ms, application-code: 4.5s)
+ GET /api/admin/inventory/out-of-stock 200 in 4.5s (next.js: 7ms, application-code: 4.5s)
+ GET /api/admin/orders/metrics 200 in 5.5s (next.js: 17ms, application-code: 5.5s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 5.5s (next.js: 12ms, application-code: 5.5s)
+ GET /api/admin/inventory/out-of-stock 200 in 5.9s (next.js: 20ms, application-code: 5.9s)
+ GET /api/admin/returns/count?status=PENDING 200 in 6.2s (next.js: 13ms, application-code: 6.2s)
+ GET /api/admin/suppliers 200 in 6.3s (next.js: 110ms, application-code: 6.2s)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 5.3s (next.js: 5ms, application-code: 5.3s)
+ GET /api/admin/orders/metrics 200 in 5.2s (next.js: 9ms, application-code: 5.2s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 5.5s (next.js: 10ms, application-code: 5.5s)
+ GET /api/admin/inventory/out-of-stock 200 in 6.1s (next.js: 28ms, application-code: 6.0s)
+ GET /api/admin/returns/count?status=PENDING 200 in 6.3s (next.js: 41ms, application-code: 6.3s)
+ GET /api/admin/me 200 in 6.6s (next.js: 12ms, application-code: 6.6s)
+[TrendingCategories] 2026-06-05T05:05:56.630Z — STRICT query returned 5 categories: [
+  'Chocolates & Food Items',
+  'Cosmetics & Skin Care',
+  'Makeup Accessories',
+  'Mother’s Day Collection',
+  'Teddy Bears'
+]
+ GET /api/admin/me 200 in 3.2s (next.js: 9ms, application-code: 3.2s)
+ GET / 200 in 26.0s (next.js: 7.5s, proxy.ts: 786ms, application-code: 17.8s)
+ POST /api/admin/pos/gift-cards/activate 200 in 10.0s (next.js: 38ms, application-code: 10.0s)
+ GET /api/admin/me 200 in 376ms (next.js: 4ms, application-code: 372ms)
+ GET /api/admin/me 200 in 324ms (next.js: 5ms, application-code: 319ms)
+ GET /api/admin/me 200 in 372ms (next.js: 2ms, application-code: 370ms)
+ GET /api/admin/me 200 in 369ms (next.js: 2ms, application-code: 366ms)
+ GET /api/admin/me 200 in 367ms (next.js: 4ms, application-code: 363ms)
+ GET /api/admin/me 200 in 368ms (next.js: 2ms, application-code: 366ms)
+ GET /api/admin/me 200 in 729ms (next.js: 1847µs, application-code: 727ms)
+ GET /api/admin/me 200 in 328ms (next.js: 10ms, application-code: 319ms)
+ GET /api/admin/me 200 in 372ms (next.js: 2ms, application-code: 370ms)
+ GET /api/admin/me 200 in 374ms (next.js: 3ms, application-code: 371ms)
+ GET /api/admin/me 200 in 368ms (next.js: 2ms, application-code: 366ms)
+ GET /api/admin/me 200 in 372ms (next.js: 2ms, application-code: 370ms)
+ GET /api/admin/me 200 in 372ms (next.js: 2ms, application-code: 369ms)
+ GET /api/admin/me 200 in 377ms (next.js: 3ms, application-code: 374ms)
+ GET /api/admin/me 200 in 368ms (next.js: 2ms, application-code: 366ms)
+ GET /api/admin/me 200 in 370ms (next.js: 2ms, application-code: 368ms)
+ GET /api/auth/session 200 in 133ms (next.js: 111ms, application-code: 22ms)
+ GET /api/admin/me 200 in 482ms (next.js: 24ms, application-code: 458ms)
+ GET /api/admin/orders/metrics 200 in 571ms (next.js: 6ms, application-code: 565ms)
+ GET /api/admin/reviews/count?status=PENDING 200 in 751ms (next.js: 10ms, application-code: 742ms)
+ GET /api/admin/inventory/out-of-stock 200 in 1302ms (next.js: 20ms, application-code: 1282ms)
+ GET /api/admin/returns/count?status=PENDING 200 in 1600ms (next.js: 22ms, application-code: 1578ms)
+ GET /api/admin/me 200 in 372ms (next.js: 2ms, application-code: 370ms)
+ GET /api/admin/me 200 in 375ms (next.js: 3ms, application-code: 372ms)
+ GET /api/admin/me 200 in 321ms (next.js: 10ms, application-code: 311ms)
+ GET /admin/pos 200 in 135ms (next.js: 6ms, application-code: 130ms)
+ GET /api/auth/session 200 in 107ms (next.js: 77ms, application-code: 31ms)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 1171ms (next.js: 5ms, application-code: 1166ms)
+ GET /api/admin/pos/shifts/close 200 in 2.0s (next.js: 11ms, application-code: 2.0s)
+ GET /api/admin/orders/metrics 200 in 2.3s (next.js: 10ms, application-code: 2.3s)
+ GET /api/admin/me 200 in 2.9s (next.js: 15ms, application-code: 2.9s)
+ GET /api/admin/returns/count?status=PENDING 200 in 1801ms (next.js: 4ms, application-code: 1797ms)
+ GET /api/admin/inventory/out-of-stock 200 in 2.9s (next.js: 21ms, application-code: 2.9s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 2.9s (next.js: 26ms, application-code: 2.9s)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 3.9s (next.js: 2ms, application-code: 3.9s)
+ GET /api/admin/orders/metrics 200 in 3.2s (next.js: 6ms, application-code: 3.2s)
+ GET /api/admin/reviews/count?status=PENDING 200 in 3.9s (next.js: 9ms, application-code: 3.9s)
+ GET /api/admin/inventory/out-of-stock 200 in 4.3s (next.js: 3ms, application-code: 4.3s)
+ GET /api/admin/returns/count?status=PENDING 200 in 4.5s (next.js: 6ms, application-code: 4.5s)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 2.5s (next.js: 2ms, application-code: 2.5s)
+ POST /api/admin/pos/gift-cards/activate 400 in 829ms (next.js: 3ms, application-code: 826ms)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 1124ms (next.js: 2ms, application-code: 1122ms)
+ POST /api/admin/pos/gift-cards/activate 200 in 487ms (next.js: 3ms, application-code: 484ms)
+ GET /api/admin/me 200 in 500ms (next.js: 3ms, application-code: 497ms)
+ GET /api/admin/me 200 in 307ms (next.js: 3ms, application-code: 304ms)
+ GET /admin/pos 200 in 135ms (next.js: 7ms, application-code: 129ms)
+ GET /api/auth/session 200 in 102ms (next.js: 86ms, application-code: 16ms)
+ GET /api/admin/pos/shifts/close 200 in 443ms (next.js: 6ms, application-code: 438ms)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 1353ms (next.js: 12ms, application-code: 1342ms)
+ GET /api/admin/me 200 in 1546ms (next.js: 5ms, application-code: 1540ms)
+ GET /api/admin/inventory/out-of-stock 200 in 1547ms (next.js: 20ms, application-code: 1527ms)
+ GET /api/admin/reviews/count?status=PENDING 200 in 1554ms (next.js: 18ms, application-code: 1537ms)
+ GET /api/admin/orders/metrics 200 in 1556ms (next.js: 11ms, application-code: 1544ms)
+ GET /api/admin/returns/count?status=PENDING 200 in 1155ms (next.js: 3ms, application-code: 1153ms)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 2.9s (next.js: 3ms, application-code: 2.9s)
+ GET /api/admin/orders/metrics 200 in 3.2s (next.js: 6ms, application-code: 3.2s)
+[browser] Image with src "https://kvglredjnqdqqbmmhivi.supabase.co/storage/v1/object/public/giftbox/products/flsh443etv_1778136077598.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[browser] Image with src "https://kvglredjnqdqqbmmhivi.supabase.co/storage/v1/object/public/giftbox/products/b9qql2lg1p_1778752163023.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /api/admin/reviews/count?status=PENDING 200 in 3.7s (next.js: 8ms, application-code: 3.6s)
+ GET /api/admin/inventory/out-of-stock 200 in 4.5s (next.js: 3ms, application-code: 4.5s)
+ GET /api/admin/returns/count?status=PENDING 200 in 4.7s (next.js: 8ms, application-code: 4.7s)
+ GET /api/admin/pos/products/search?page=1&limit=20 200 in 3.0s (next.js: 2ms, application-code: 3.0s)
+⨯ Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/pos/products/search/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/pos/products/search/[__metadata_id__]/route/app-paths-manifest.json'
+}
+
+thread 'tokio-runtime-worker' (574448) panicked at turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17:
+Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Caused by:
+    0: Looking up task storage for TaskId 2351 from database failed
+    1: Unable to open static sorted file referenced from 00000023.meta
+    2: Unable to open static sorted file 00000016.sst
+    3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+    4: No such file or directory (os error 2)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tokio-runtime-worker' (574449) panicked at turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17:
+Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Caused by:
+    0: Looking up task storage for TaskId 2351 from database failed
+    1: Unable to open static sorted file referenced from 00000023.meta
+    2: Unable to open static sorted file 00000016.sst
+    3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+    4: No such file or directory (os error 2)
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /tmp/next-panic-462bbfda9b5457918cbeea19db6601a4.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29&body=Turbopack%20version%3A%20%600ca967b8%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Looking%20up%20task%20storage%20for%20TaskId%202351%20from%20database%20failed%0A%20%20%20%20%20%201%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000023.meta%0A%20%20%20%20%20%202%3A%20Unable%20to%20open%20static%20sorted%20file%2000000016.sst%0A%20%20%20%20%20%203%3A%20Failed%20to%20open%20SST%20file%20%2Frun%2Fmedia%2Fsharadamarasinghe%2F01DCB46A126F9D70%2Fgitboxlk%2Fgiftboxlk%2F.next%2Fdev%2Fcache%2Fturbopack%2F0ca967b8%2F00000016.sst%0A%20%20%20%20%20%204%3A%20No%20such%20file%20or%20directory%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/pos/products/search/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/pos/products/search/[__metadata_id__]/route/app-paths-manifest.json'
+}
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+
+thread 'tokio-runtime-worker' (574449) panicked at turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:618:14:
+Failed to lookup task ids: Looking up task id for CachedTaskType { native_fn: NativeFunction { name: "<EcmascriptBrowserChunk as GenerateSourceMap>::generate_source_map", global_name: "<turbopack_browser::ecmascript::chunk::EcmascriptBrowserChunk as dyn turbopack_core::source_map::GenerateSourceMap>::generate_source_map", .. }, this: Some(RawVc::TaskCell(282679, "turbopack_browser::ecmascript::chunk::EcmascriptBrowserChunk#0")), arg: () } from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000025.meta
+    1: Unable to open static sorted file 00000020.sst
+    2: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000020.sst
+    3: No such file or directory (os error 2)
+[browser] Product search error: Error: Failed to fetch products
+    at PosProductGrid.useCallback[fetchProducts] (file:///run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/static/chunks/src_0adc0m.._.js:181:36) (file:///run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/static/chunks/src_0adc0m.._.js:190:25)
+Persisting failed: Unable to write SST file 00000121.sst
+
+Caused by:
+    No such file or directory (os error 2)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+⨯ Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /tmp/next-panic-462bbfda9b5457918cbeea19db6601a4.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29&body=Turbopack%20version%3A%20%600ca967b8%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Looking%20up%20task%20storage%20for%20TaskId%202351%20from%20database%20failed%0A%20%20%20%20%20%201%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000023.meta%0A%20%20%20%20%20%202%3A%20Unable%20to%20open%20static%20sorted%20file%2000000016.sst%0A%20%20%20%20%20%203%3A%20Failed%20to%20open%20SST%20file%20%2Frun%2Fmedia%2Fsharadamarasinghe%2F01DCB46A126F9D70%2Fgitboxlk%2Fgiftboxlk%2F.next%2Fdev%2Fcache%2Fturbopack%2F0ca967b8%2F00000016.sst%0A%20%20%20%20%20%204%3A%20No%20such%20file%20or%20directory%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+⨯ Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /tmp/next-panic-462bbfda9b5457918cbeea19db6601a4.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29&body=Turbopack%20version%3A%20%600ca967b8%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Looking%20up%20task%20storage%20for%20TaskId%202351%20from%20database%20failed%0A%20%20%20%20%20%201%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000023.meta%0A%20%20%20%20%20%202%3A%20Unable%20to%20open%20static%20sorted%20file%2000000016.sst%0A%20%20%20%20%20%203%3A%20Failed%20to%20open%20SST%20file%20%2Frun%2Fmedia%2Fsharadamarasinghe%2F01DCB46A126F9D70%2Fgitboxlk%2Fgiftboxlk%2F.next%2Fdev%2Fcache%2Fturbopack%2F0ca967b8%2F00000016.sst%0A%20%20%20%20%20%204%3A%20No%20such%20file%20or%20directory%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+⨯ Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /tmp/next-panic-462bbfda9b5457918cbeea19db6601a4.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29&body=Turbopack%20version%3A%20%600ca967b8%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Looking%20up%20task%20storage%20for%20TaskId%202351%20from%20database%20failed%0A%20%20%20%20%20%201%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000023.meta%0A%20%20%20%20%20%202%3A%20Unable%20to%20open%20static%20sorted%20file%2000000016.sst%0A%20%20%20%20%20%203%3A%20Failed%20to%20open%20SST%20file%20%2Frun%2Fmedia%2Fsharadamarasinghe%2F01DCB46A126F9D70%2Fgitboxlk%2Fgiftboxlk%2F.next%2Fdev%2Fcache%2Fturbopack%2F0ca967b8%2F00000016.sst%0A%20%20%20%20%20%204%3A%20No%20such%20file%20or%20directory%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+⨯ Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to /tmp/next-panic-462bbfda9b5457918cbeea19db6601a4.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29&body=Turbopack%20version%3A%20%600ca967b8%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%0ADebug%20info%3A%0A-%20Execution%20of%20get_written_endpoint_with_issues_operation%20failed%0A-%20Failed%20to%20restore%20task%20data%20%28corrupted%20database%20or%20bug%29%3A%20Meta%20for%20TaskId%202351%29%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Looking%20up%20task%20storage%20for%20TaskId%202351%20from%20database%20failed%0A%20%20%20%20%20%201%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000023.meta%0A%20%20%20%20%20%202%3A%20Unable%20to%20open%20static%20sorted%20file%2000000016.sst%0A%20%20%20%20%20%203%3A%20Failed%20to%20open%20SST%20file%20%2Frun%2Fmedia%2Fsharadamarasinghe%2F01DCB46A126F9D70%2Fgitboxlk%2Fgiftboxlk%2F.next%2Fdev%2Fcache%2Fturbopack%2F0ca967b8%2F00000016.sst%0A%20%20%20%20%20%204%3A%20No%20such%20file%20or%20directory%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error: ENOENT: no such file or directory, open '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+    at ignore-listed frames {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/server/app/api/admin/me/[__metadata_id__]/route/app-paths-manifest.json'
+}
+⨯ Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Error [TurbopackInternalError]: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)
+  
+  Caused by:
+      0: Looking up task storage for TaskId 2351 from database failed
+      1: Unable to open static sorted file referenced from 00000023.meta
+      2: Unable to open static sorted file 00000016.sst
+      3: Failed to open SST file /run/media/sharadamarasinghe/01DCB46A126F9D70/gitboxlk/giftboxlk/.next/dev/cache/turbopack/0ca967b8/00000016.sst
+      4: No such file or directory (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to restore task data (corrupted database or bug): Meta for TaskId 2351)) {
+  location: 'turbopack/crates/turbo-tasks-backend/src/backend/operation/mod.rs:196:17'
+}
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+[?25h

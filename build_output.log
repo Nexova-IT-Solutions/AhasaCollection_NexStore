@@ -1,0 +1,175 @@
+
+> nextjs_tailwind_shadcn_ts@1.0.3 build
+> next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/
+
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'optimizePackageImports'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+▲ Next.js 16.2.0 (Turbopack)
+- Environments: .env.local, .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 16.9s
+  Skipping validation of types
+  Finished TypeScript config validation in 56ms ...
+  Collecting page data using 7 workers ...
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+[Auth-Diagnostic] Checking environment variables...
+[Auth-Diagnostic] ❌ GOOGLE_CLIENT_ID is MISSING
+[Auth-Diagnostic] ⚠️ FACEBOOK_CLIENT_ID is missing. Facebook login will be disabled.
+[Auth-Diagnostic] ⚠️ TIKTOK_CLIENT_KEY is missing. TikTok login will be disabled.
+  Generating static pages using 7 workers (0/28) ...
+  Generating static pages using 7 workers (7/28) 
+  Generating static pages using 7 workers (14/28) 
+  Generating static pages using 7 workers (21/28) 
+✓ Generating static pages using 7 workers (28/28) in 648ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/admin
+├ ƒ /[locale]/admin/banners
+├ ƒ /[locale]/admin/categories
+├ ƒ /[locale]/admin/discounts
+├ ƒ /[locale]/admin/gift-cards
+├ ƒ /[locale]/admin/moods
+├ ƒ /[locale]/admin/occasions
+├ ƒ /[locale]/admin/orders
+├ ƒ /[locale]/admin/orders/[id]
+├ ƒ /[locale]/admin/products
+├ ƒ /[locale]/admin/products/[id]/edit
+├ ƒ /[locale]/admin/products/new
+├ ƒ /[locale]/admin/profile/edit
+├ ƒ /[locale]/admin/recipients
+├ ƒ /[locale]/admin/settings/account
+├ ƒ /[locale]/admin/settings/shipping
+├ ƒ /[locale]/admin/settings/wrappings
+├ ƒ /[locale]/admin/users
+├ ƒ /[locale]/admin/users/[id]
+├ ƒ /[locale]/admin/users/[id]/edit
+├ ƒ /[locale]/admin/users/new
+├ ƒ /[locale]/admin/users/templates
+├ ƒ /[locale]/auth/error
+├ ƒ /[locale]/auth/forgot-password
+├ ƒ /[locale]/auth/login
+├ ƒ /[locale]/auth/register
+├ ƒ /[locale]/auth/reset-password
+├ ƒ /[locale]/box-builder
+├ ƒ /[locale]/cart
+├ ƒ /[locale]/categories
+├ ƒ /[locale]/checkout
+├ ƒ /[locale]/checkout/success/[id]
+├ ƒ /[locale]/contact
+├ ƒ /[locale]/gift-boxes
+├ ƒ /[locale]/gift-card
+├ ƒ /[locale]/occasion/[slug]
+├ ƒ /[locale]/order-success
+├ ƒ /[locale]/orders
+├ ƒ /[locale]/orders/[id]
+├ ƒ /[locale]/privacy-policy
+├ ƒ /[locale]/product/[slug]
+├ ƒ /[locale]/products/[id]
+├ ƒ /[locale]/profile
+├ ƒ /[locale]/profile/addresses
+├ ƒ /[locale]/profile/billing
+├ ƒ /[locale]/profile/orders
+├ ƒ /[locale]/profile/orders/[id]
+├ ƒ /[locale]/profile/settings
+├ ƒ /[locale]/sign-in
+├ ƒ /[locale]/sign-up
+├ ƒ /[locale]/terms-of-conditions
+├ ƒ /[locale]/test-supabase
+├ ƒ /api
+├ ƒ /api/addresses
+├ ƒ /api/admin/banners
+├ ƒ /api/admin/banners/[id]
+├ ƒ /api/admin/categories
+├ ƒ /api/admin/discounts
+├ ƒ /api/admin/gift-cards
+├ ƒ /api/admin/moods
+├ ƒ /api/admin/occasions
+├ ƒ /api/admin/orders/[id]
+├ ƒ /api/admin/orders/metrics
+├ ƒ /api/admin/permission-templates
+├ ƒ /api/admin/permission-templates/[id]
+├ ƒ /api/admin/products
+├ ƒ /api/admin/products/[id]
+├ ƒ /api/admin/products/search
+├ ƒ /api/admin/recipients
+├ ƒ /api/admin/recipients/[id]
+├ ƒ /api/admin/shipping-config
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[id]
+├ ƒ /api/admin/wrappings
+├ ƒ /api/admin/wrappings/[id]
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/register
+├ ƒ /api/auth/reset-password
+├ ƒ /api/categories
+├ ƒ /api/checkout
+├ ƒ /api/occasions
+├ ƒ /api/products
+├ ƒ /api/profile/recently-viewed
+├ ƒ /api/shipping-config
+└ ƒ /api/wrappings
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

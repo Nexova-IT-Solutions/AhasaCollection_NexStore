@@ -41,50 +41,50 @@ model Session {
 }
 
 model User {
-  id                 String               @id @default(cuid())
-  name               String?
-  email              String?              @unique
-  emailVerified      DateTime?
-  image              String?
-  password           String?
-  isActive           Boolean              @default(true)
-  role               Role                 @default(USER)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  privileges         String[]             @default([])
-  templateId         String?
-  customPermissions  Json?
-  phoneNumber        String?
-  comments           String?
-  addressLine1       String?
-  addressLine2       String?
-  city               String?
-  state              String?
-  zipCode            String?
-  country            String?
-  loginStartTime     String?
-  loginEndTime       String?
-  hireDate           DateTime?
-  birthday           DateTime?
-  employeeNumber     String?              @unique
-  language           String               @default("en")
-  canOverridePrices  Boolean              @default(false)
-  maxDiscount        Float                @default(0)
-  commissionRate     Float                @default(0)
-  commissionMethod   String?
-  outstandingBalance Float                @default(0)
-  accounts           Account[]
-  addresses          Address[]
-  orders             Order[]
-  sessions           Session[]
-  cart               Cart?
-  template           PermissionTemplate?  @relation(fields: [templateId], references: [id])
-  reviews            Review[]
+  id                String              @id @default(cuid())
+  name              String?
+  email             String?             @unique
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  isActive          Boolean             @default(true)
+  role              Role                @default(USER)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  privileges        String[]            @default([])
+  templateId        String?
+  customPermissions Json?
+  phoneNumber       String?
+  comments          String?
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  state             String?
+  zipCode           String?
+  country           String?
+  loginStartTime    String?
+  loginEndTime      String?
+  hireDate          DateTime?
+  birthday          DateTime?
+  employeeNumber    String?             @unique
+  language          String              @default("en")
+  canOverridePrices Boolean             @default(false)
+  maxDiscount       Float               @default(0)
+  commissionRate    Float               @default(0)
+  commissionMethod  String?
+  outstandingBalance Float              @default(0)
+  accounts          Account[]
+  addresses         Address[]
+  orders            Order[]
+  sessions          Session[]
+  cart              Cart?
+  template          PermissionTemplate? @relation(fields: [templateId], references: [id])
+  reviews           Review[]
   purchasedGiftCards GiftCard[]           @relation("GiftCardPurchaser")
-  posShifts          PosShift[]
-  returnRequests     ReturnRequest[]
-  statusHistories    OrderStatusHistory[]
-  ledgerEntries      CustomerLedger[]
+  posShifts         PosShift[]
+  returnRequests    ReturnRequest[]
+  statusHistories   OrderStatusHistory[]
+  ledgerEntries     CustomerLedger[]
 }
 
 enum LedgerTransactionType {
@@ -102,8 +102,8 @@ model CustomerLedger {
   paymentMethod String?
   createdAt     DateTime              @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   @@index([userId])
   @@index([createdAt])
 }
@@ -127,19 +127,19 @@ model PasswordResetToken {
 }
 
 model Category {
-  id             String     @id @default(cuid())
-  name           String     @unique
-  slug           String     @unique
-  description    String?
-  image          String?
-  parentId       String?
-  parentCategory Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  subCategories  Category[] @relation("CategoryHierarchy")
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  isActive       Boolean    @default(true)
-  isPopular      Boolean    @default(false)
-  products       Product[]
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  image       String?
+  parentId        String?
+  parentCategory  Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  subCategories   Category[] @relation("CategoryHierarchy")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isActive    Boolean    @default(true)
+  isPopular   Boolean    @default(false)
+  products    Product[]
 
   @@index([parentId])
   @@index([isActive])
@@ -162,13 +162,13 @@ model Occasion {
 }
 
 model Recipient {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  slug      String    @unique
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[] @relation("RecipientToProduct")
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[] @relation("RecipientToProduct")
 }
 
 model Mood {
@@ -212,54 +212,54 @@ model Supplier {
 }
 
 model Product {
-  id                     String          @id @default(cuid())
-  name                   String
-  nameAr                 String?
-  description            String?
-  shortDescription       String?         @db.VarChar(250)
-  price                  Float
-  stock                  Int             @default(0)
-  sizes                  String[]        @default([])
-  colors                 String[]        @default([])
-  isActive               Boolean         @default(true)
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  categoryId             String?
-  productImages          Json
-  productVariants        Json
-  isNewArrival           Boolean         @default(false)
-  isTrending             Boolean         @default(false)
+  id                    String          @id @default(cuid())
+  name                  String
+  nameAr                String?
+  description           String?
+  shortDescription      String?         @db.VarChar(250)
+  price                 Float
+  stock                 Int             @default(0)
+  sizes                 String[]        @default([])
+  colors                String[]        @default([])
+  isActive              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  categoryId            String?
+  productImages         Json
+  productVariants       Json
+  isNewArrival          Boolean         @default(false)
+  isTrending            Boolean         @default(false)
   showInChocolateSection Boolean         @default(false)
   showInSoftToysSection  Boolean         @default(false)
-  isTopRated             Boolean         @default(false)
-  isBestSeller           Boolean         @default(false)
-  salePrice              Float?
-  isPremiumGiftBox       Boolean         @default(false)
-  discountId             String?
-  showInDiscountSection  Boolean         @default(false)
-  isSpecialTouch         Boolean         @default(false)
-  specialTouchOrder      Int             @default(0)
-  costPrice              Float?
-  supplierId             String?
-  lastSuppliedAt         DateTime?
-  sku                    String?         @unique
-  isEGiftCard            Boolean         @default(false)
-  giftCardValue          Float?
-  builderCapacityUnits   Int             @default(1)
-  isAvailableInBuilder   Boolean         @default(false)
-  itemsInside            GiftBoxItem[]   @relation("BoxToItems")
-  parentBoxes            GiftBoxItem[]   @relation("ItemToBoxes")
-  category               Category?       @relation(fields: [categoryId], references: [id])
-  discount               Discount?       @relation(fields: [discountId], references: [id], onDelete: Restrict)
-  supplier               Supplier?       @relation(fields: [supplierId], references: [id])
-  moods                  ProductMood[]
-  supplyHistory          ProductSupply[]
-  occasions              Occasion[]      @relation("OccasionToProduct")
-  recipients             Recipient[]     @relation("RecipientToProduct")
-  reviews                Review[]
-  averageRating          Float           @default(0)
-  reviewCount            Int             @default(0)
-  orderItems             OrderItem[]
+  isTopRated            Boolean         @default(false)
+  isBestSeller          Boolean         @default(false)
+  salePrice             Float?
+  isPremiumGiftBox      Boolean         @default(false)
+  discountId            String?
+  showInDiscountSection Boolean         @default(false)
+  isSpecialTouch        Boolean         @default(false)
+  specialTouchOrder     Int             @default(0)
+  costPrice             Float?
+  supplierId            String?
+  lastSuppliedAt        DateTime?
+  sku                   String?         @unique
+  isEGiftCard           Boolean         @default(false)
+  giftCardValue         Float?
+  builderCapacityUnits  Int             @default(1)
+  isAvailableInBuilder  Boolean         @default(false)
+  itemsInside           GiftBoxItem[]   @relation("BoxToItems")
+  parentBoxes           GiftBoxItem[]   @relation("ItemToBoxes")
+  category              Category?       @relation(fields: [categoryId], references: [id])
+  discount              Discount?       @relation(fields: [discountId], references: [id], onDelete: Restrict)
+  supplier              Supplier?       @relation(fields: [supplierId], references: [id])
+  moods                 ProductMood[]
+  supplyHistory         ProductSupply[]
+  occasions             Occasion[]      @relation("OccasionToProduct")
+  recipients            Recipient[]     @relation("RecipientToProduct")
+  reviews               Review[]
+  averageRating         Float           @default(0)
+  reviewCount           Int             @default(0)
+  orderItems            OrderItem[]
 
   @@index([categoryId])
   @@index([isNewArrival])
@@ -316,38 +316,38 @@ model ProductMood {
 }
 
 model GiftCard {
-  id                 String                 @id @default(cuid())
-  code               String                 @unique
-  barcode            String?                @unique
+  id                 String               @id @default(cuid())
+  code               String               @unique
+  barcode            String?              @unique
   initialValue       Float
   balance            Float
-  currency           String                 @default("LKR")
+  currency           String               @default("LKR")
   image              String?
-  isActive           Boolean                @default(false)
+  isActive           Boolean              @default(false)
   expiresAt          DateTime?
-  createdAt          DateTime               @default(now())
-  updatedAt          DateTime               @updatedAt
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   heldByOrderId      String?
   heldUntil          DateTime?
-  isPhysical         Boolean                @default(false)
-  type               GiftCardType           @default(DIGITAL)
-  status             GiftCardStatus         @default(DISABLED)
+  isPhysical         Boolean              @default(false)
+  type               GiftCardType         @default(DIGITAL)
+  status             GiftCardStatus       @default(DISABLED)
   purchasedInOrderId String?
-  purchasedInOrder   Order?                 @relation("PurchasedGiftCards", fields: [purchasedInOrderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  recipientEmail     String?
-  recipientName      String?
-  senderName         String?
-  personalMessage    String?
-  purchasedByUserId  String?
-  purchasedByUser    User?                  @relation("GiftCardPurchaser", fields: [purchasedByUserId], references: [id])
-  orderId            String?
-  order              Order?                 @relation("GiftCardOrder", fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  orderItemId        String?
-  orderItem          OrderItem?             @relation(fields: [orderItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  sentAt             DateTime?
-  deliveryStatus     GiftCardDeliveryStatus @default(PENDING)
+  purchasedInOrder   Order?               @relation("PurchasedGiftCards", fields: [purchasedInOrderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  recipientEmail    String?
+  recipientName     String?
+  senderName        String?
+  personalMessage   String?
+  purchasedByUserId String?
+  purchasedByUser   User?     @relation("GiftCardPurchaser", fields: [purchasedByUserId], references: [id])
+  orderId           String?
+  order             Order?    @relation("GiftCardOrder", fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  orderItemId       String?
+  orderItem         OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  sentAt            DateTime?
+  deliveryStatus    GiftCardDeliveryStatus @default(PENDING)
   redemptions        GiftCardRedemption[]
-  orders             Order[]                @relation("AppliedGiftCards")
+  orders             Order[]              @relation("AppliedGiftCards")
 
   @@index([barcode])
 }
@@ -362,14 +362,14 @@ model GiftCardDenomination {
 }
 
 model GiftCardRedemption {
-  id         String            @id @default(cuid())
+  id         String             @id @default(cuid())
   giftCardId String
   orderId    String
   amount     Float
-  redeemedAt DateTime          @default(now())
-  channel    RedemptionChannel @default(WEB)
-  giftCard   GiftCard          @relation(fields: [giftCardId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  order      Order             @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  redeemedAt DateTime           @default(now())
+  channel    RedemptionChannel  @default(WEB)
+  giftCard   GiftCard           @relation(fields: [giftCardId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  order      Order              @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@index([giftCardId])
   @@index([orderId])
@@ -398,7 +398,7 @@ model Address {
   addressLine1 String
   addressLine2 String?
   city         String
-  province     String? // Added string field for customer profiles
+  province     String?     // Added string field for customer profiles
   postalCode   String
   isDefault    Boolean     @default(false)
   createdAt    DateTime    @default(now())
@@ -410,14 +410,14 @@ model Address {
 }
 
 model PromoBanner {
-  id            String   @id @default(cuid())
-  key           String   @unique
-  imageUrl      String   @default("")
-  images        String[] @default([])
-  slideInterval Int      @default(3000)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(cuid())
+  key            String   @unique
+  imageUrl       String   @default("")
+  images         String[] @default([])
+  slideInterval  Int      @default(3000)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([isActive])
 }
@@ -460,7 +460,7 @@ model Province {
 
 model City {
   id         String   @id @default(cuid())
-  name       String // e.g., "Galle"
+  name       String   // e.g., "Galle"
   provinceId String
   province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
   fee        Float    @default(0)
@@ -473,6 +473,7 @@ model City {
   @@index([isActive])
   @@index([name])
 }
+
 
 model GiftWrap {
   id          String   @id @default(cuid())
@@ -581,33 +582,33 @@ model OrderStatusHistory {
 }
 
 model OrderItem {
-  id               String            @id @default(cuid())
-  orderId          String
-  productId        String
-  productName      String
-  productNameAr    String?
-  productImage     String?
-  quantity         Int
-  unitPrice        Float
-  salePrice        Float?
-  subtotal         Float
-  returnedQuantity Int               @default(0)
-  discountId       String?
-  discountName     String?
-  discountValue    Float?
-  sku              String?           @default("")
-  variantDetails   Json?
-  isCustomBox      Boolean           @default(false)
-  customBoxConfig  Json?
-  parentBoxId      String?
-  parentBox        OrderItem?        @relation("BoxItems", fields: [parentBoxId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  childItems       OrderItem[]       @relation("BoxItems")
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  order            Order             @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  product          Product?          @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  giftCards        GiftCard[]
-  returns          OrderItemReturn[]
+  id            String   @id @default(cuid())
+  orderId       String
+  productId     String
+  productName   String
+  productNameAr String?
+  productImage  String?
+  quantity      Int
+  unitPrice     Float
+  salePrice     Float?
+  subtotal      Float
+  returnedQuantity Int     @default(0)
+  discountId    String?
+  discountName  String?
+  discountValue Float?
+  sku           String?   @default("")
+  variantDetails Json?
+  isCustomBox   Boolean  @default(false)
+  customBoxConfig Json?
+  parentBoxId   String?
+  parentBox     OrderItem?  @relation("BoxItems", fields: [parentBoxId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  childItems    OrderItem[] @relation("BoxItems")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  giftCards     GiftCard[]
+  returns       OrderItemReturn[]
 
   @@index([orderId])
   @@index([productId])
@@ -617,18 +618,18 @@ model OrderItem {
 }
 
 model OrderItemReturn {
-  id           String   @id @default(cuid())
-  orderItemId  String
-  orderId      String
-  quantity     Int
-  refundAmount Float
-  reason       String?  @db.Text
-  restocked    Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id            String    @id @default(cuid())
+  orderItemId   String
+  orderId       String
+  quantity      Int
+  refundAmount  Float
+  reason        String?   @db.Text
+  restocked     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
 
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
-  order     Order     @relation(fields: [orderId], references: [id])
-
+  orderItem     OrderItem @relation(fields: [orderItemId], references: [id])
+  order         Order     @relation(fields: [orderId], references: [id])
+  
   @@index([orderItemId])
   @@index([orderId])
 }
@@ -758,8 +759,8 @@ model Review {
   updatedAt  DateTime     @updatedAt
 
   product Product? @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  order   Order?   @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([orderId, productId, userId])
   @@index([productId])
@@ -812,39 +813,39 @@ enum PosShiftStatus {
 }
 
 model PosShift {
-  id           String         @id @default(cuid())
-  operatorId   String
-  operator     User           @relation(fields: [operatorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  status       PosShiftStatus @default(OPEN)
-  openedAt     DateTime       @default(now())
-  closedAt     DateTime?
-  openingCash  Float          @default(0)
-  actualCash   Float?
-  expectedCash Float          @default(0)
-  variance     Float          @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-
+  id             String           @id @default(cuid())
+  operatorId     String
+  operator       User             @relation(fields: [operatorId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  status         PosShiftStatus   @default(OPEN)
+  openedAt       DateTime         @default(now())
+  closedAt       DateTime?
+  openingCash    Float            @default(0)
+  actualCash     Float?
+  expectedCash   Float            @default(0)
+  variance       Float            @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
   // Legacy / Additional fields for compatibility
-  startTime        DateTime  @default(now())
-  endTime          DateTime?
-  startingCash     Float     @default(0)
-  expectedCredit   Float     @default(0)
-  actualCredit     Float?    @default(0)
-  cashVariance     Float?    @default(0)
-  creditVariance   Float?    @default(0)
-  expectedDebit    Float     @default(0)
-  actualDebit      Float?    @default(0)
-  debitVariance    Float?    @default(0)
-  expectedGiftCard Float     @default(0)
-  actualGiftCard   Float?    @default(0)
-  giftCardVariance Float?    @default(0)
-  notes            String?
-  denomination     Json?
-
-  cashCounts      ShiftCashCount[]
-  orders          Order[]               @relation("OrderToPosShift")
-  legacyOrders    Order[]               @relation("LegacyOrderToPosShift")
+  startTime      DateTime         @default(now())
+  endTime        DateTime?
+  startingCash   Float            @default(0)
+  expectedCredit Float            @default(0)
+  actualCredit   Float?           @default(0)
+  cashVariance   Float?           @default(0)
+  creditVariance Float?           @default(0)
+  expectedDebit  Float            @default(0)
+  actualDebit    Float?           @default(0)
+  debitVariance  Float?           @default(0)
+  expectedGiftCard Float          @default(0)
+  actualGiftCard   Float?         @default(0)
+  giftCardVariance Float?         @default(0)
+  notes          String?
+  denomination   Json?
+  
+  cashCounts     ShiftCashCount[]
+  orders         Order[]          @relation("OrderToPosShift")
+  legacyOrders   Order[]          @relation("LegacyOrderToPosShift")
   reconciliations ShiftReconciliation[]
 
   @@index([operatorId])
@@ -854,11 +855,11 @@ model PosShift {
 }
 
 model Denomination {
-  id        String            @id @default(cuid())
-  value     Float             @unique
-  isActive  Boolean           @default(true)
+  id        String   @id @default(cuid())
+  value     Float      @unique
+  isActive  Boolean  @default(true)
   type      CurrencyDenomType @default(NOTE)
-  createdAt DateTime          @default(now())
+  createdAt DateTime @default(now())
 }
 
 enum CashCountType {
@@ -873,20 +874,20 @@ model ShiftCashCount {
   type            CashCountType
   denominationVal Float
   quantity        Int
-  total           Float         @default(0) // denominationVal * quantity
+  total           Float    @default(0) // denominationVal * quantity
 
   @@index([shiftId])
 }
 
 model CurrencyDenomination {
-  id        String            @id @default(cuid())
+  id        String              @id @default(cuid())
   value     Float
   label     String
-  type      CurrencyDenomType @default(NOTE)
-  isActive  Boolean           @default(true)
-  sortOrder Int               @default(0)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  type      CurrencyDenomType   @default(NOTE)
+  isActive  Boolean             @default(true)
+  sortOrder Int                 @default(0)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
 
   @@unique([value, type])
   @@index([isActive])
@@ -906,11 +907,11 @@ model ShiftReconciliation {
   id             String   @id @default(cuid())
   shiftId        String
   shift          PosShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  paymentMethod  String // e.g., "POS_CASH", "CREDIT_CARD", "DEBIT_CARD", "POS_GIFT_CARD"
+  paymentMethod  String   // e.g., "POS_CASH", "CREDIT_CARD", "DEBIT_CARD", "POS_GIFT_CARD"
   systemAmount   Float    @default(0)
   operatorAmount Float    @default(0)
   variance       Float    @default(0)
-  status         String // "MATCHED" or "MISMATCHED"
+  status         String   // "MATCHED" or "MISMATCHED"
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -925,23 +926,24 @@ model FeatureToggle {
   updatedAt DateTime @updatedAt
 }
 
+
 model CompanyDetails {
-  id                String   @id @default("1")
-  companyName       String?
-  mobileNumber      String?
-  address           String?
-  website           String?
-  email             String?
-  crNumber          String?
-  posPrinterName    String?
-  posPrintMode      String   @default("raw") // "raw" or "raster"
-  timezone          String   @default("Asia/Muscat")
-  receiptCharWidth  Int      @default(42)
-  receiptLogoWidth  Int      @default(200)
-  receiptLogoHeight Int      @default(80)
-  receiptPrintArea  Int      @default(80)
-  logoBase64        String?
-  updatedAt         DateTime @updatedAt
+  id             String   @id @default("1")
+  companyName    String?
+  mobileNumber   String?
+  address        String?
+  website        String?
+  email          String?
+  crNumber       String?
+  posPrinterName String?
+  posPrintMode     String   @default("raw") // "raw" or "raster"
+  timezone         String   @default("Asia/Muscat")
+  receiptCharWidth Int      @default(42)
+  receiptLogoWidth Int      @default(200)
+  receiptLogoHeight Int     @default(80)
+  receiptPrintArea Int      @default(80)
+  logoBase64       String?
+  updatedAt        DateTime @updatedAt
 }
 
 model ScheduledReport {
@@ -950,15 +952,14 @@ model ScheduledReport {
   enabled      Boolean  @default(false)
   emailAddress String
   ownerName    String
-  scheduleTime String // e.g. "21:00"
+  scheduleTime String   // e.g. "21:00"
   updatedAt    DateTime @updatedAt
 }
-
 model EmailLog {
   id           String   @id @default(cuid())
   recipient    String
   subject      String
-  status       String // "SUCCESS", "FAILED"
+  status       String   // "SUCCESS", "FAILED"
   errorMessage String?  @db.Text
   createdAt    DateTime @default(now())
 }
