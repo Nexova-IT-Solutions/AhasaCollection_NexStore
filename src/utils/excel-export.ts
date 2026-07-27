@@ -47,7 +47,7 @@ export class ExcelExportUtility {
     // 1. Merged Header Banner: Company Name and Report Title
     worksheet.mergeCells(`A1:${lastColLetter}1`);
     const bannerCell = worksheet.getCell("A1");
-    bannerCell.value = `AL ZINA TRADING ESTABLISHMENT SPC — ${title.toUpperCase()}`;
+    bannerCell.value = `AHASA COLLECTION — ${title.toUpperCase()}`;
     bannerCell.font = {
       name: "Segoe UI",
       size: 14,
