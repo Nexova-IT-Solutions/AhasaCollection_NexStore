@@ -46,6 +46,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
 import { useToast } from "@/hooks/use-toast";
 import useSWR from "swr";
 import { useCurrency } from "@/components/CurrencyProvider";
@@ -69,6 +71,7 @@ export default function PurchaseOrderDetailPage({
   const router = useRouter();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
+  const { data: session } = useSession();
 
   const { data, isLoading, mutate } = useSWR(`/api/admin/purchase-orders/${id}`, fetcher);
   const { data: categoriesData } = useSWR("/api/admin/categories", fetcher);
@@ -320,6 +323,11 @@ export default function PurchaseOrderDetailPage({
     }
   };
 
+  const canApprove = hasPermission(session, "purchase_orders.approve") || hasPermission(session, "catalog.stock_admin");
+  const canReceive = hasPermission(session, "purchase_orders.receive") || hasPermission(session, "catalog.manage_inventory");
+  const canIntake = hasPermission(session, "purchase_orders.inventory_intake") || hasPermission(session, "catalog.manage_products");
+  const canPay = hasPermission(session, "purchase_orders.payment") || hasPermission(session, "catalog.stock_admin");
+
   const currentStepIdx = getStepIndex(po.status);
   const totalCost = po.finalCost ?? po.totalEstimatedCost;
   const balanceDue = Math.max(0, totalCost - po.paidAmount);
@@ -374,7 +382,7 @@ export default function PurchaseOrderDetailPage({
           )}
 
           {/* Receive Goods Button */}
-          {["APPROVED", "GOODS_RECEIVED", "REVIEWING"].includes(po.status) && (
+          {["APPROVED", "GOODS_RECEIVED", "REVIEWING"].includes(po.status) && canReceive && (
             <Button
               onClick={openReceiveModal}
               size="sm"
@@ -386,7 +394,7 @@ export default function PurchaseOrderDetailPage({
           )}
 
           {/* Inventory Intake Button */}
-          {["GOODS_RECEIVED", "REVIEWING"].includes(po.status) && (
+          {["GOODS_RECEIVED", "REVIEWING"].includes(po.status) && canIntake && (
             <Button
               onClick={openIntakeModal}
               size="sm"
@@ -398,7 +406,7 @@ export default function PurchaseOrderDetailPage({
           )}
 
           {/* Add Payment Button */}
-          {["APPROVED", "GOODS_RECEIVED", "REVIEWING", "COMPLETED"].includes(po.status) && balanceDue > 0 && (
+          {["APPROVED", "GOODS_RECEIVED", "REVIEWING", "COMPLETED"].includes(po.status) && balanceDue > 0 && canPay && (
             <Button
               onClick={() => {
                 setPayAmount(balanceDue);
@@ -456,7 +464,7 @@ export default function PurchaseOrderDetailPage({
       )}
 
       {/* Stock Admin Approval Action Banner */}
-      {po.status === "PENDING_APPROVAL" && (
+      {po.status === "PENDING_APPROVAL" && canApprove && (
         <Card className="border-amber-200 bg-amber-50/70 shadow-sm rounded-2xl">
           <CardContent className="p-5 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
