@@ -43,13 +43,15 @@ const posCheckoutSchema = z.object({
   items: z.array(checkoutItemSchema).min(1, "At least one item is required"),
   subtotal: z.number(),
   total: z.number().min(0, "Total must be non-negative"),
-  paymentMethod: z.enum(["POS_CASH", "POS_CARD", "POS_GIFT_CARD", "POS_SPLIT", "CREDIT_CARD", "DEBIT_CARD", "POS_MOBILE_TRANSFER", "POS_CREDIT"]),
+  paymentMethod: z.enum(["POS_CASH", "POS_CARD", "POS_GIFT_CARD", "POS_SPLIT", "CREDIT_CARD", "DEBIT_CARD", "POS_MOBILE_TRANSFER", "POS_CREDIT", "COURIER_COD", "COURIER_OTHER"]),
   cashTendered: z.number().optional().nullable(),
   changeDue: z.number().optional().nullable(),
   cardReference: z.string().optional().nullable(),
   giftCardCode: z.string().optional().nullable(),
   giftCardDeduction: z.number().optional().nullable(),
   splitPayments: z.array(splitPaymentSchema).optional().nullable(),
+  courierTrackingId: z.string().optional().nullable(),
+  courierReference: z.string().optional().nullable(),
   shiftId: z.string().min(1, "Active shift ID is required"),
   customerId: z.string().optional().nullable(),
   customerName: z.string().optional().nullable(),
@@ -116,6 +118,8 @@ export async function POST(req: NextRequest) {
       giftCardCode,
       giftCardDeduction,
       splitPayments,
+      courierTrackingId,
+      courierReference,
       shiftId,
       customerId,
       customerName,
@@ -478,10 +482,12 @@ export async function POST(req: NextRequest) {
           deliveryFee: 0,
           freeDeliveryThreshold: 0,
           total: total,
-          orderStatus: "DELIVERED",
+          orderStatus: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? "CONFIRMED" : "DELIVERED",
           paymentMethod: paymentMethod,
-          paymentStatus: "PAID",
-          paymentConfirmedAt: new Date(),
+          paymentStatus: paymentMethod === "COURIER_COD" ? "PENDING" : "PAID",
+          paymentConfirmedAt: paymentMethod === "COURIER_COD" ? null : new Date(),
+          trackingNumber: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? (courierTrackingId || null) : null,
+          paymentReference: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? (courierReference || null) : null,
           orderSource: "POS",
           orderType: isByobFlow ? "CUSTOM_GIFT_BOX" : "STANDARD",
           isBYOB: isByobFlow,
@@ -492,7 +498,9 @@ export async function POST(req: NextRequest) {
           appliedGiftCardId: appliedGiftCardId,
           remainingPayable: Math.max(0, total - giftCardDeductionAmount),
           gatewayResponse: (
-            paymentMethod === "POS_SPLIT"
+            (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER")
+              ? { courierTrackingId: courierTrackingId || "", courierReference: courierReference || "" }
+              : paymentMethod === "POS_SPLIT"
               ? { splitPayments: splitPayments || [] }
               : (paymentMethod === "POS_CARD" || paymentMethod === "CREDIT_CARD" || paymentMethod === "DEBIT_CARD")
               ? { cardReference: cardReference || "" }
@@ -505,8 +513,10 @@ export async function POST(req: NextRequest) {
           internalNotes: notes || null,
           statusHistory: {
             create: {
-              status: "DELIVERED",
-              note: "POS in-store purchase — paid and fulfilled",
+              status: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? "CONFIRMED" : "DELIVERED",
+              note: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER")
+                ? `POS Courier Sales order created via ${paymentMethod === "COURIER_COD" ? "COD" : "Other Payment"}`
+                : "POS in-store purchase — paid and fulfilled",
               changedByUserId: session.user.id,
               changedByName: session.user.name || "POS Operator",
             },

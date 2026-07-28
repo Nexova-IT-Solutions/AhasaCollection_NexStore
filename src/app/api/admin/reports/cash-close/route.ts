@@ -95,6 +95,8 @@ export async function GET(req: NextRequest) {
               break;
             case "CREDIT_CARD":
             case "POS_CARD":
+            case "COURIER_COD":
+            case "COURIER_OTHER":
               creditSalesSum += orderNetTotal;
               break;
             case "DEBIT_CARD":

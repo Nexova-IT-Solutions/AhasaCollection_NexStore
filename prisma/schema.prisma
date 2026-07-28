@@ -712,6 +712,8 @@ enum PaymentMethod {
   DEBIT_CARD
   CASH
   GIFT_VOUCHER
+  COURIER_COD
+  COURIER_OTHER
 }
 
 enum OrderSource {

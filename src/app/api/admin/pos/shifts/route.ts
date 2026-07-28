@@ -278,6 +278,8 @@ export async function PATCH(req: NextRequest) {
           expectedCashFromSales += orderNetTotal;
           break;
         case "POS_CARD":
+        case "COURIER_COD":
+        case "COURIER_OTHER":
           expectedCreditFromSales += orderNetTotal;
           break;
         case "POS_GIFT_CARD":

@@ -74,7 +74,7 @@ export interface CurrencyDenominationData {
   sortOrder: number;
 }
 
-export type PosPaymentMethod = "POS_CASH" | "POS_CARD" | "POS_GIFT_CARD" | "POS_SPLIT" | "CREDIT_CARD" | "DEBIT_CARD" | "POS_MOBILE_TRANSFER" | "POS_CREDIT";
+export type PosPaymentMethod = "POS_CASH" | "POS_CARD" | "POS_GIFT_CARD" | "CREDIT_CARD" | "DEBIT_CARD" | "POS_CREDIT" | "COURIER_COD" | "COURIER_OTHER";
 
 export interface PosPayment {
   method: PosPaymentMethod;
@@ -84,6 +84,8 @@ export interface PosPayment {
   giftCardCode: string;
   giftCardDeduction: number;
   splitPayments: SplitPaymentEntry[];
+  courierTrackingId?: string;
+  courierReference?: string;
 }
 
 export interface SplitPaymentEntry {

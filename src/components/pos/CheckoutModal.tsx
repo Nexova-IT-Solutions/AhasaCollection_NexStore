@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Banknote, CreditCard, Gift, Split, Loader2, CheckCircle2,
   Calculator, Receipt, ArrowRight, Plus, Trash2, Sparkles, ScanLine, Printer, Download, Smartphone, FileText,
+  Truck, Send,
 } from "lucide-react";
 import { useCurrency } from "@/components/CurrencyProvider";
 import { usePosCart } from "@/store/use-pos-cart";
@@ -58,6 +59,8 @@ export function CheckoutModal() {
   const [giftCardError, setGiftCardError] = useState<string | null>(null);
   const [giftCardIsPhysical, setGiftCardIsPhysical] = useState(false);
   const [splitEntries, setSplitEntries] = useState<SplitPaymentEntry[]>([]);
+  const [courierTrackingId, setCourierTrackingId] = useState("");
+  const [courierReference, setCourierReference] = useState("");
   const [successOrder, setSuccessOrder] = useState<{
     orderNumber: string; total: number; subtotal: number; changeDue: number;
     paymentMethod: string;
@@ -196,6 +199,8 @@ export function CheckoutModal() {
           ? payment.giftCardCode : "",
         giftCardDeduction: payment.giftCardDeduction,
         splitPayments: payment.method === "POS_SPLIT" ? splitEntries : [],
+        courierTrackingId: (payment.method === "COURIER_COD" || payment.method === "COURIER_OTHER") ? courierTrackingId : null,
+        courierReference: (payment.method === "COURIER_COD" || payment.method === "COURIER_OTHER") ? courierReference : null,
         shiftId: activeShift.id,
         customerId: customer?.id || null,
         customerName: customer?.name || "Walk-in Customer",
@@ -272,10 +277,10 @@ export function CheckoutModal() {
   const paymentMethods: { method: PosPaymentMethod; label: string; icon: any }[] = [
     { method: "POS_CASH", label: "Cash", icon: Banknote },
     { method: "POS_CARD", label: "Card", icon: CreditCard },
-    { method: "POS_MOBILE_TRANSFER", label: "Mobile transfer", icon: Smartphone },
     { method: "POS_CREDIT", label: "Credit", icon: FileText },
+    { method: "COURIER_COD", label: "Courier COD", icon: Truck },
+    { method: "COURIER_OTHER", label: "Courier Other", icon: Send },
     ...(isGiftcardsEnabled ? [{ method: "POS_GIFT_CARD", label: "Gift Card", icon: Gift }] : []),
-    ...(isSplitEnabled ? [{ method: "POS_SPLIT", label: "Split", icon: Split }] : []),
   ];
 
   return (
@@ -448,19 +453,35 @@ export function CheckoutModal() {
                 </div>
               )}
 
-              {/* ─── MOBILE TRANSFER PAYMENT ───────── */}
-              {payment.method === "POS_MOBILE_TRANSFER" && (
+              {/* ─── COURIER SALES (COD & OTHER) ───── */}
+              {(payment.method === "COURIER_COD" || payment.method === "COURIER_OTHER") && (
                 <div className="space-y-4">
                   <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 text-center">
-                    <Smartphone className="h-10 w-10 text-white/50 mx-auto mb-3" />
+                    <Truck className="h-10 w-10 text-white/50 mx-auto mb-3" />
                     <p className="text-2xl font-black text-white">{formatPrice(total)}</p>
-                    <p className="text-xs text-white/50 mt-1">Complete transfer via mobile app</p>
+                    <p className="text-xs text-white/50 mt-1">
+                      {payment.method === "COURIER_COD"
+                        ? "Cash on Delivery (COD) order"
+                        : "Other Payment (Bank Transfer, Online Payment)"}
+                    </p>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-600">Transaction Reference (optional)</Label>
-                    <Input value={payment.cardReference}
-                      onChange={(e) => setCardReference(e.target.value)}
-                      placeholder="e.g., transfer ID" className="h-10 text-sm" />
+                    <Label className="text-xs font-medium text-slate-600">Tracking ID (optional)</Label>
+                    <Input
+                      value={courierTrackingId}
+                      onChange={(e) => setCourierTrackingId(e.target.value)}
+                      placeholder="e.g. Courier Tracking Number"
+                      className="h-10 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-slate-600">Payment Details / Reference Information (optional)</Label>
+                    <Input
+                      value={courierReference}
+                      onChange={(e) => setCourierReference(e.target.value)}
+                      placeholder="e.g. Bank Transfer ID, online pay reference"
+                      className="h-10 text-sm"
+                    />
                   </div>
                 </div>
               )}
@@ -670,7 +691,6 @@ export function CheckoutModal() {
                 disabled={
                   isProcessing || items.length === 0 ||
                   (payment.method === "POS_CASH" && payment.cashTendered < total) ||
-                  (payment.method === "POS_SPLIT" && Math.abs(splitRemaining) > 0.01) ||
                   (payment.method === "POS_GIFT_CARD" && giftCardBalance === null) ||
                   (payment.method === "POS_CREDIT" && !customer)
                 }

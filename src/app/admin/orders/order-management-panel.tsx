@@ -218,6 +218,49 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
         </Card>
       )}
 
+      {order.paymentMethod === "COURIER_COD" && order.paymentStatus === "PENDING" && (
+        <Card className="overflow-hidden rounded-2xl border-2 border-emerald-200 bg-emerald-50 shadow-sm transition-all hover:shadow-md">
+          <CardHeader className="bg-emerald-100/50 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold text-emerald-900">
+              <CheckCircle2 className="size-4 text-emerald-600" />
+              Settle COD Payment
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <p className="mb-4 text-xs font-medium leading-relaxed text-emerald-800">
+              This Courier COD order is currently <strong>UNPAID</strong>. You can settle the COD payment once payment is received from the courier service.
+            </p>
+            <Button
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  const result = await updateOrderAction(order.id, {
+                    paymentStatus: "PAID",
+                  });
+                  if (result.success) {
+                    toast({
+                      title: "COD Payment Settled",
+                      description: "Payment status has been updated to PAID successfully.",
+                    });
+                    setDraftPaymentStatus("PAID");
+                    router.refresh();
+                  } else {
+                    toast({
+                      title: "Settlement Failed",
+                      description: result.message,
+                      variant: "destructive",
+                    });
+                  }
+                });
+              }}
+              className="h-11 w-full rounded-xl bg-emerald-600 font-bold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {isPending ? "Settling Payment..." : "Mark COD Payment as Paid"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="overflow-hidden rounded-2xl border border-brand-border bg-white shadow-sm transition-all hover:shadow-md p-5 md:p-6">
         <CardHeader className="bg-transparent p-0 mb-1.5">
           <CardTitle className="text-base font-bold text-[#1F1720]">Status Management</CardTitle>
@@ -267,7 +310,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
             </Select>
           </div>
 
-          {requiresTrackingNumber ? (
+          {(requiresTrackingNumber || order.paymentMethod === "COURIER_COD" || order.paymentMethod === "COURIER_OTHER") ? (
             <div className="space-y-2 rounded-xl border border-dashed border-[#A7066A]/20 bg-[#FCEAF4]/40 p-4">
               <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#6B5A64]">
                 <PackageSearch className="size-4 text-[#A7066A]" />
@@ -280,7 +323,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
                 className="h-11 w-full rounded-xl border border-brand-border bg-white px-4 text-sm outline-none transition focus:border-[#A7066A] focus:ring-2 focus:ring-[#A7066A]/20"
               />
               <p className="text-[10px] font-medium text-[#6B5A64]">
-                Required before saving when the order is marked as shipped.
+                {(order.paymentMethod === "COURIER_COD" || order.paymentMethod === "COURIER_OTHER") ? "Tracking ID for Courier Sales." : "Required before saving when the order is marked as shipped."}
               </p>
             </div>
           ) : null}

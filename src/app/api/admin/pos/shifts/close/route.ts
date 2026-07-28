@@ -81,6 +81,8 @@ export async function POST(req: NextRequest) {
         case "POS_CARD":
         case "POS_MOBILE_TRANSFER":
         case "POS_CREDIT":
+        case "COURIER_COD":
+        case "COURIER_OTHER":
           expectedCreditFromSales += orderTotal;
           break;
         case "DEBIT_CARD":

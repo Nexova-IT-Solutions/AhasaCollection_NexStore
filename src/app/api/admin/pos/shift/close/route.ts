@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
         if (order.paymentMethod === "POS_CASH" || order.paymentMethod === "COD") {
           cashSalesSum += orderNetTotal;
-        } else if (order.paymentMethod === "CREDIT_CARD" || order.paymentMethod === "POS_CARD") {
+        } else if (order.paymentMethod === "CREDIT_CARD" || order.paymentMethod === "POS_CARD" || order.paymentMethod === "COURIER_COD" || order.paymentMethod === "COURIER_OTHER") {
           creditSalesSum += orderNetTotal;
         } else if (order.paymentMethod === "DEBIT_CARD") {
           debitSalesSum += orderNetTotal;
