@@ -88,7 +88,7 @@ export function CheckoutModal() {
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
 
   // ─── Gift Card Reason → Human Message ───────────────────────────────
   const reasonToMessage = (reason: string | undefined): string => {
@@ -262,6 +262,8 @@ export function CheckoutModal() {
       customerName: customer?.name || null,
       paidAmount: successOrder.paymentMethod === "POS_CREDIT" ? 0 : successOrder.total,
       outstandingAmount: successOrder.paymentMethod === "POS_CREDIT" ? successOrder.total : 0,
+      currencySymbol: currency,
+      decimals: currency === "OMR" ? 3 : 2,
     }, "download");
   };
 
@@ -280,6 +282,8 @@ export function CheckoutModal() {
       customerName: customer?.name || null,
       paidAmount: successOrder.paymentMethod === "POS_CREDIT" ? 0 : successOrder.total,
       outstandingAmount: successOrder.paymentMethod === "POS_CREDIT" ? successOrder.total : 0,
+      currencySymbol: currency,
+      decimals: currency === "OMR" ? 3 : 2,
     }, "print");
   };
 

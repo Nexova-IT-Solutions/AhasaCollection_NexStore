@@ -69,6 +69,8 @@ export interface ReceiptData {
   customerName?: string | null;
   paidAmount?: number;
   outstandingAmount?: number;
+  currencySymbol?: string;
+  decimals?: number;
   items: {
     name: string;
     nameAr?: string | null;
@@ -206,6 +208,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     saleType = "Credit Sale";
   }
 
+  const curSymbol = (data.currencySymbol || "OMR").trim();
+  const decimals = typeof data.decimals === "number" ? data.decimals : 3;
+
   if (format === "print") {
     const mode = data.companyDetails?.posPrintMode || "raw";
     const isRaster = mode.startsWith("raster");
@@ -221,8 +226,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         if (!isEnglish && item.nameAr) itemName += ` - ${item.nameAr}`;
         
         let qtyPrice = isEnglish 
-          ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
-          : `Qty / ප්‍රමාණය: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+          ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
+          : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
           
         if (item.discountPercent && item.discountPercent > 0) {
           qtyPrice += isEnglish 
@@ -231,8 +236,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         }
         
         const total = isEnglish
-          ? `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`
-          : `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
+          ? `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`
+          : `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
         
         itemsHtml += `
           <div style="margin-bottom: 4px;">
@@ -283,8 +288,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           ${data.paymentMethod === "POS_CREDIT" ? `
             <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #ccc;">
               <div>Customer: ${data.customerName || "Walk-in Customer"}</div>
-              <div>Paid Amount: OMR ${(data.paidAmount ?? 0).toFixed(3)}</div>
-              <div>Outstanding Amount: OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}</div>
+              <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
+              <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
             </div>
           ` : ""}
         </div>
@@ -296,16 +301,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
           <span>${isEnglish ? 'Subtotal:' : 'Subtotal / උප එකතුව:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)}`}</span>
+          <span style="font-weight: bold;">${isEnglish ? `${curSymbol} ${data.subtotal.toFixed(decimals)}` : `${curSymbol} ${data.subtotal.toFixed(decimals)}`}</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
           <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / මුළු මුදල:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(3)}` : `OMR ${data.total.toFixed(3)}`}</span>
+          <span style="font-weight: bold;">${isEnglish ? `${curSymbol} ${data.total.toFixed(decimals)}` : `${curSymbol} ${data.total.toFixed(decimals)}`}</span>
         </div>
         ${data.changeDue > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
             <span>${isEnglish ? 'Change Due:' : 'Change Due / ඉතිරි මුදල:'}</span>
-            <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(3)}` : `OMR ${data.changeDue.toFixed(3)}`}</span>
+            <span style="font-weight: bold;">${isEnglish ? `${curSymbol} ${data.changeDue.toFixed(decimals)}` : `${curSymbol} ${data.changeDue.toFixed(decimals)}`}</span>
           </div>
         ` : ''}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
@@ -406,7 +411,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
         data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
         data.paymentMethod === "POS_CREDIT"
-          ? `Customer: ${data.customerName || "Walk-in Customer"}\nPaid Amount: OMR ${(data.paidAmount ?? 0).toFixed(3)}\nOutstanding Amount: OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}\n`
+          ? `Customer: ${data.customerName || "Walk-in Customer"}\nPaid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}\nOutstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}\n`
           : "",
         `${SEP}\n`
       );
@@ -423,15 +428,15 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
         // Qty line (left aligned)
         const qtyPrice = isEnglish
-          ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
-          : `Qty / ප්‍රමාණය: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+          ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
+          : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
         rawLines.push(`${qtyPrice}\n`);
 
         // Discount line if applicable (left aligned)
         if (item.discountPercent && item.discountPercent > 0) {
           const discountedTotal = item.quantity * item.price * (1 - item.discountPercent / 100);
           const discLine = isEnglish
-            ? `Discount: ${item.discountPercent}% off -> OMR ${discountedTotal.toFixed(3)}`
+            ? `Discount: ${item.discountPercent}% off -> ${curSymbol} ${discountedTotal.toFixed(decimals)}`
             : `Discount / වට්ටම්: ${item.discountPercent}%`;
           rawLines.push(`${discLine}\n`);
         }
@@ -439,7 +444,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         // Total — always right-aligned by the printer's own hardware command
         const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
         rawLines.push('\x1B\x61\x02'); // Right align
-        rawLines.push(`OMR ${lineTotal.toFixed(3)}\n`);
+        rawLines.push(`${curSymbol} ${lineTotal.toFixed(decimals)}\n`);
         rawLines.push('\x1B\x61\x00'); // Back to left align
       });
 
@@ -448,12 +453,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         '\x1B\x61\x00', // Left align for separator
         `${SEP}\n`,
         '\x1B\x61\x02', // Right align for totals
-        isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / උප එකතුව: OMR ${data.subtotal.toFixed(3)}\n`,
-        isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / මුළු මුදල: OMR ${data.total.toFixed(3)}\n`
+        isEnglish ? `Subtotal: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n` : `Subtotal / උප එකතුව: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n`,
+        isEnglish ? `Total: ${curSymbol} ${data.total.toFixed(decimals)}\n` : `Total / මුළු මුදල: ${curSymbol} ${data.total.toFixed(decimals)}\n`
       );
       
       if (data.changeDue > 0) {
-        rawLines.push(isEnglish ? `Change Due: OMR ${data.changeDue.toFixed(3)}\n` : `Change Due / ඉතිරි මුදල: OMR ${data.changeDue.toFixed(3)}\n`);
+        rawLines.push(isEnglish ? `Change Due: ${curSymbol} ${data.changeDue.toFixed(decimals)}\n` : `Change Due / ඉතිරි මුදල: ${curSymbol} ${data.changeDue.toFixed(decimals)}\n`);
       }
       
       rawLines.push(
@@ -759,7 +764,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.text("Paid Amount:", pageWidth - 80, rightY);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text(`OMR ${(data.paidAmount ?? 0).toFixed(3)}`, pageWidth - 15, rightY, { align: "right" });
+      doc.text(`${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}`, pageWidth - 15, rightY, { align: "right" });
 
       rightY += 8;
       doc.setFont("helvetica", "bold");
@@ -767,7 +772,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.text("Outstanding:", pageWidth - 80, rightY);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text(`OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}`, pageWidth - 15, rightY, { align: "right" });
+      doc.text(`${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}`, pageWidth - 15, rightY, { align: "right" });
     }
 
     currentY = Math.max(currentY, rightY) + 15;
@@ -787,9 +792,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       return [
         itemName,
         `${item.quantity}`,
-        `OMR ${item.price.toFixed(3)}`,
+        `${curSymbol} ${item.price.toFixed(decimals)}`,
         discountText,
-        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`,
+        `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`,
       ];
     });
 
@@ -823,14 +828,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(100, 100, 100);
     
     doc.text("Subtotal:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.subtotal.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`${curSymbol} ${data.subtotal.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(37, 99, 235);
     doc.text("Total:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.total.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text(`${curSymbol} ${data.total.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
@@ -838,7 +843,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text("Change Due:", pageWidth - 110, totalY);
-      doc.text(`OMR ${data.changeDue.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text(`${curSymbol} ${data.changeDue.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
     // Footer
