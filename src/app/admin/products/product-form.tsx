@@ -1825,6 +1825,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             <div className="space-y-2">
               <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Repository</Label>
               <Select
+                key={`repo-${repositoryOptions.length}-${repositoryId}`}
                 value={repositoryId || "__none__"}
                 onValueChange={(val) => {
                   const finalVal = val === "__none__" ? "" : val;
@@ -1832,7 +1833,11 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                 }}
               >
                 <SelectTrigger className="h-12 w-full border-brand-border">
-                  <SelectValue placeholder="Select a repository" />
+                  <SelectValue placeholder="Select a repository">
+                    {repositoryId
+                      ? (repositoryOptions.find((r) => r.id === repositoryId)?.name ?? "Loading...")
+                      : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
@@ -1849,6 +1854,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
             <div className="space-y-2">
               <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Outlet</Label>
               <Select
+                key={`outlet-${outletOptions.length}-${outletId}`}
                 value={outletId || "__none__"}
                 onValueChange={(val) => {
                   const finalVal = val === "__none__" ? "" : val;
@@ -1856,7 +1862,11 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                 }}
               >
                 <SelectTrigger className="h-12 w-full border-brand-border">
-                  <SelectValue placeholder="Select an outlet" />
+                  <SelectValue placeholder="Select an outlet">
+                    {outletId
+                      ? (outletOptions.find((o) => o.id === outletId)?.name ?? "Loading...")
+                      : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
