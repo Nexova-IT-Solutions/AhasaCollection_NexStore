@@ -6,8 +6,7 @@ import html2canvas from "html2canvas";
 import { initQZSecurity } from "./qz-init";
 
 const arNum = (n: number | string) => {
-  const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-  return String(n).replace(/[0-9]/g, (w) => arabicNumbers[+w]);
+  return String(n);
 };
 
 // ─── Windows-1256 Arabic encoder ────────────────────────────────────────────
@@ -212,17 +211,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         
         let qtyPrice = isEnglish 
           ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
-          : `Qty / الكمية: ${item.quantity} / ${arNum(item.quantity)} x ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`;
+          : `Qty / ප්‍රමාණය: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
           
         if (item.discountPercent && item.discountPercent > 0) {
           qtyPrice += isEnglish 
             ? ` (Disc ${item.discountPercent}%)`
-            : ` (Disc / خصم ${item.discountPercent}%)`;
+            : ` (Disc / වට්ටම් ${item.discountPercent}%)`;
         }
         
         const total = isEnglish
           ? `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`
-          : `${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3))}`;
+          : `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
         
         itemsHtml += `
           <div style="margin-bottom: 4px;">
@@ -276,17 +275,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-          <span>${isEnglish ? 'Subtotal:' : 'Subtotal / المجموع الفرعي:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`}</span>
+          <span>${isEnglish ? 'Subtotal:' : 'Subtotal / උප එකතුව:'}</span>
+          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.subtotal.toFixed(3)}` : `OMR ${data.subtotal.toFixed(3)}`}</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
-          <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / المجموع:'}</span>
-          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(3)}` : `OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`}</span>
+          <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / මුළු මුදල:'}</span>
+          <span style="font-weight: bold;">${isEnglish ? `OMR ${data.total.toFixed(3)}` : `OMR ${data.total.toFixed(3)}`}</span>
         </div>
         ${data.changeDue > 0 ? `
           <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-            <span>${isEnglish ? 'Change Due:' : 'Change Due / الباقي:'}</span>
-            <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(3)}` : `OMR ${data.changeDue.toFixed(3)} / ${arNum(data.changeDue.toFixed(3))}`}</span>
+            <span>${isEnglish ? 'Change Due:' : 'Change Due / ඉතිරි මුදල:'}</span>
+            <span style="font-weight: bold;">${isEnglish ? `OMR ${data.changeDue.toFixed(3)}` : `OMR ${data.changeDue.toFixed(3)}`}</span>
           </div>
         ` : ''}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 4px;">Thank you for your purchase!</div>
@@ -400,7 +399,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         // Qty line (left aligned)
         const qtyPrice = isEnglish
           ? `Qty: ${item.quantity} x OMR ${item.price.toFixed(3)}`
-          : `Qty/الكمية: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
+          : `Qty / ප්‍රමාණය: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
         rawLines.push(`${qtyPrice}\n`);
 
         // Discount line if applicable (left aligned)
@@ -408,7 +407,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           const discountedTotal = item.quantity * item.price * (1 - item.discountPercent / 100);
           const discLine = isEnglish
             ? `Discount: ${item.discountPercent}% off -> OMR ${discountedTotal.toFixed(3)}`
-            : `Discount / خصم: ${item.discountPercent}%`;
+            : `Discount / වට්ටම්: ${item.discountPercent}%`;
           rawLines.push(`${discLine}\n`);
         }
 
@@ -424,17 +423,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         '\x1B\x61\x00', // Left align for separator
         `${SEP}\n`,
         '\x1B\x61\x02', // Right align for totals
-        isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / المجموع الفرعي: OMR ${data.subtotal.toFixed(3)}\n`,
-        isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / المجموع: OMR ${data.total.toFixed(3)}\n`
+        isEnglish ? `Subtotal: OMR ${data.subtotal.toFixed(3)}\n` : `Subtotal / උප එකතුව: OMR ${data.subtotal.toFixed(3)}\n`,
+        isEnglish ? `Total: OMR ${data.total.toFixed(3)}\n` : `Total / මුළු මුදල: OMR ${data.total.toFixed(3)}\n`
       );
       
       if (data.changeDue > 0) {
-        rawLines.push(isEnglish ? `Change Due: OMR ${data.changeDue.toFixed(3)}\n` : `Change Due / الباقي: OMR ${data.changeDue.toFixed(3)}\n`);
+        rawLines.push(isEnglish ? `Change Due: OMR ${data.changeDue.toFixed(3)}\n` : `Change Due / ඉතිරි මුදල: OMR ${data.changeDue.toFixed(3)}\n`);
       }
       
       rawLines.push(
         '\x1B\x61\x01', // Center align
-        isEnglish ? '\nThank you for your purchase!\n' : '\nThank you for your purchase!\nشكرا لتسوقكم معنا\n',
+        isEnglish ? '\nThank you for your purchase!\n' : '\nThank you for your purchase!\n',
         '\nPowered by Nexova\n',
         '\n\n\n\n\n\n', // Feed paper
         '\x1D\x56\x41\x10' // Full cut
@@ -719,16 +718,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       return [
         itemName,
-        `${item.quantity} / ${arNum(item.quantity)}`,
-        `OMR ${item.price.toFixed(3)} / ${arNum(item.price.toFixed(3))}`,
+        `${item.quantity}`,
+        `OMR ${item.price.toFixed(3)}`,
         discountText,
-        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)} / ${arNum((item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3))}`,
+        `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`,
       ];
     });
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item Description / وصف العنصر", "Qty / الكمية", "Unit Price / سعر الوحدة", "Discount / خصم", "Total / المجموع"]],
+      head: [["Item Description / විස්තරය", "Qty / ප්‍රමාණය", "Unit Price / ඒකක මිල", "Discount / වට්ටම්", "Total / මුළු මුදල"]],
       body: tableData,
       theme: "striped",
       headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
@@ -755,23 +754,23 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     
-    doc.text("Subtotal / المجموع الفرعي:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.subtotal.toFixed(3)} / ${arNum(data.subtotal.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text("Subtotal / උප එකතුව:", pageWidth - 110, totalY);
+    doc.text(`OMR ${data.subtotal.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(37, 99, 235);
-    doc.text("Total / المجموع:", pageWidth - 110, totalY);
-    doc.text(`OMR ${data.total.toFixed(3)} / ${arNum(data.total.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
+    doc.text("Total / මුළු මුදල:", pageWidth - 110, totalY);
+    doc.text(`OMR ${data.total.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
       totalY += 10;
       doc.setFont("Amiri", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text("Change Due / الباقي:", pageWidth - 110, totalY);
-      doc.text(`OMR ${data.changeDue.toFixed(3)} / ${arNum(data.changeDue.toFixed(3))}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text("Change Due / ඉතිරි මුදල:", pageWidth - 110, totalY);
+      doc.text(`OMR ${data.changeDue.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
     // Footer
