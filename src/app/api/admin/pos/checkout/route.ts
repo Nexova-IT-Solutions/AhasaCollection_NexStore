@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { issueGiftCards } from "@/lib/giftcard/issueGiftCards";
 
 const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN", "PRODUCT_MANAGER", "CUSTOM_ROLE"];
@@ -802,11 +803,16 @@ export async function POST(req: NextRequest) {
       console.error("[POS Checkout] Async gift card issuance failed:", err);
     });
 
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/pos");
+    revalidateTag("admin-products", "max");
+
     return NextResponse.json({
       success: true,
-      order: {
-        id: result.order.id,
+      data: {
+        orderId: result.order.id,
         orderNumber: result.order.orderNumber,
+        subtotal: result.order.subtotal,
         total: result.order.total,
         paymentMethod: result.order.paymentMethod,
         paymentStatus: result.order.paymentStatus,

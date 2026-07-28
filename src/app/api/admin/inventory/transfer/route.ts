@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { hasPermission } from "@/lib/permissions";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -134,9 +134,13 @@ export async function POST(req: Request) {
       });
     });
 
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/pos");
+    revalidateTag("admin-products");
+
     return NextResponse.json({ success: true, message: "Stock transferred successfully" });
   } catch (error: any) {
     console.error("[Inventory Transfer Error]:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ message: error.message || "Internal server error" }, { status: 500 });
   }
 }

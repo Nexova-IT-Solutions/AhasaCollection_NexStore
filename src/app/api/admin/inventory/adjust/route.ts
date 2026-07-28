@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { hasPermission } from "@/lib/permissions";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -69,6 +69,10 @@ export async function POST(req: Request) {
         },
       });
     });
+
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/pos");
+    revalidateTag("admin-products", "max");
 
     return NextResponse.json({ success: true, message: "Stock removed successfully" });
   } catch (error: any) {

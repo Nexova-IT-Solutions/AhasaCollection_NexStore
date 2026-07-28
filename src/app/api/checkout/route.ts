@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { ensureShippingConfig } from "@/lib/shipping-config";
 // Force rebuild to sync Prisma Client types
 import { issueGiftCards } from "@/lib/giftcard/issueGiftCards";
+import { revalidatePath, revalidateTag } from "next/cache";
 import type { PaymentMethod } from "@prisma/client";
 import { AddressType } from "@prisma/client";
 import crypto from "crypto";
@@ -908,6 +909,10 @@ export async function POST(request: NextRequest) {
     if ((order.paymentStatus === "PAID" || order.paymentMethod === "COD") && order.paymentMethod !== "BANK_TRANSFER") {
       issueGiftCards(order.id).catch(err => console.error("Gift card issuance failed:", err));
     }
+
+    revalidatePath("/admin/products");
+    revalidatePath("/admin/pos");
+    revalidateTag("admin-products", "max");
 
     return NextResponse.json(
       {

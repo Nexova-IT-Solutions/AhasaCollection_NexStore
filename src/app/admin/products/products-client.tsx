@@ -175,6 +175,10 @@ export function ProductsClient({
       if (!res.ok) throw new Error(data.message || "Transfer failed");
 
       toast({ title: "Success", description: "Stock transferred successfully!" });
+      // Optimistically update stock count in UI immediately
+      setProducts((prev) =>
+        prev.map((p) => (p.id === transferProduct.id ? { ...p, stock: Math.max(0, p.stock - transferQty) } : p))
+      );
       setTransferProduct(null);
       setTransferOutletId("");
       setTransferQty(1);
@@ -217,6 +221,10 @@ export function ProductsClient({
       if (!res.ok) throw new Error(data.message || "Adjustment failed");
 
       toast({ title: "Success", description: "Stock removed successfully!" });
+      // Optimistically update stock count in UI immediately
+      setProducts((prev) =>
+        prev.map((p) => (p.id === adjustProduct.id ? { ...p, stock: Math.max(0, p.stock - adjustQty) } : p))
+      );
       setAdjustProduct(null);
       setAdjustQty(1);
       setAdjustReason("");
