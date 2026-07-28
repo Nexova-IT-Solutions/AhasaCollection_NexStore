@@ -723,6 +723,14 @@ export function ProductsClient({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-4 py-4">
+            <div className="rounded-xl bg-slate-50 border border-gray-100 p-3">
+              <p className="text-[10px] font-extrabold text-[#6B5A64] uppercase tracking-wider">Source Placement</p>
+              <p className="text-sm font-bold text-gray-850 mt-0.5">
+                {transferProduct?.repository?.name ? `Repository: ${transferProduct.repository.name}` : ""}
+                {transferProduct?.repository?.name && transferProduct?.outlet?.name ? " / " : ""}
+                {transferProduct?.outlet?.name ? `Outlet: ${transferProduct.outlet.name}` : "Central Warehouse"}
+              </p>
+            </div>
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-750">Target Outlet</label>
               <select
@@ -732,7 +740,7 @@ export function ProductsClient({
               >
                 <option value="">Select an outlet...</option>
                 {outlets
-                  .filter((o) => o.id !== transferProduct?.outletId) // exclude current outlet
+                  .filter((o) => o.id !== transferProduct?.outlet?.id) // exclude current outlet correctly
                   .map((o) => (
                     <option key={o.id} value={o.id}>
                       {o.name}

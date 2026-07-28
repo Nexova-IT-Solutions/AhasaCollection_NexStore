@@ -92,6 +92,7 @@ export async function POST(req: Request) {
             sizes: sourceProduct.sizes,
             colors: sourceProduct.colors,
             productImages: sourceProduct.productImages || [],
+            productVariants: sourceProduct.productVariants || [],
             isEGiftCard: sourceProduct.isEGiftCard,
             giftCardValue: sourceProduct.giftCardValue,
             isActive: true,
@@ -111,6 +112,9 @@ export async function POST(req: Request) {
             costPrice: sourceProduct.costPrice,
             supplierId: sourceProduct.supplierId,
             discountId: sourceProduct.discountId,
+            builderCapacityUnits: sourceProduct.builderCapacityUnits,
+            averageRating: sourceProduct.averageRating,
+            reviewCount: sourceProduct.reviewCount,
           },
         });
       }
