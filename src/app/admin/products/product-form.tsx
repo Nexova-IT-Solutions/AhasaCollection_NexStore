@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/ui/image-upload";
+import { BulkUploadButton } from "./bulk-upload-button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1111,12 +1112,15 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
       {/* Middle Column: Product Form Content Area */}
       <div className="flex-1 h-full overflow-y-auto p-6 min-w-0 custom-scrollbar">
         <div className="max-w-4xl mx-auto space-y-6 bg-white p-8 rounded-3xl shadow-xl border border-brand-border">
-          <h1 className="text-2xl font-bold text-[#1F1720] mb-8 flex items-center gap-3">
-            <div className="p-2 bg-brand-surface rounded-xl">
-              <Package className="w-6 h-6 text-[#A7066A]" />
-            </div>
-            {heading}
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <h1 className="text-2xl font-bold text-[#1F1720] flex items-center gap-3">
+              <div className="p-2 bg-brand-surface rounded-xl">
+                <Package className="w-6 h-6 text-[#A7066A]" />
+              </div>
+              {heading}
+            </h1>
+            {!isEdit && <BulkUploadButton />}
+          </div>
 
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Badge className="bg-[#1F1720] text-white hover:bg-[#1F1720]">

@@ -48,6 +48,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { uploadFile } from "@/utils/supabase";
 import { useSession } from "next-auth/react";
 import { hasPermission } from "@/lib/permissions";
 import { useToast } from "@/hooks/use-toast";
@@ -283,11 +285,25 @@ export default function PurchaseOrderDetailPage({
   const handleInventoryIntakeSubmit = async () => {
     setIsIntaking(true);
     try {
+      // Process and upload any staged image files first
+      const processedIntakeItems = await Promise.all(
+        intakeItemsState.map(async (item) => {
+          let finalImageUrl = item.imageUrl || "";
+          if (item.imageFile && item.imageFile instanceof File) {
+            finalImageUrl = await uploadFile(item.imageFile, "products");
+          }
+          return {
+            ...item,
+            imageUrl: finalImageUrl,
+          };
+        })
+      );
+
       const res = await fetch(`/api/admin/purchase-orders/${id}/intake`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          itemsIntake: intakeItemsState,
+          itemsIntake: processedIntakeItems,
         }),
       });
 
@@ -1098,17 +1114,24 @@ export default function PurchaseOrderDetailPage({
                             />
                           </div>
 
-                          <div className="sm:col-span-2">
-                            <Label className="text-[10px] font-bold uppercase text-slate-600">Main Image URL</Label>
-                            <Input
-                              value={item.imageUrl}
-                              onChange={(e) =>
+                          <div className="sm:col-span-3 space-y-1.5">
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Product Image Upload</Label>
+                            <ImageUpload
+                              value={item.imageFile ? [item.imageFile] : (item.imageUrl ? [item.imageUrl] : [])}
+                              onChange={(val) => {
+                                const selected = val[0];
                                 setIntakeItemsState((prev) =>
-                                  prev.map((it, i) => (i === idx ? { ...it, imageUrl: e.target.value } : it))
-                                )
-                              }
-                              placeholder="https://example.com/product-image.jpg"
-                              className="h-9 text-xs mt-1 border-brand-border"
+                                  prev.map((it, i) =>
+                                    i === idx
+                                      ? {
+                                          ...it,
+                                          imageFile: selected instanceof File ? selected : null,
+                                          imageUrl: typeof selected === "string" ? selected : it.imageUrl,
+                                        }
+                                      : it
+                                  )
+                                );
+                              }}
                             />
                           </div>
                         </div>
