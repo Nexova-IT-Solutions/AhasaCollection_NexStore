@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const product = await db.product.findUnique({
+    const product = await db.product.findFirst({
       where: { sku: sku.trim().toUpperCase() },
       select: {
         id: true,

@@ -244,7 +244,7 @@ model Product {
   costPrice             Float?
   supplierId            String?
   lastSuppliedAt        DateTime?
-  sku                   String?         @unique
+  sku                   String?
   isEGiftCard           Boolean         @default(false)
   giftCardValue         Float?
   builderCapacityUnits  Int             @default(1)
@@ -282,6 +282,7 @@ model Product {
   @@index([stock])
   @@index([repositoryId])
   @@index([outletId])
+  @@index([sku])
 }
 
 model ProductSupply {
