@@ -166,8 +166,16 @@ async function getAdminProductsData(input: AdminProductsQueryInput) {
       db.product.count({ where: giftBoxesWhere }),
     ]);
 
+    const serializedProducts = products.map((p) => ({
+      ...p,
+      createdAt: p.createdAt ? p.createdAt.toISOString() : new Date().toISOString(),
+      price: Number(p.price || 0),
+      salePrice: p.salePrice !== null && p.salePrice !== undefined ? Number(p.salePrice) : null,
+      stock: Number(p.stock || 0),
+    }));
+
     return {
-      products,
+      products: serializedProducts,
       totalCount,
       standardCount,
       giftBoxesCount,
@@ -234,24 +242,37 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   // If user lacks Stock Admin permission, restrict products view strictly to their assigned outlet
   const effectiveOutlet = (!hasStockAdmin && session?.user?.outletId) ? session.user.outletId : outlet;
 
-  const { products, totalCount, standardCount, giftBoxesCount } = await getAdminProductsData({
-    q,
-    category,
-    occasion,
-    stock,
-    repository: hasStockAdmin ? repository : "",
-    outlet: effectiveOutlet,
-    isTrending,
-    isNewArrival,
-    showInDiscountSection,
-    isTopRated,
-    isBestSeller,
-    showInChocolateSection,
-    showInSoftToysSection,
-    tab,
-    page,
-    pageSize,
-  });
+  let productsData = {
+    products: [] as any[],
+    totalCount: 0,
+    standardCount: 0,
+    giftBoxesCount: 0,
+  };
+
+  try {
+    productsData = await getAdminProductsData({
+      q,
+      category,
+      occasion,
+      stock,
+      repository: hasStockAdmin ? repository : "",
+      outlet: effectiveOutlet,
+      isTrending,
+      isNewArrival,
+      showInDiscountSection,
+      isTopRated,
+      isBestSeller,
+      showInChocolateSection,
+      showInSoftToysSection,
+      tab,
+      page,
+      pageSize,
+    });
+  } catch (err) {
+    console.error("[AdminProductsPage] Failed to fetch products data:", err);
+  }
+
+  const { products, totalCount, standardCount, giftBoxesCount } = productsData;
 
   const storeConfig = await getStoreConfig();
 
