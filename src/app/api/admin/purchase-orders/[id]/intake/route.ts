@@ -58,15 +58,17 @@ export async function POST(req: Request, { params }: PageProps) {
     }
 
     await db.$transaction(async (tx) => {
-      // Resolve placement (repositoryId vs outletId) from PO destination location
-      let targetRepoId: string | undefined = undefined;
-      let targetOutletId: string | undefined = undefined;
+      // ── Step 1: Resolve target placement from PO destination ──
+      let targetRepoId: string | null = null;
+      let targetOutletId: string | null = null;
 
       if (po.outletId) {
+        // Check if it's a Repository ID first
         const repoExists = await tx.repository.findUnique({ where: { id: po.outletId } });
         if (repoExists) {
           targetRepoId = repoExists.id;
         } else {
+          // Fall back to Outlet check
           const outletExists = await tx.outlet.findUnique({ where: { id: po.outletId } });
           if (outletExists) {
             targetOutletId = outletExists.id;
@@ -74,6 +76,7 @@ export async function POST(req: Request, { params }: PageProps) {
         }
       }
 
+      // Try outletName if ID resolution failed
       if (!targetRepoId && !targetOutletId && po.outletName) {
         const repoByName = await tx.repository.findFirst({
           where: { name: { equals: po.outletName, mode: "insensitive" } },
@@ -82,6 +85,23 @@ export async function POST(req: Request, { params }: PageProps) {
           targetRepoId = repoByName.id;
         }
       }
+
+      // ── Fallback: default to Warehouse one if still nothing resolved ──
+      if (!targetRepoId && !targetOutletId) {
+        const defaultRepo = await tx.repository.findFirst({
+          where: { name: { contains: "Warehouse", mode: "insensitive" } },
+          orderBy: { createdAt: "asc" },
+        }) ?? await tx.repository.findFirst({ orderBy: { createdAt: "asc" } });
+        if (defaultRepo) {
+          targetRepoId = defaultRepo.id;
+        }
+      }
+
+      // ── When destination is a repo, outletId must be null (and vice versa) ──
+      // Using explicit null so Prisma clears the opposite field on every product update
+      const placementUpdate = targetRepoId
+        ? { repositoryId: targetRepoId, outletId: null }
+        : { repositoryId: null, outletId: targetOutletId };
 
       for (const intakeSpec of itemsIntake) {
         const poItem = po.items.find((i) => i.id === intakeSpec.poItemId);
@@ -96,7 +116,7 @@ export async function POST(req: Request, { params }: PageProps) {
         let targetProductId = intakeSpec.productId || poItem.productId;
 
         if (targetProductId) {
-          // Update existing product stock and cost price + detailed fields & placement
+          // Update existing product — increment stock and force correct placement
           await tx.product.update({
             where: { id: targetProductId },
             data: {
@@ -105,8 +125,7 @@ export async function POST(req: Request, { params }: PageProps) {
               price: sellingPrice > 0 ? sellingPrice : undefined,
               supplierId: po.supplierId,
               lastSuppliedAt: new Date(),
-              repositoryId: targetRepoId || undefined,
-              outletId: targetOutletId || undefined,
+              ...placementUpdate,
               shortDescription: intakeSpec.shortDescription || undefined,
               description: intakeSpec.description || undefined,
               weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : undefined,
@@ -135,7 +154,7 @@ export async function POST(req: Request, { params }: PageProps) {
             : null;
 
           if (skuMatch) {
-            // Product with same SKU exists — just increment its stock
+            // SKU matched — increment stock and apply correct placement
             targetProductId = skuMatch.id;
             await tx.product.update({
               where: { id: skuMatch.id },
@@ -145,8 +164,7 @@ export async function POST(req: Request, { params }: PageProps) {
                 price: sellingPrice > 0 ? sellingPrice : undefined,
                 supplierId: po.supplierId,
                 lastSuppliedAt: new Date(),
-                repositoryId: targetRepoId || undefined,
-                outletId: targetOutletId || undefined,
+                ...placementUpdate,
               },
             });
 
@@ -174,8 +192,7 @@ export async function POST(req: Request, { params }: PageProps) {
                 stock: qtyToAdd,
                 supplierId: po.supplierId,
                 lastSuppliedAt: new Date(),
-                repositoryId: targetRepoId || undefined,
-                outletId: targetOutletId || undefined,
+                ...placementUpdate,
                 productImages: intakeSpec.imageUrl ? [{ url: intakeSpec.imageUrl, isMain: true }] : [],
                 productVariants: [],
                 isActive: true,
