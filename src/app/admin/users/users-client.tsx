@@ -365,7 +365,7 @@ export function UsersClient({ initialUsers, templates }: { initialUsers: UserDat
       <div className="space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F1720]">User Administration</h1>
+            <h1 className="text-3xl font-bold text-[#1F1720]">User Management</h1>
             <p className="text-[#6B5A64] mt-2">Manage system roles, privileges, and account status.</p>
           </div>
 

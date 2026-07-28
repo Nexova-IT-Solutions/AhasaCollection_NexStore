@@ -29,8 +29,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard - Ahasa",
-  description: "Ahasa Admin Panel",
+  title: "POS Portal - Ahasa",
+  description: "Ahasa POS Portal",
   icons: {
     icon: "/logo/logo.png",
   },

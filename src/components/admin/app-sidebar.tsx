@@ -262,7 +262,7 @@ const reportItems: NavItem[] = [
 
 const systemItems: NavItem[] = [
   {
-    title: "Administration",
+    title: "System Users",
     icon: Users,
     requiredPermission: "system.manage_users",
     children: [
@@ -730,7 +730,7 @@ export function AppSidebar() {
       <div className="h-16 flex items-center justify-center border-b border-brand-border px-4 shrink-0">
         <Link href={`/${isLocale ? localePrefix : "en"}`} className="flex items-center gap-2 font-bold text-xl text-[#2563EB] overflow-hidden truncate">
           <Image src="/logo/logo.png" alt="Ahasa" width={38} height={38} className="h-[38px] w-[38px] shrink-0 object-contain" priority />
-          <span className="truncate">Ahasa Admin</span>
+          <span className="truncate">Ahasa POS</span>
         </Link>
       </div>
 
@@ -743,7 +743,7 @@ export function AppSidebar() {
         {renderNavGroup("Operations", filteredOperationsItems)}
         {reportsEnabled && renderNavGroup("Reports & Analytics", filteredReportItems)}
 
-        {(isSuperAdmin || isDevAdmin) && renderNavGroup("Administration", [systemItems[0]])}
+        {(isSuperAdmin || isDevAdmin) && renderNavGroup("System Users", [systemItems[0]])}
 
         {(isDevAdmin || isSuperAdmin) && renderNavGroup("System", systemItems.slice(1))}
 

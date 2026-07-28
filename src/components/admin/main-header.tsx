@@ -41,7 +41,7 @@ type MainHeaderProps = {
 }
 
 function getInitials(name: string, email?: string | null) {
-  const source = name.trim() || email?.trim() || "Admin"
+  const source = name.trim() || email?.trim() || "POS"
   const parts = source
     .replace(/@.*/, "")
     .split(/\s+/)
@@ -68,7 +68,7 @@ export function MainHeader({ locale = "en", user }: MainHeaderProps) {
 
   const isPosRoute = pathname.includes("/admin/pos")
 
-  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "Admin"
+  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "POS"
   const email = user?.email?.trim() || "No email available"
   const initials = getInitials(displayName, user?.email)
 

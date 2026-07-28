@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
       <div className="max-w-[1600px] mx-auto space-y-8 px-4 md:px-8 lg:px-10">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-brand-border pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#1F1720]">Admin POS Dashboard</h1>
+            <h1 className="text-3xl font-bold text-[#1F1720]">POS Dashboard</h1>
             <p className="text-[#6B5A64] mt-1">Touch-friendly controls for store operations and fast navigation.</p>
           </div>
         </div>
