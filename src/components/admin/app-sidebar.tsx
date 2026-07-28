@@ -32,6 +32,7 @@ import {
   Banknote,
   Box,
   FileText,
+  Database,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
