@@ -30,7 +30,7 @@ export async function updateOrderAction(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN", "POS_ADMIN", "PRODUCT_MANAGER"].includes(session.user.role)) {
+  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN", "POS_ADMIN", "PRODUCT_MANAGER", "CUSTOM_ROLE"].includes(session.user.role)) {
     throw new Error("Unauthorized");
   }
 
