@@ -54,6 +54,12 @@ const productUpdateSchema = z.object({
   supplyDate: z.string().optional().nullable(),
   repositoryId: z.string().trim().optional().nullable(),
   outletId: z.string().trim().optional().nullable(),
+  isbn: z.string().trim().optional().nullable(),
+  author: z.string().trim().optional().nullable(),
+  publisher: z.string().trim().optional().nullable(),
+  rackNumber: z.string().trim().optional().nullable(),
+  rowNumber: z.string().trim().optional().nullable(),
+  binLocation: z.string().trim().optional().nullable(),
 });
 
 function revalidateHomePaths(id?: string) {
@@ -314,6 +320,12 @@ export async function PATCH(req: Request, props: RouteProps) {
           colors: data.colors,
           ...(repositoryRelation ? { repository: repositoryRelation } : {}),
           ...(outletRelation ? { outlet: outletRelation } : {}),
+          ...(data.isbn !== undefined ? { isbn: data.isbn } : {}),
+          ...(data.author !== undefined ? { author: data.author } : {}),
+          ...(data.publisher !== undefined ? { publisher: data.publisher } : {}),
+          ...(data.rackNumber !== undefined ? { rackNumber: data.rackNumber } : {}),
+          ...(data.rowNumber !== undefined ? { rowNumber: data.rowNumber } : {}),
+          ...(data.binLocation !== undefined ? { binLocation: data.binLocation } : {}),
           occasions: data.occasionIds
             ? {
                 set: data.occasionIds.map((occasionId) => ({ id: occasionId })),

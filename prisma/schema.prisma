@@ -249,6 +249,12 @@ model Product {
   giftCardValue         Float?
   builderCapacityUnits  Int             @default(1)
   isAvailableInBuilder  Boolean         @default(false)
+  isbn                  String?
+  author                String?
+  publisher             String?
+  rackNumber            String?
+  rowNumber             String?
+  binLocation           String?
   itemsInside           GiftBoxItem[]   @relation("BoxToItems")
   parentBoxes           GiftBoxItem[]   @relation("ItemToBoxes")
   category              Category?       @relation(fields: [categoryId], references: [id])

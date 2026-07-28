@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/components/CurrencyProvider";
-import { Eye, Grid3X3, Layers, Package, Pencil, Search, TableProperties, Trash2, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, Grid3X3, Layers, Package, Pencil, Search, TableProperties, Trash2, AlertTriangle, ChevronLeft, ChevronRight, MinusCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ProductFilters } from "./ProductFilters";
 import { ReusablePagination } from "@/components/admin/reusable-pagination";
@@ -178,6 +178,47 @@ export function ProductsClient({
       setTransferOutletId("");
       setTransferQty(1);
       setTransferReason("");
+      router.refresh();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [adjustProduct, setAdjustProduct] = useState<ProductData | null>(null);
+  const [adjustQty, setAdjustQty] = useState(1);
+  const [adjustReason, setAdjustReason] = useState("");
+
+  const handleAdjust = async () => {
+    if (!adjustProduct || adjustQty <= 0 || !adjustReason) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/inventory/adjust", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: adjustProduct.id,
+          quantity: adjustQty,
+          reason: adjustReason,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Adjustment failed");
+
+      toast({ title: "Success", description: "Stock removed successfully!" });
+      setAdjustProduct(null);
+      setAdjustQty(1);
+      setAdjustReason("");
       router.refresh();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -492,6 +533,21 @@ export function ProductsClient({
                         <Layers className="w-3.5 h-3.5 text-gray-500 hover:text-[#2563EB]" />
                       </Button>
 
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8.5 w-8.5 border-gray-200 hover:bg-red-50 hover:text-red-650"
+                        onClick={() => {
+                          setAdjustProduct(product);
+                          setAdjustQty(1);
+                          setAdjustReason("");
+                        }}
+                        title="Deduct Stock"
+                      >
+                        <MinusCircle className="w-3.5 h-3.5 text-gray-500 hover:text-red-600" />
+                      </Button>
+
                       <Button asChild variant="outline" size="icon" className="h-8.5 w-8.5 border-gray-200 hover:bg-gray-50">
                         <Link href={`/admin/products/${product.id}/edit`} aria-label={`Edit ${product.name}`}>
                           <Pencil className="w-3.5 h-3.5 text-gray-500" />
@@ -616,6 +672,20 @@ export function ProductsClient({
                     title="Transfer Stock"
                   >
                     <Layers className="w-4 h-4 text-gray-500 hover:text-[#2563EB]" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 border-brand-border hover:bg-red-50"
+                    onClick={() => {
+                      setAdjustProduct(product);
+                      setAdjustQty(1);
+                      setAdjustReason("");
+                    }}
+                    title="Deduct Stock"
+                  >
+                    <MinusCircle className="w-4 h-4 text-gray-500 hover:text-red-650" />
                   </Button>
                   <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#EFF6FF]">
                     <Link href={`/admin/products/${product.id}/edit`}>
@@ -780,6 +850,61 @@ export function ProductsClient({
               className="rounded-xl bg-[#2563EB] text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Transferring..." : "Confirm Transfer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Stock Removal/Deduction Dialog */}
+      <AlertDialog open={!!adjustProduct} onOpenChange={(open) => !open && setAdjustProduct(null)}>
+        <AlertDialogContent className="rounded-2xl border-brand-border bg-white shadow-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-[#1F1720]">Deduct Stock</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-[#6B5A64]">
+              Remove/reduce stock for <span className="font-bold text-[#A7066A]">{adjustProduct?.name}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="rounded-xl bg-red-50/50 border border-red-100 p-3">
+              <p className="text-[10px] font-extrabold text-[#A7066A] uppercase tracking-wider">Current Location</p>
+              <p className="text-sm font-bold text-gray-800 mt-0.5">
+                {adjustProduct?.repository?.name ? `Repository: ${adjustProduct.repository.name}` : ""}
+                {adjustProduct?.repository?.name && adjustProduct?.outlet?.name ? " / " : ""}
+                {adjustProduct?.outlet?.name ? `Outlet: ${adjustProduct.outlet.name}` : "Central Warehouse"}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-750">Quantity to Remove (Max: {adjustProduct?.stock})</label>
+              <input
+                type="number"
+                min={1}
+                max={adjustProduct?.stock || 1}
+                value={adjustQty}
+                onChange={(e) => setAdjustQty(Math.max(1, Math.min(adjustProduct?.stock || 9999, Number(e.target.value))))}
+                className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-750">Reason for Removal</label>
+              <textarea
+                value={adjustReason}
+                onChange={(e) => setAdjustReason(e.target.value)}
+                placeholder="Reason for removing stock (e.g. damaged item, expired, discrepancy)"
+                className="w-full min-h-[80px] p-3 rounded-xl border border-brand-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl border-brand-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleAdjust();
+              }}
+              disabled={loading || !adjustReason || adjustQty <= 0}
+              className="rounded-xl bg-red-650 text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {loading ? "Removing..." : "Remove Stock"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -68,6 +68,12 @@ const productFormSchema = z.object({
   isSpecialTouch: z.boolean().default(false),
   isAvailableInBuilder: z.boolean().default(false),
   supplierId: z.string().optional().nullable().or(z.literal('')),
+  isbn: z.string().optional().or(z.literal('')),
+  author: z.string().optional().or(z.literal('')),
+  publisher: z.string().optional().or(z.literal('')),
+  rackNumber: z.string().optional().or(z.literal('')),
+  rowNumber: z.string().optional().or(z.literal('')),
+  binLocation: z.string().optional().or(z.literal('')),
 }).superRefine((data, ctx) => {
   const hasDiscount = Boolean(data.discountId && data.discountId.trim().length > 0);
   if (data.showInDiscountSection && !hasDiscount) {
@@ -380,6 +386,12 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [outletOptions, setOutletOptions] = useState<{ id: string; name: string }[]>([]);
   const [repositoryId, setRepositoryId] = useState("");
   const [outletId, setOutletId] = useState("");
+  const [isbn, setIsbn] = useState("");
+  const [author, setAuthor] = useState("");
+  const [publisher, setPublisher] = useState("");
+  const [rackNumber, setRackNumber] = useState("");
+  const [rowNumber, setRowNumber] = useState("");
+  const [binLocation, setBinLocation] = useState("");
 
   const [sizeInput, setSizeInput] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
@@ -437,6 +449,12 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
       isSpecialTouch: Boolean(product.isSpecialTouch),
       isAvailableInBuilder: Boolean(product.isAvailableInBuilder),
       supplierId: product.supplierId || (product as any).supplier?.id || "",
+      isbn: (product as any).isbn || "",
+      author: (product as any).author || "",
+      publisher: (product as any).publisher || "",
+      rackNumber: (product as any).rackNumber || "",
+      rowNumber: (product as any).rowNumber || "",
+      binLocation: (product as any).binLocation || "",
     });
 
     // Sync remaining non-form local states
@@ -454,6 +472,12 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     setSupplierId(product.supplierId ?? "");
     setRepositoryId((product as any).repositoryId ?? "");
     setOutletId((product as any).outletId ?? "");
+    setIsbn((product as any).isbn || "");
+    setAuthor((product as any).author || "");
+    setPublisher((product as any).publisher || "");
+    setRackNumber((product as any).rackNumber || "");
+    setRowNumber((product as any).rowNumber || "");
+    setBinLocation((product as any).binLocation || "");
     setSupplyDate(product.lastSuppliedAt ? new Date(product.lastSuppliedAt) : undefined);
     setSelectedOccasionIds(product.occasions?.map((occasion) => occasion.id) ?? []);
     setSelectedRecipientIds(product.recipients?.map((recipient) => recipient.id) ?? []);
@@ -1024,6 +1048,12 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           supplyDate: supplierId && supplyDate ? supplyDate.toISOString() : null,
           repositoryId: repositoryId || null,
           outletId: outletId || null,
+          isbn: isbn || null,
+          author: author || null,
+          publisher: publisher || null,
+          rackNumber: rackNumber || null,
+          rowNumber: rowNumber || null,
+          binLocation: binLocation || null,
         }),
       });
 
@@ -1239,6 +1269,44 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           <div className="space-y-2">
             <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider block mb-2">Product Narrative (Markdown)</Label>
             <MarkdownEditor value={description || ""} onChange={setDescription} placeholder="Tell the brand story for this item..." />
+          </div>
+        </div>
+
+        {/* Section 1.5: Book Specifications (Optional) */}
+        <div className="bg-white rounded-[2rem] shadow-2xl border border-brand-border p-6 md:p-8 space-y-6">
+          <div className="border-b border-brand-border pb-4">
+            <p className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Section 1.5: Book Specifications</p>
+            <p className="text-[11px] text-[#6B5A64] mt-0.5">Optional specifications for book products (ISBN, Author, Publisher).</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">ISBN</Label>
+              <Input
+                value={isbn}
+                onChange={(e) => setIsbn(e.target.value)}
+                placeholder="e.g. 978-3-16-148410-0"
+                className="h-11 rounded-xl border-brand-border focus:ring-[#A7066A]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Author</Label>
+              <Input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="e.g. J.K. Rowling"
+                className="h-11 rounded-xl border-brand-border focus:ring-[#A7066A]"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Publisher</Label>
+              <Input
+                value={publisher}
+                onChange={(e) => setPublisher(e.target.value)}
+                placeholder="e.g. Bloomsbury Publishing"
+                className="h-11 rounded-xl border-brand-border focus:ring-[#A7066A]"
+              />
+            </div>
           </div>
         </div>
 
@@ -1793,6 +1861,39 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                 </SelectContent>
               </Select>
               <p className="text-[11px] text-[#6B5A64]">Assign this product to a physical outlet.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Rack Number</Label>
+              <Input
+                value={rackNumber}
+                onChange={(e) => setRackNumber(e.target.value)}
+                placeholder="e.g. Rack A"
+                className="h-12 border-brand-border focus:ring-[#A7066A]"
+              />
+              <p className="text-[11px] text-[#6B5A64]">Assign a physical rack for product location.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Row Location</Label>
+              <Input
+                value={rowNumber}
+                onChange={(e) => setRowNumber(e.target.value)}
+                placeholder="e.g. Row 3"
+                className="h-12 border-brand-border focus:ring-[#A7066A]"
+              />
+              <p className="text-[11px] text-[#6B5A64]">Assign a physical row number for product location.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Bin Location</Label>
+              <Input
+                value={binLocation}
+                onChange={(e) => setBinLocation(e.target.value)}
+                placeholder="e.g. Bin 14"
+                className="h-12 border-brand-border focus:ring-[#A7066A]"
+              />
+              <p className="text-[11px] text-[#6B5A64]">Assign a specific bin/shelf location identifier.</p>
             </div>
 
             <div className="space-y-2">

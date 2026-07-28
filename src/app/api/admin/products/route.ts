@@ -55,6 +55,12 @@ const productCreateSchema = z.object({
   supplyDate: z.string().optional().nullable(),
   repositoryId: z.string().trim().optional().nullable(),
   outletId: z.string().trim().optional().nullable(),
+  isbn: z.string().trim().optional().nullable(),
+  author: z.string().trim().optional().nullable(),
+  publisher: z.string().trim().optional().nullable(),
+  rackNumber: z.string().trim().optional().nullable(),
+  rowNumber: z.string().trim().optional().nullable(),
+  binLocation: z.string().trim().optional().nullable(),
 });
 
 function revalidateHomePaths() {
@@ -238,6 +244,12 @@ export async function POST(req: Request) {
       supplyDate,
       repositoryId,
       outletId,
+      isbn,
+      author,
+      publisher,
+      rackNumber,
+      rowNumber,
+      binLocation,
     } = parsed.data;
 
     const normalizedGiftBoxItems = Array.from(
@@ -350,6 +362,12 @@ export async function POST(req: Request) {
             ...(supplierId && supplyDate ? { lastSuppliedAt: new Date(supplyDate) } : {}),
             ...(repositoryId ? { repository: { connect: { id: repositoryId } } } : {}),
             ...(outletId ? { outlet: { connect: { id: outletId } } } : {}),
+            isbn: isbn || null,
+            author: author || null,
+            publisher: publisher || null,
+            rackNumber: rackNumber || null,
+            rowNumber: rowNumber || null,
+            binLocation: binLocation || null,
           },
           select: {
             id: true,
