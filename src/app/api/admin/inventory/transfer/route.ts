@@ -72,13 +72,16 @@ export async function POST(req: Request) {
       });
 
       if (targetProduct) {
-        // Increment stock
+        // Increment stock and preserve source product repository assignment
         await tx.product.update({
           where: { id: targetProduct.id },
-          data: { stock: { increment: quantity } },
+          data: {
+            stock: { increment: quantity },
+            repositoryId: targetProduct.repositoryId || sourceProduct.repositoryId || undefined,
+          },
         });
       } else {
-        // Create new row copying details
+        // Create new row copying details including exact source repositoryId
         await tx.product.create({
           data: {
             name: sourceProduct.name,
@@ -98,7 +101,7 @@ export async function POST(req: Request) {
             giftCardValue: sourceProduct.giftCardValue,
             isActive: true,
             outletId: targetOutletId,
-            repositoryId: sourceProduct.repositoryId,
+            repositoryId: sourceProduct.repositoryId || undefined,
             isNewArrival: sourceProduct.isNewArrival,
             isTrending: sourceProduct.isTrending,
             isTopRated: sourceProduct.isTopRated,
