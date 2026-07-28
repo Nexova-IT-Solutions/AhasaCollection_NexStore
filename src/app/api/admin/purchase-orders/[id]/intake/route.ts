@@ -126,55 +126,86 @@ export async function POST(req: Request, { params }: PageProps) {
             },
           });
         } else {
-          // Create new Product if it doesn't exist in catalog yet
-          const categoryId = intakeSpec.categoryId;
-          if (!categoryId) {
-            throw new Error(`Category is required to add new product "${poItem.itemName}" to inventory.`);
+          // ── SKU Upsert: before creating, check if a matching SKU already exists ──
+          const rawSku = intakeSpec.sku || poItem.sku;
+          const normalizedSku = rawSku ? String(rawSku).trim().toUpperCase() : null;
+
+          const skuMatch = normalizedSku
+            ? await tx.product.findFirst({ where: { sku: normalizedSku } })
+            : null;
+
+          if (skuMatch) {
+            // Product with same SKU exists — just increment its stock
+            targetProductId = skuMatch.id;
+            await tx.product.update({
+              where: { id: skuMatch.id },
+              data: {
+                stock: { increment: qtyToAdd },
+                costPrice,
+                price: sellingPrice > 0 ? sellingPrice : undefined,
+                supplierId: po.supplierId,
+                lastSuppliedAt: new Date(),
+                repositoryId: targetRepoId || undefined,
+                outletId: targetOutletId || undefined,
+              },
+            });
+
+            // Link PO item back to the existing matched product
+            await tx.purchaseOrderItem.update({
+              where: { id: poItem.id },
+              data: { productId: skuMatch.id },
+            });
+          } else {
+            // No SKU match — create new Product in catalog
+            const categoryId = intakeSpec.categoryId;
+            if (!categoryId) {
+              throw new Error(`Category is required to add new product "${poItem.itemName}" to inventory.`);
+            }
+
+            const sku = normalizedSku || `SKU-PO-${Date.now().toString().slice(-6)}`;
+
+            const newProd = await tx.product.create({
+              data: {
+                name: poItem.itemName,
+                sku,
+                categoryId,
+                price: sellingPrice > 0 ? sellingPrice : costPrice * 1.2,
+                costPrice,
+                stock: qtyToAdd,
+                supplierId: po.supplierId,
+                lastSuppliedAt: new Date(),
+                repositoryId: targetRepoId || undefined,
+                outletId: targetOutletId || undefined,
+                productImages: intakeSpec.imageUrl ? [{ url: intakeSpec.imageUrl, isMain: true }] : [],
+                productVariants: [],
+                isActive: true,
+                shortDescription: intakeSpec.shortDescription || null,
+                description: intakeSpec.description || null,
+                weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : null,
+                rackNumber: intakeSpec.rackNumber || null,
+                rowNumber: intakeSpec.rowNumber || null,
+                binLocation: intakeSpec.binLocation || null,
+                isbn: intakeSpec.isbn || null,
+                author: intakeSpec.author || null,
+                publisher: intakeSpec.publisher || null,
+                isNewArrival: Boolean(intakeSpec.isNewArrival),
+                isTrending: Boolean(intakeSpec.isTrending),
+                isTopRated: Boolean(intakeSpec.isTopRated),
+                isBestSeller: Boolean(intakeSpec.isBestSeller),
+                showInDiscountSection: Boolean(intakeSpec.showInDiscountSection),
+                showInChocolateSection: Boolean(intakeSpec.showInChocolateSection),
+                showInSoftToysSection: Boolean(intakeSpec.showInSoftToysSection),
+              },
+            });
+
+            targetProductId = newProd.id;
+
+            // Link product back to PO item
+            await tx.purchaseOrderItem.update({
+              where: { id: poItem.id },
+              data: { productId: newProd.id },
+            });
           }
-
-          const sku = intakeSpec.sku || poItem.sku || `SKU-PO-${Date.now().toString().slice(-6)}`;
-
-          const newProd = await tx.product.create({
-            data: {
-              name: poItem.itemName,
-              sku,
-              categoryId,
-              price: sellingPrice > 0 ? sellingPrice : costPrice * 1.2,
-              costPrice,
-              stock: qtyToAdd,
-              supplierId: po.supplierId,
-              lastSuppliedAt: new Date(),
-              repositoryId: targetRepoId || undefined,
-              outletId: targetOutletId || undefined,
-              productImages: intakeSpec.imageUrl ? [{ url: intakeSpec.imageUrl, isMain: true }] : [],
-              productVariants: [],
-              isActive: true,
-              shortDescription: intakeSpec.shortDescription || null,
-              description: intakeSpec.description || null,
-              weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : null,
-              rackNumber: intakeSpec.rackNumber || null,
-              rowNumber: intakeSpec.rowNumber || null,
-              binLocation: intakeSpec.binLocation || null,
-              isbn: intakeSpec.isbn || null,
-              author: intakeSpec.author || null,
-              publisher: intakeSpec.publisher || null,
-              isNewArrival: Boolean(intakeSpec.isNewArrival),
-              isTrending: Boolean(intakeSpec.isTrending),
-              isTopRated: Boolean(intakeSpec.isTopRated),
-              isBestSeller: Boolean(intakeSpec.isBestSeller),
-              showInDiscountSection: Boolean(intakeSpec.showInDiscountSection),
-              showInChocolateSection: Boolean(intakeSpec.showInChocolateSection),
-              showInSoftToysSection: Boolean(intakeSpec.showInSoftToysSection),
-            },
-          });
-
-          targetProductId = newProd.id;
-
-          // Link product back to PO item
-          await tx.purchaseOrderItem.update({
-            where: { id: poItem.id },
-            data: { productId: newProd.id },
-          });
         }
 
         // Record Supply History log
