@@ -311,6 +311,23 @@ export async function POST(req: Request) {
       }
     }
 
+    // ── SKU Upsert: if a product with this SKU already exists, increment its stock ──
+    const normalizedSku = sku ? sku.trim().toUpperCase() : null;
+    if (normalizedSku) {
+      const existing = await db.product.findFirst({ where: { sku: normalizedSku } });
+      if (existing) {
+        const updated = await db.product.update({
+          where: { id: existing.id },
+          data: { stock: { increment: finalStock } },
+        });
+        revalidateHomePaths();
+        return NextResponse.json(
+          { ...updated, _merged: true, message: `SKU "${normalizedSku}" already exists — stock updated from ${existing.stock} to ${updated.stock}.` },
+          { status: 200 }
+        );
+      }
+    }
+
     const newProduct = await db.$transaction(
       async (tx) => {
         const productRecord = await tx.product.create({

@@ -129,9 +129,34 @@ export async function POST(req: Request) {
       defaultRepoId = defaultRepo.id;
     }
 
+    // Pre-load all existing product SKUs for fast upsert lookups
+    const existingProductsBySku = await db.product.findMany({
+      where: { sku: { not: null } },
+      select: { id: true, sku: true, stock: true },
+    });
+    const skuToProductId = new Map<string, string>();
+    existingProductsBySku.forEach((p) => {
+      if (p.sku) skuToProductId.set(p.sku.toUpperCase(), p.id);
+    });
+
+    let updatedCount = 0;
+
     // Process rows sequentially in transaction
     await db.$transaction(async (tx) => {
       for (const item of rowsToCreate) {
+        const normalizedSku = item.sku ? item.sku.toUpperCase() : null;
+
+        // ── SKU Upsert: increment stock on existing product instead of duplicating ──
+        if (normalizedSku && skuToProductId.has(normalizedSku)) {
+          const existingId = skuToProductId.get(normalizedSku)!;
+          await tx.product.update({
+            where: { id: existingId },
+            data: { stock: { increment: item.stock } },
+          });
+          updatedCount++;
+          continue;
+        }
+
         // Resolve or create category
         const catKey = item.categoryName.toLowerCase().trim();
         let categoryId = categoryMap.get(catKey);
@@ -151,7 +176,7 @@ export async function POST(req: Request) {
         await tx.product.create({
           data: {
             name: item.name,
-            sku: item.sku,
+            sku: normalizedSku || item.sku,
             categoryId,
             price: item.price,
             costPrice: item.costPrice,
@@ -182,8 +207,9 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       createdCount,
+      updatedCount,
       errors,
-      message: `Successfully imported ${createdCount} products into catalog.`,
+      message: `Import complete: ${createdCount} product(s) created, ${updatedCount} product(s) had their stock updated (duplicate SKU).`,
     });
   } catch (error: any) {
     console.error("Bulk Product Upload Error:", error);
