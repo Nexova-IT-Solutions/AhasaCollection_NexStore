@@ -4,95 +4,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { hasPermission } from "@/lib/permissions";
 import { Prisma } from "@prisma/client";
-import { unstable_cache as cache } from "next/cache";
-import { Suspense } from "react";
+import { cache } from "react";
 
-import { db } from "@/lib/db";
-import { ProductsClient } from "./products-client";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import AdminProductsLoading from "./loading";
-import { getStoreConfig } from "@/lib/store-config";
-import { isFeatureEnabled } from "@/lib/queries/feature-toggles";
-import { ExportInventoryButton } from "./export-inventory-button";
-import { BulkUploadButton } from "./bulk-upload-button";
-
-type ProductsTab = "standard" | "gift-boxes";
-
-type AdminProductsQueryInput = {
-  q: string;
-  category: string;
-  occasion: string;
-  stock: string;
-  repository: string;
-  outlet: string;
-  isTrending: boolean;
-  isNewArrival: boolean;
-  showInDiscountSection: boolean;
-  isTopRated: boolean;
-  isBestSeller: boolean;
-  showInChocolateSection: boolean;
-  showInSoftToysSection: boolean;
-  tab: ProductsTab;
-  page: number;
-  pageSize: number;
-};
-
-function normalizeTab(value: unknown): ProductsTab {
-  return value === "gift-boxes" ? "gift-boxes" : "standard";
-}
-
-function buildBaseWhere(input: Omit<AdminProductsQueryInput, "tab" | "page" | "pageSize">): Prisma.ProductWhereInput {
-  const { 
-    q, category, occasion, stock, repository, outlet,
-    isTrending, isNewArrival, showInDiscountSection,
-    isTopRated, isBestSeller, showInChocolateSection, showInSoftToysSection
-  } = input;
-  const where: Prisma.ProductWhereInput = {};
-
-  if (q) {
-    where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { sku: { contains: q, mode: "insensitive" } },
-    ];
-  }
-
-  if (category) {
-    where.categoryId = category;
-  }
-
-  if (occasion) {
-    where.occasions = { some: { id: occasion } };
-  }
-
-  if (stock === "in") {
-    where.stock = { gt: 0 };
-  } else if (stock === "out") {
-    where.stock = 0;
-  }
-
-  if (isTrending) where.isTrending = true;
-  if (isNewArrival) where.isNewArrival = true;
-  if (showInDiscountSection) where.showInDiscountSection = true;
-  if (isTopRated) where.isTopRated = true;
-  if (isBestSeller) where.isBestSeller = true;
-  if (showInChocolateSection) where.showInChocolateSection = true;
-  if (showInSoftToysSection) where.showInSoftToysSection = true;
-
-  if (repository) {
-    where.repositoryId = repository;
-  }
-
-  if (outlet) {
-    where.outletId = outlet;
-  }
-
-  return where;
-}
-
-const getAdminProductsData = cache(
-  async (input: AdminProductsQueryInput) => {
+async function getAdminProductsData(input: AdminProductsQueryInput) {
     const { tab, page, pageSize } = input;
     const baseWhere = buildBaseWhere(input);
     const where: Prisma.ProductWhereInput = {
@@ -174,10 +88,7 @@ const getAdminProductsData = cache(
       standardCount,
       giftBoxesCount,
     };
-  },
-  ["admin-products-tabbed-table"],
-  { revalidate: 60, tags: ["admin-products"] }
-);
+}
 
 type PageProps = {
   searchParams: Promise<{
