@@ -539,9 +539,29 @@ export async function DELETE(_req: Request, props: RouteProps) {
   }
 
   try {
-    await db.product.delete({
-      where: { id },
-    });
+    try {
+      await db.product.delete({
+        where: { id },
+      });
+    } catch (deleteError: any) {
+      if (
+        deleteError?.code === "P2014" || 
+        deleteError?.code === "P2003" || 
+        deleteError?.message?.includes("violate") ||
+        deleteError?.message?.includes("relation") ||
+        deleteError?.message?.includes("foreign key")
+      ) {
+        await db.product.update({
+          where: { id },
+          data: { isActive: false },
+        });
+        revalidateHomePaths(id);
+        return NextResponse.json({ 
+          message: "Product is referenced by orders/items; it has been deactivated (soft-deleted) successfully." 
+        });
+      }
+      throw deleteError;
+    }
 
     revalidateHomePaths(id);
 
