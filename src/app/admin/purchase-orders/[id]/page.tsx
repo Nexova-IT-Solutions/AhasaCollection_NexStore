@@ -24,6 +24,8 @@ import {
   Calendar,
   User,
   Check,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -74,10 +76,14 @@ export default function PurchaseOrderDetailPage({
   const { data: session } = useSession();
 
   const { data, isLoading, mutate } = useSWR(`/api/admin/purchase-orders/${id}`, fetcher);
-  const { data: categoriesData } = useSWR("/api/admin/categories", fetcher);
+  const { data: categoriesData } = useSWR("/api/admin/categories?limit=500", fetcher);
 
   const po = data?.purchaseOrder;
-  const categories = Array.isArray(categoriesData) ? categoriesData : (Array.isArray(categoriesData?.categories) ? categoriesData.categories : []);
+  const categories = Array.isArray(categoriesData?.data)
+    ? categoriesData.data
+    : (Array.isArray(categoriesData?.categories)
+      ? categoriesData.categories
+      : (Array.isArray(categoriesData) ? categoriesData : []));
 
   // Modals state
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -231,19 +237,44 @@ export default function PurchaseOrderDetailPage({
 
   // Open Inventory Review & Intake Modal
   const openIntakeModal = () => {
-    setIntakeItemsState(
-      (po.items || []).map((item: any) => ({
-        poItemId: item.id,
-        productId: item.productId || null,
-        itemName: item.itemName,
-        sku: item.sku || "",
-        acceptedQty: item.acceptedQty || item.receivedQty || item.requestedQty,
-        costPrice: item.finalUnitCost || item.estimatedUnitCost,
-        sellingPrice: (item.finalUnitCost || item.estimatedUnitCost) * 1.25,
-        categoryId: "",
-        imageUrl: "",
-      }))
-    );
+    const initializedState = (po.items || []).map((item: any) => ({
+      poItemId: item.id,
+      productId: item.productId || null,
+      itemName: item.itemName,
+      sku: item.sku || "",
+      acceptedQty: item.acceptedQty || item.receivedQty || item.requestedQty,
+      costPrice: item.finalUnitCost || item.estimatedUnitCost,
+      sellingPrice: (item.finalUnitCost || item.estimatedUnitCost) * 1.25,
+      categoryId: "",
+      imageUrl: "",
+      shortDescription: "",
+      description: "",
+      weightGrams: "",
+      rackNumber: "",
+      rowNumber: "",
+      binLocation: "",
+      isbn: "",
+      author: "",
+      publisher: "",
+      isNewArrival: false,
+      isTrending: false,
+      isTopRated: false,
+      isBestSeller: false,
+      showInDiscountSection: false,
+      showInChocolateSection: false,
+      showInSoftToysSection: false,
+    }));
+
+    setIntakeItemsState(initializedState);
+
+    // Expand items by default if only 1 item, or expand first item
+    const initialExpanded: Record<string, boolean> = {};
+    if (initializedState.length > 0) {
+      initializedState.forEach((it: any, idx: number) => {
+        initialExpanded[it.poItemId] = idx === 0 || initializedState.length === 1;
+      });
+    }
+    setExpandedItems(initialExpanded);
     setIntakeModalOpen(true);
   };
 
@@ -931,88 +962,415 @@ export default function PurchaseOrderDetailPage({
       <Dialog open={intakeModalOpen} onOpenChange={setIntakeModalOpen}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#1F1720]">
               <Layers className="w-5 h-5 text-purple-600" />
               Review & Intake Received Items to Inventory
             </DialogTitle>
             <DialogDescription>
-              Review basic product properties (Category, Selling Price, SKU) before adding accepted stock into live inventory.
+              Configure category, selling prices, descriptions, location, and flags for all items before ingesting stock into catalog.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-3 text-xs">
-            {intakeItemsState.map((item, idx) => (
-              <Card key={item.poItemId} className="border-brand-border p-4 rounded-xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-purple-600" />
-                    <span className="font-bold text-sm text-slate-800">{item.itemName}</span>
-                    <Badge variant="outline" className="text-[10px] bg-slate-50">
-                      Qty to Intake: {item.acceptedQty} Pcs
-                    </Badge>
-                  </div>
-                  <span className="text-xs font-semibold text-slate-500">
-                    Cost Price: {formatPrice(item.costPrice)}
-                  </span>
-                </div>
+            {intakeItemsState.map((item, idx) => {
+              const isExpanded = expandedItems[item.poItemId] ?? (intakeItemsState.length === 1);
+              return (
+                <Card key={item.poItemId} className="border-brand-border rounded-2xl overflow-hidden shadow-sm">
+                  {/* Collapsible Card Header */}
+                  <div
+                    onClick={() =>
+                      setExpandedItems((prev) => ({
+                        ...prev,
+                        [item.poItemId]: !prev[item.poItemId],
+                      }))
+                    }
+                    className="p-4 bg-slate-50 hover:bg-slate-100/80 cursor-pointer flex items-center justify-between transition-colors border-b border-brand-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                        <Package className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 text-sm">{item.itemName}</span>
+                          <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200">
+                            Qty to Intake: {item.acceptedQty} Pcs
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-0.5">
+                          <span>Cost: <strong className="text-slate-700">{formatPrice(item.costPrice)}</strong></span>
+                          <span>Selling: <strong className="text-emerald-600">{formatPrice(item.sellingPrice)}</strong></span>
+                          {item.categoryId && (
+                            <span className="text-purple-600 font-semibold">
+                              • {categories.find((c: any) => c.id === item.categoryId)?.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-[10px] font-bold uppercase">Category *</Label>
-                    <Select
-                      value={item.categoryId}
-                      onValueChange={(val) =>
-                        setIntakeItemsState((prev) =>
-                          prev.map((it, i) => (i === idx ? { ...it, categoryId: val } : it))
-                        )
-                      }
-                    >
-                      <SelectTrigger className="h-9 text-xs mt-1">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((c: any) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-[10px] font-bold uppercase">Selling Price (LKR) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={item.sellingPrice}
-                      onChange={(e) => {
-                        const val = Math.max(0, Number(e.target.value) || 0);
-                        setIntakeItemsState((prev) =>
-                          prev.map((it, i) => (i === idx ? { ...it, sellingPrice: val } : it))
-                        );
-                      }}
-                      className="h-9 text-right font-bold mt-1"
-                    />
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <span className="text-[11px] font-semibold hidden sm:inline">
+                        {isExpanded ? "Collapse" : "Expand Details"}
+                      </span>
+                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </div>
                   </div>
 
-                  <div>
-                    <Label className="text-[10px] font-bold uppercase">Catalog SKU</Label>
-                    <Input
-                      value={item.sku}
-                      onChange={(e) =>
-                        setIntakeItemsState((prev) =>
-                          prev.map((it, i) => (i === idx ? { ...it, sku: e.target.value } : it))
-                        )
-                      }
-                      placeholder="e.g. HP001"
-                      className="h-9 font-mono text-xs mt-1"
-                    />
-                  </div>
-                </div>
-              </Card>
-            ))}
+                  {/* Card Content (When Expanded) */}
+                  {isExpanded && (
+                    <div className="p-4 space-y-4 bg-white">
+                      {/* Section 1: Basic Information */}
+                      <div>
+                        <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-purple-600" />
+                          1. Core Product Info
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Category *</Label>
+                            <Select
+                              value={item.categoryId}
+                              onValueChange={(val) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, categoryId: val } : it))
+                                )
+                              }
+                            >
+                              <SelectTrigger className="h-9 text-xs mt-1 border-brand-border">
+                                <SelectValue placeholder="Select Category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map((c: any) => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    {c.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Selling Price (LKR) *</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={item.sellingPrice}
+                              onChange={(e) => {
+                                const val = Math.max(0, Number(e.target.value) || 0);
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, sellingPrice: val } : it))
+                                );
+                              }}
+                              className="h-9 text-right font-bold mt-1 border-brand-border"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Catalog SKU</Label>
+                            <Input
+                              value={item.sku}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, sku: e.target.value } : it))
+                                )
+                              }
+                              placeholder="e.g. HP001"
+                              className="h-9 font-mono text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Cost Price (LKR)</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={item.costPrice}
+                              onChange={(e) => {
+                                const val = Math.max(0, Number(e.target.value) || 0);
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, costPrice: val } : it))
+                                );
+                              }}
+                              className="h-9 text-right font-semibold mt-1 border-brand-border"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Main Image URL</Label>
+                            <Input
+                              value={item.imageUrl}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, imageUrl: e.target.value } : it))
+                                )
+                              }
+                              placeholder="https://example.com/product-image.jpg"
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 2: Descriptions */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                          2. Descriptions & Copy
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Short Description</Label>
+                            <Textarea
+                              value={item.shortDescription}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, shortDescription: e.target.value } : it))
+                                )
+                              }
+                              placeholder="Brief summary for product card..."
+                              rows={2}
+                              className="mt-1 text-xs border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Full Description</Label>
+                            <Textarea
+                              value={item.description}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, description: e.target.value } : it))
+                                )
+                              }
+                              placeholder="Detailed product specification..."
+                              rows={2}
+                              className="mt-1 text-xs border-brand-border"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 3: Physical Storage & Weight */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                          3. Physical Location & Weight
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Weight (g)</Label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              placeholder="e.g. 350"
+                              value={item.weightGrams}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, weightGrams: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Rack Number</Label>
+                            <Input
+                              placeholder="e.g. RACK-04"
+                              value={item.rackNumber}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, rackNumber: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Row Location</Label>
+                            <Input
+                              placeholder="e.g. ROW-B"
+                              value={item.rowNumber}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, rowNumber: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Bin Location</Label>
+                            <Input
+                              placeholder="e.g. BIN-12"
+                              value={item.binLocation}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, binLocation: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 4: Barcode & Publishing Metadata */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                          4. Barcode & Publishing (Optional)
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Barcode / ISBN</Label>
+                            <Input
+                              placeholder="e.g. 9780547928227"
+                              value={item.isbn}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, isbn: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Author</Label>
+                            <Input
+                              placeholder="e.g. J.K. Rowling"
+                              value={item.author}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, author: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-[10px] font-bold uppercase text-slate-600">Publisher</Label>
+                            <Input
+                              placeholder="e.g. Bloomsbury"
+                              value={item.publisher}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, publisher: e.target.value } : it))
+                                )
+                              }
+                              className="h-9 text-xs mt-1 border-brand-border"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 5: Storefront Display Flags */}
+                      <div className="pt-2 border-t border-slate-100">
+                        <h4 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+                          5. Storefront Badges & Sections
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.isNewArrival}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, isNewArrival: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Is New Arrival</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.isTrending}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, isTrending: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Is Trending</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.isTopRated}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, isTopRated: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Is Top Rated</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.isBestSeller}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, isBestSeller: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Is Best Seller</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.showInDiscountSection}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, showInDiscountSection: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Discount Section</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.showInChocolateSection}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, showInChocolateSection: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Chocolate Section</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={item.showInSoftToysSection}
+                              onChange={(e) =>
+                                setIntakeItemsState((prev) =>
+                                  prev.map((it, i) => (i === idx ? { ...it, showInSoftToysSection: e.target.checked } : it))
+                                )
+                              }
+                              className="rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <span>Soft Toys Section</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
           </div>
 
           <DialogFooter>

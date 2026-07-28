@@ -11,7 +11,7 @@ function revalidateStorefront() {
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string)) {
+    if (!session || session.user?.role === "USER") {
       return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 
@@ -20,11 +20,11 @@ export async function GET(req: Request) {
     
     // Parse limit and page query parameters from the URL as integers
     const page = parseInt(searchParams.get("page") || "1", 10) || 1;
-    const limit = parseInt(searchParams.get("limit") || searchParams.get("pageSize") || "10", 10) || 10;
+    const limit = parseInt(searchParams.get("limit") || searchParams.get("pageSize") || "50", 10) || 50;
     
     const hasPagination = !isNaN(page) && !isNaN(limit) && page > 0 && limit > 0;
     const skip = hasPagination ? (page - 1) * limit : undefined;
-    const take = hasPagination ? Math.min(limit, 100) : undefined;
+    const take = hasPagination ? Math.min(limit, 1000) : undefined;
 
     const where = q
       ? {

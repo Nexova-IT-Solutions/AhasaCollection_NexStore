@@ -71,7 +71,7 @@ export async function POST(req: Request, { params }: PageProps) {
         let targetProductId = intakeSpec.productId || poItem.productId;
 
         if (targetProductId) {
-          // Update existing product stock and cost price
+          // Update existing product stock and cost price + detailed fields
           await tx.product.update({
             where: { id: targetProductId },
             data: {
@@ -81,6 +81,22 @@ export async function POST(req: Request, { params }: PageProps) {
               supplierId: po.supplierId,
               lastSuppliedAt: new Date(),
               outletId: po.outletId || undefined,
+              shortDescription: intakeSpec.shortDescription || undefined,
+              description: intakeSpec.description || undefined,
+              weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : undefined,
+              rackNumber: intakeSpec.rackNumber || undefined,
+              rowNumber: intakeSpec.rowNumber || undefined,
+              binLocation: intakeSpec.binLocation || undefined,
+              isbn: intakeSpec.isbn || undefined,
+              author: intakeSpec.author || undefined,
+              publisher: intakeSpec.publisher || undefined,
+              isNewArrival: Boolean(intakeSpec.isNewArrival),
+              isTrending: Boolean(intakeSpec.isTrending),
+              isTopRated: Boolean(intakeSpec.isTopRated),
+              isBestSeller: Boolean(intakeSpec.isBestSeller),
+              showInDiscountSection: Boolean(intakeSpec.showInDiscountSection),
+              showInChocolateSection: Boolean(intakeSpec.showInChocolateSection),
+              showInSoftToysSection: Boolean(intakeSpec.showInSoftToysSection),
             },
           });
         } else {
@@ -106,6 +122,22 @@ export async function POST(req: Request, { params }: PageProps) {
               productImages: intakeSpec.imageUrl ? [{ url: intakeSpec.imageUrl, isMain: true }] : [],
               productVariants: [],
               isActive: true,
+              shortDescription: intakeSpec.shortDescription || null,
+              description: intakeSpec.description || null,
+              weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : null,
+              rackNumber: intakeSpec.rackNumber || null,
+              rowNumber: intakeSpec.rowNumber || null,
+              binLocation: intakeSpec.binLocation || null,
+              isbn: intakeSpec.isbn || null,
+              author: intakeSpec.author || null,
+              publisher: intakeSpec.publisher || null,
+              isNewArrival: Boolean(intakeSpec.isNewArrival),
+              isTrending: Boolean(intakeSpec.isTrending),
+              isTopRated: Boolean(intakeSpec.isTopRated),
+              isBestSeller: Boolean(intakeSpec.isBestSeller),
+              showInDiscountSection: Boolean(intakeSpec.showInDiscountSection),
+              showInChocolateSection: Boolean(intakeSpec.showInChocolateSection),
+              showInSoftToysSection: Boolean(intakeSpec.showInSoftToysSection),
             },
           });
 
