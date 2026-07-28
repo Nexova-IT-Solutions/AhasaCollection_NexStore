@@ -209,8 +209,10 @@ model Supplier {
   isActive      Boolean         @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  products      Product[]
-  supplyHistory ProductSupply[]
+  products       Product[]
+  supplyHistory  ProductSupply[]
+  purchaseOrders PurchaseOrder[]
+  payments       SupplierPayment[]
 }
 
 model Product {
@@ -1011,3 +1013,145 @@ model StockTransferLog {
   performedById  String
   createdAt      DateTime @default(now())
 }
+
+enum PORequestType {
+  NEW_STOCK
+  RESTOCK
+  EMERGENCY
+}
+
+enum POPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum POStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  GOODS_RECEIVED
+  REVIEWING
+  COMPLETED
+  CANCELLED
+}
+
+enum POPaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  FULLY_PAID
+}
+
+enum POPaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHEQUE
+  CREDIT
+}
+
+model PurchaseOrder {
+  id                   String                 @id @default(cuid())
+  poNumber             String                 @unique
+  requestDate          DateTime               @default(now())
+  requestedById        String
+  requestedByName      String
+  outletId             String?
+  outletName           String?
+  supplierId           String
+  supplier             Supplier               @relation(fields: [supplierId], references: [id])
+  requestType          PORequestType          @default(RESTOCK)
+  priority             POPriority             @default(NORMAL)
+  expectedDeliveryDate DateTime?
+  remarks              String?
+  status               POStatus               @default(PENDING_APPROVAL)
+  paymentStatus        POPaymentStatus        @default(UNPAID)
+  paymentMethod        POPaymentMethod        @default(CREDIT)
+  totalEstimatedCost   Float                  @default(0)
+  finalCost            Float?
+  paidAmount           Float                  @default(0)
+  approvedById         String?
+  approvedByName       String?
+  approvedAt           DateTime?
+  rejectionReason      String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  items                PurchaseOrderItem[]
+  receipts             PurchaseOrderReceipt[]
+  payments             SupplierPayment[]
+
+  @@index([supplierId])
+  @@index([status])
+  @@index([poNumber])
+}
+
+model PurchaseOrderItem {
+  id                String                     @id @default(cuid())
+  poId              String
+  po                PurchaseOrder              @relation(fields: [poId], references: [id], onDelete: Cascade)
+  productId         String?
+  itemName          String
+  sku               String?
+  requestedQty      Int                        @default(1)
+  unit              String                     @default("Pcs")
+  estimatedUnitCost Float                      @default(0)
+  reason            String?
+  receivedQty       Int                        @default(0)
+  damagedQty        Int                        @default(0)
+  acceptedQty       Int                        @default(0)
+  finalUnitCost     Float?
+  receiptItems      PurchaseOrderReceiptItem[]
+
+  @@index([poId])
+  @@index([productId])
+}
+
+model PurchaseOrderReceipt {
+  id             String                     @id @default(cuid())
+  poId           String
+  po             PurchaseOrder              @relation(fields: [poId], references: [id], onDelete: Cascade)
+  receiptNumber  String
+  invoiceNo      String?
+  deliveryNoteNo String?
+  receivedAt     DateTime                   @default(now())
+  receivedById   String
+  receivedByName String
+  notes          String?
+  damagedNotes   String?
+  totalReceived  Int                        @default(0)
+  totalDamaged   Int                        @default(0)
+  items          PurchaseOrderReceiptItem[]
+
+  @@index([poId])
+}
+
+model PurchaseOrderReceiptItem {
+  id          String               @id @default(cuid())
+  receiptId   String
+  receipt     PurchaseOrderReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  poItemId    String
+  poItem      PurchaseOrderItem    @relation(fields: [poItemId], references: [id], onDelete: Cascade)
+  receivedQty Int                  @default(0)
+  damagedQty  Int                  @default(0)
+  acceptedQty Int                  @default(0)
+  unitCost    Float                @default(0)
+}
+
+model SupplierPayment {
+  id            String          @id @default(cuid())
+  supplierId    String
+  supplier      Supplier        @relation(fields: [supplierId], references: [id])
+  poId          String?
+  po            PurchaseOrder?  @relation(fields: [poId], references: [id])
+  amount        Float
+  paymentMethod POPaymentMethod @default(CASH)
+  referenceNo   String?
+  notes         String?
+  paidAt        DateTime        @default(now())
+  paidById      String
+  paidByName    String
+
+  @@index([supplierId])
+  @@index([poId])
+}
+

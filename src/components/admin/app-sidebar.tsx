@@ -31,7 +31,7 @@ import {
   Heart,
   Banknote,
   Box,
-  Database,
+  FileText,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
@@ -149,6 +149,31 @@ const operationsItems: NavItem[] = [
     url: "/admin/returns",
     icon: ArrowRightLeft,
     requiredPermission: "pos.manage_returns",
+  },
+  {
+    title: "Purchase Orders",
+    icon: FileText,
+    requiredPermission: "purchase_orders.create",
+    children: [
+      {
+        title: "All Requests",
+        url: "/admin/purchase-orders",
+        icon: FileText,
+        requiredPermission: "purchase_orders.create",
+      },
+      {
+        title: "New Purchase Order",
+        url: "/admin/purchase-orders/new",
+        icon: Package,
+        requiredPermission: "purchase_orders.create",
+      },
+      {
+        title: "Supplier Balances",
+        url: "/admin/purchase-orders/payments",
+        icon: Wallet,
+        requiredPermission: "purchase_orders.payment",
+      },
+    ],
   },
   {
     title: "Suppliers",

@@ -51,6 +51,16 @@ export const PERMISSION_TREE_STRUCTURE = {
       manage: "Add/Edit/Search Customers",
     },
   },
+  purchase_orders: {
+    label: "Purchase Order Management",
+    permissions: {
+      create: "Create Purchase Requests",
+      approve: "Approve / Reject Purchase Requests (Stock Admin)",
+      receive: "Receive Goods & Track Damage",
+      inventory_intake: "Review & Intake Received Items to Inventory",
+      payment: "Process Supplier Payments & Outstanding Balances",
+    },
+  },
   system: {
     label: "System Settings",
     permissions: {
