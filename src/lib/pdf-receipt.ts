@@ -66,6 +66,9 @@ export interface ReceiptData {
   paymentMethod: string;
   date: string;
   trackingNumber?: string | null;
+  customerName?: string | null;
+  paidAmount?: number;
+  outstandingAmount?: number;
   items: {
     name: string;
     nameAr?: string | null;
@@ -196,6 +199,13 @@ let printQueue = Promise.resolve();
 export async function generateReceiptPdf(data: ReceiptData, format: "print" | "download") {
   const logoBase64 = data.companyDetails?.logoBase64 || await getResizedLogoBase64("/logo/logo.png", 200);
 
+  let saleType = "Cash Sale";
+  if (data.paymentMethod === "COURIER_COD" || data.paymentMethod === "COURIER_OTHER") {
+    saleType = "Courier Sale";
+  } else if (data.paymentMethod === "POS_CREDIT") {
+    saleType = "Credit Sale";
+  }
+
   if (format === "print") {
     const mode = data.companyDetails?.posPrintMode || "raw";
     const isRaster = mode.startsWith("raster");
@@ -267,8 +277,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         <div style="font-size: 11px; margin-bottom: 8px;">
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
+          <div>Sale Type: ${saleType}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
+          ${data.paymentMethod === "POS_CREDIT" ? `
+            <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #ccc;">
+              <div>Customer: ${data.customerName || "Walk-in Customer"}</div>
+              <div>Paid Amount: OMR ${(data.paidAmount ?? 0).toFixed(3)}</div>
+              <div>Outstanding Amount: OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}</div>
+            </div>
+          ` : ""}
         </div>
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="margin-bottom: 8px;">
@@ -382,10 +400,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       rawLines.push(
         '\x1B\x61\x00', // Left align
         `${SEP}\n`,
-        isEnglish ? `Order: ${data.orderNumber}\n` : `Order: ${data.orderNumber}\n`,
-        isEnglish ? `Date: ${data.date}\n` : `Date: ${data.date}\n`,
-        isEnglish ? `Payment: ${data.paymentMethod.replace("POS_", "")}\n` : `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
+        `Order: ${data.orderNumber}\n`,
+        `Date: ${data.date}\n`,
+        `Sale Type: ${saleType}\n`,
+        `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
         data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
+        data.paymentMethod === "POS_CREDIT"
+          ? `Customer: ${data.customerName || "Walk-in Customer"}\nPaid Amount: OMR ${(data.paidAmount ?? 0).toFixed(3)}\nOutstanding Amount: OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}\n`
+          : "",
         `${SEP}\n`
       );
       
@@ -696,6 +718,13 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(data.date, pageWidth - 15, rightY, { align: "right" });
+    rightY += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(33, 33, 33);
+    doc.text("Sale Type:", pageWidth - 80, rightY);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text(saleType, pageWidth - 15, rightY, { align: "right" });
     
     rightY += 8;
     doc.setFont("helvetica", "bold");
@@ -713,6 +742,32 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
       doc.text(data.trackingNumber, pageWidth - 15, rightY, { align: "right" });
+    }
+
+    if (data.paymentMethod === "POS_CREDIT") {
+      rightY += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(33, 33, 33);
+      doc.text("Customer:", pageWidth - 80, rightY);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(data.customerName || "Walk-in Customer", pageWidth - 15, rightY, { align: "right" });
+
+      rightY += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(33, 33, 33);
+      doc.text("Paid Amount:", pageWidth - 80, rightY);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(`OMR ${(data.paidAmount ?? 0).toFixed(3)}`, pageWidth - 15, rightY, { align: "right" });
+
+      rightY += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(33, 33, 33);
+      doc.text("Outstanding:", pageWidth - 80, rightY);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(`OMR ${(data.outstandingAmount ?? data.total).toFixed(3)}`, pageWidth - 15, rightY, { align: "right" });
     }
 
     currentY = Math.max(currentY, rightY) + 15;

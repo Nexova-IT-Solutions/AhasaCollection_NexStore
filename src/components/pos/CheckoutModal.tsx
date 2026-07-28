@@ -259,6 +259,9 @@ export function CheckoutModal() {
       items: successOrder.items,
       companyDetails: companyDetails,
       trackingNumber: successOrder.trackingNumber,
+      customerName: customer?.name || null,
+      paidAmount: successOrder.paymentMethod === "POS_CREDIT" ? 0 : successOrder.total,
+      outstandingAmount: successOrder.paymentMethod === "POS_CREDIT" ? successOrder.total : 0,
     }, "download");
   };
 
@@ -274,6 +277,9 @@ export function CheckoutModal() {
       items: successOrder.items,
       companyDetails: companyDetails,
       trackingNumber: successOrder.trackingNumber,
+      customerName: customer?.name || null,
+      paidAmount: successOrder.paymentMethod === "POS_CREDIT" ? 0 : successOrder.total,
+      outstandingAmount: successOrder.paymentMethod === "POS_CREDIT" ? successOrder.total : 0,
     }, "print");
   };
 
