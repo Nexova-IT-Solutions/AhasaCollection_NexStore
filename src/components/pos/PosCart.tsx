@@ -131,7 +131,7 @@ export function PosCart() {
             <div className="bg-white/20 p-1.5 rounded-lg">
               <Receipt className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-white font-semibold text-sm">Current Sale / المبيعات الحالية</h2>
+            <h2 className="text-white font-semibold text-sm">Current Sale / වත්මන් විකුණුම්</h2>
           </div>
           {items.length > 0 && (
             <Badge className="bg-white/20 text-white border-white/30 text-xs">
@@ -301,7 +301,7 @@ export function PosCart() {
           <div className="flex justify-between text-xs text-slate-500 items-end">
             <span className="flex flex-col">
               <span>Subtotal ({itemCount} items)</span>
-              <span className="text-[10px] dir-rtl">المجموع الفرعي</span>
+              <span className="text-[10px] dir-rtl">උප එකතුව</span>
             </span>
             <span className="flex flex-col items-end">
               <span>{formatPrice(subtotal)}</span>
@@ -318,7 +318,7 @@ export function PosCart() {
           <div className="flex justify-between items-end">
             <span className="flex flex-col">
               <span className="text-sm font-bold text-slate-800">Total</span>
-              <span className="text-xs font-bold text-slate-600 dir-rtl">المجموع</span>
+              <span className="text-xs font-bold text-slate-600 dir-rtl">මුළු මුදල</span>
             </span>
             <span className="flex flex-col items-end">
               <span className="text-lg font-black text-[#A7066A] leading-tight">{formatPrice(effectiveTotal)}</span>

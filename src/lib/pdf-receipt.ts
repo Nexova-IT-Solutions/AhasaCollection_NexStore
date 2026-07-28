@@ -65,6 +65,7 @@ export interface ReceiptData {
   changeDue: number;
   paymentMethod: string;
   date: string;
+  trackingNumber?: string | null;
   items: {
     name: string;
     nameAr?: string | null;
@@ -267,6 +268,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
+          ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
         </div>
         <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
         <div style="margin-bottom: 8px;">
@@ -380,9 +382,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       rawLines.push(
         '\x1B\x61\x00', // Left align
         `${SEP}\n`,
-        isEnglish ? `Order: ${data.orderNumber}\n` : `Order / الطلب: ${data.orderNumber}\n`,
-        isEnglish ? `Date: ${data.date}\n` : `Date / التاريخ: ${data.date}\n`,
-        isEnglish ? `Payment: ${data.paymentMethod.replace("POS_", "")}\n` : `Payment / الدفع: ${data.paymentMethod.replace("POS_", "")}\n`,
+        isEnglish ? `Order: ${data.orderNumber}\n` : `Order: ${data.orderNumber}\n`,
+        isEnglish ? `Date: ${data.date}\n` : `Date: ${data.date}\n`,
+        isEnglish ? `Payment: ${data.paymentMethod.replace("POS_", "")}\n` : `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
+        data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
         `${SEP}\n`
       );
       
@@ -702,6 +705,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setTextColor(100, 100, 100);
     doc.text(data.paymentMethod.replace("POS_", ""), pageWidth - 15, rightY, { align: "right" });
 
+    if (data.trackingNumber) {
+      rightY += 8;
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(33, 33, 33);
+      doc.text("Tracking ID:", pageWidth - 80, rightY);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 100, 100);
+      doc.text(data.trackingNumber, pageWidth - 15, rightY, { align: "right" });
+    }
+
     currentY = Math.max(currentY, rightY) + 15;
 
     // Items Table mapping
@@ -727,7 +740,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Item Description / විස්තරය", "Qty / ප්‍රමාණය", "Unit Price / ඒකක මිල", "Discount / වට්ටම්", "Total / මුළු මුදල"]],
+      head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
       headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
@@ -754,14 +767,14 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     
-    doc.text("Subtotal / උප එකතුව:", pageWidth - 110, totalY);
+    doc.text("Subtotal:", pageWidth - 110, totalY);
     doc.text(`OMR ${data.subtotal.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
     
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
     doc.setTextColor(37, 99, 235);
-    doc.text("Total / මුළු මුදල:", pageWidth - 110, totalY);
+    doc.text("Total:", pageWidth - 110, totalY);
     doc.text(`OMR ${data.total.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
 
     if (data.changeDue > 0) {
@@ -769,7 +782,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.setFont("Amiri", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text("Change Due / ඉතිරි මුදල:", pageWidth - 110, totalY);
+      doc.text("Change Due:", pageWidth - 110, totalY);
       doc.text(`OMR ${data.changeDue.toFixed(3)}`, pageWidth - 20, totalY, { align: "right" });
     }
 

@@ -64,6 +64,7 @@ export function CheckoutModal() {
   const [successOrder, setSuccessOrder] = useState<{
     orderNumber: string; total: number; subtotal: number; changeDue: number;
     paymentMethod: string;
+    trackingNumber?: string | null;
     items: { name: string; quantity: number; price: number; discountPercent?: number }[];
     activatedCodes?: string[];
   } | null>(null);
@@ -228,6 +229,7 @@ export function CheckoutModal() {
         subtotal,
         changeDue,
         paymentMethod: payment.method,
+        trackingNumber: data.order.trackingNumber || courierTrackingId || null,
         items: items.map(i => ({ name: i.name, nameAr: i.nameAr || null, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
         activatedCodes: data.order.activatedCodes ?? [],
       });
@@ -256,6 +258,7 @@ export function CheckoutModal() {
       date: format(new Date(), "PPpp"),
       items: successOrder.items,
       companyDetails: companyDetails,
+      trackingNumber: successOrder.trackingNumber,
     }, "download");
   };
 
@@ -270,6 +273,7 @@ export function CheckoutModal() {
       date: format(new Date(), "PPpp"),
       items: successOrder.items,
       companyDetails: companyDetails,
+      trackingNumber: successOrder.trackingNumber,
     }, "print");
   };
 
