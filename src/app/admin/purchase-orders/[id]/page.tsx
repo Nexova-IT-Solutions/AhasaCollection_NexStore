@@ -511,7 +511,7 @@ export default function PurchaseOrderDetailPage({
             <CardContent className="p-5 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
               <div>
                 <span className="text-slate-400 font-semibold block uppercase text-[10px]">
-                  Branch / Warehouse
+                  Warehouse
                 </span>
                 <span className="font-bold text-slate-800 text-sm mt-0.5 block">
                   {po.outletName || "Main Warehouse"}

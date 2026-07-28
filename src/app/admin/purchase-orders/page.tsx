@@ -216,7 +216,7 @@ export default function PurchaseOrdersPage() {
                       Supplier
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase tracking-wider">
-                      Branch / Warehouse
+                      Warehouse
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-bold text-[#6B5A64] uppercase tracking-wider">
                       Priority / Type

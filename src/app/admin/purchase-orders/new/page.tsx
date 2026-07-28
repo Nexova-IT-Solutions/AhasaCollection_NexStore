@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import useSWR from "swr";
 import { useCurrency } from "@/components/CurrencyProvider";
@@ -52,9 +53,10 @@ export default function NewPurchaseOrderPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
+  const { data: session } = useSession();
 
   const [requestDate, setRequestDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [requestedBy, setRequestedBy] = useState("Loading...");
+  const [requestedBy, setRequestedBy] = useState("");
   const [branchId, setBranchId] = useState("");
   const [branchName, setBranchName] = useState("");
   const [supplierId, setSupplierId] = useState("");
@@ -92,17 +94,18 @@ export default function NewPurchaseOrderPage() {
   // Fetch session & metadata options
   const { data: sessionData } = useSWR("/api/admin/me", fetcher);
   const { data: suppliersData, isLoading: suppliersLoading } = useSWR("/api/admin/suppliers", fetcher);
-  const { data: outletsData } = useSWR("/api/admin/outlets", fetcher);
+  const { data: repositoriesData } = useSWR("/api/admin/repositories", fetcher);
   const { data: productsData } = useSWR("/api/admin/products?pageSize=100", fetcher);
 
   useEffect(() => {
-    if (sessionData?.user) {
-      setRequestedBy(sessionData.user.name || sessionData.user.email || "Nimal");
+    const currentUserName = session?.user?.name || session?.user?.email || sessionData?.user?.name || sessionData?.user?.email;
+    if (currentUserName && !requestedBy) {
+      setRequestedBy(currentUserName);
     }
-  }, [sessionData]);
+  }, [session, sessionData, requestedBy]);
 
   const suppliers = Array.isArray(suppliersData?.suppliers) ? suppliersData.suppliers : (Array.isArray(suppliersData) ? suppliersData : []);
-  const outlets = Array.isArray(outletsData) ? outletsData : (Array.isArray(outletsData?.outlets) ? outletsData.outlets : []);
+  const repositories = Array.isArray(repositoriesData) ? repositoriesData : (Array.isArray(repositoriesData?.repositories) ? repositoriesData.repositories : []);
   const existingProducts = Array.isArray(productsData?.products) ? productsData.products : [];
 
   const handleAddItemRow = () => {
@@ -301,27 +304,27 @@ export default function NewPurchaseOrderPage() {
                 />
               </div>
 
-              {/* Branch / Warehouse */}
+              {/* Warehouse (Repositories only, no outlets) */}
               <div className="space-y-2">
                 <Label className="text-xs font-bold text-[#1F1720] uppercase tracking-wider">
-                  Branch / Warehouse
+                  Warehouse
                 </Label>
                 <Select
                   value={branchId}
                   onValueChange={(val) => {
                     setBranchId(val);
-                    const selected = outlets.find((o: any) => o.id === val);
-                    setBranchName(selected?.name || "");
+                    const selected = repositories.find((r: any) => r.id === val);
+                    setBranchName(selected ? selected.name : "Main Warehouse");
                   }}
                 >
                   <SelectTrigger className="h-11 border-brand-border">
-                    <SelectValue placeholder="Select Branch / Warehouse" />
+                    <SelectValue placeholder="Select Warehouse" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="main">Main Warehouse</SelectItem>
-                    {outlets.map((o: any) => (
-                      <SelectItem key={o.id} value={o.id}>
-                        {o.name}
+                    {repositories.map((repo: any) => (
+                      <SelectItem key={repo.id} value={repo.id}>
+                        {repo.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
