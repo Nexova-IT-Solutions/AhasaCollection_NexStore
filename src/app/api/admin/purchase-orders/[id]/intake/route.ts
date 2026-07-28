@@ -58,6 +58,31 @@ export async function POST(req: Request, { params }: PageProps) {
     }
 
     await db.$transaction(async (tx) => {
+      // Resolve placement (repositoryId vs outletId) from PO destination location
+      let targetRepoId: string | undefined = undefined;
+      let targetOutletId: string | undefined = undefined;
+
+      if (po.outletId) {
+        const repoExists = await tx.repository.findUnique({ where: { id: po.outletId } });
+        if (repoExists) {
+          targetRepoId = repoExists.id;
+        } else {
+          const outletExists = await tx.outlet.findUnique({ where: { id: po.outletId } });
+          if (outletExists) {
+            targetOutletId = outletExists.id;
+          }
+        }
+      }
+
+      if (!targetRepoId && !targetOutletId && po.outletName) {
+        const repoByName = await tx.repository.findFirst({
+          where: { name: { equals: po.outletName, mode: "insensitive" } },
+        });
+        if (repoByName) {
+          targetRepoId = repoByName.id;
+        }
+      }
+
       for (const intakeSpec of itemsIntake) {
         const poItem = po.items.find((i) => i.id === intakeSpec.poItemId);
         if (!poItem) continue;
@@ -71,7 +96,7 @@ export async function POST(req: Request, { params }: PageProps) {
         let targetProductId = intakeSpec.productId || poItem.productId;
 
         if (targetProductId) {
-          // Update existing product stock and cost price + detailed fields
+          // Update existing product stock and cost price + detailed fields & placement
           await tx.product.update({
             where: { id: targetProductId },
             data: {
@@ -80,7 +105,8 @@ export async function POST(req: Request, { params }: PageProps) {
               price: sellingPrice > 0 ? sellingPrice : undefined,
               supplierId: po.supplierId,
               lastSuppliedAt: new Date(),
-              outletId: po.outletId || undefined,
+              repositoryId: targetRepoId || undefined,
+              outletId: targetOutletId || undefined,
               shortDescription: intakeSpec.shortDescription || undefined,
               description: intakeSpec.description || undefined,
               weightGrams: intakeSpec.weightGrams ? Number(intakeSpec.weightGrams) : undefined,
@@ -118,7 +144,8 @@ export async function POST(req: Request, { params }: PageProps) {
               stock: qtyToAdd,
               supplierId: po.supplierId,
               lastSuppliedAt: new Date(),
-              outletId: po.outletId || undefined,
+              repositoryId: targetRepoId || undefined,
+              outletId: targetOutletId || undefined,
               productImages: intakeSpec.imageUrl ? [{ url: intakeSpec.imageUrl, isMain: true }] : [],
               productVariants: [],
               isActive: true,
