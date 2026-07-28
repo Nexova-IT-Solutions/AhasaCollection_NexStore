@@ -392,6 +392,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [rackNumber, setRackNumber] = useState("");
   const [rowNumber, setRowNumber] = useState("");
   const [binLocation, setBinLocation] = useState("");
+  const [weightGrams, setWeightGrams] = useState<number | "">("");
 
   const [sizeInput, setSizeInput] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
@@ -478,6 +479,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
     setRackNumber((product as any).rackNumber || "");
     setRowNumber((product as any).rowNumber || "");
     setBinLocation((product as any).binLocation || "");
+    setWeightGrams((product as any).weightGrams != null ? Number((product as any).weightGrams) : "");
     setSupplyDate(product.lastSuppliedAt ? new Date(product.lastSuppliedAt) : undefined);
     setSelectedOccasionIds(product.occasions?.map((occasion) => occasion.id) ?? []);
     setSelectedRecipientIds(product.recipients?.map((recipient) => recipient.id) ?? []);
@@ -1054,6 +1056,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
           rackNumber: rackNumber || null,
           rowNumber: rowNumber || null,
           binLocation: binLocation || null,
+          weightGrams: weightGrams === "" ? null : Number(weightGrams),
         }),
       });
 
@@ -1894,6 +1897,20 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                 className="h-12 border-brand-border focus:ring-[#A7066A]"
               />
               <p className="text-[11px] text-[#6B5A64]">Assign a specific bin/shelf location identifier.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Weight (g)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={weightGrams}
+                onChange={(e) => setWeightGrams(e.target.value === "" ? "" : Number(e.target.value))}
+                placeholder="e.g. 500"
+                className="h-12 border-brand-border focus:ring-[#A7066A]"
+              />
+              <p className="text-[11px] text-[#6B5A64]">Specify the unit weight in grams for shipping and logistics.</p>
             </div>
 
             <div className="space-y-2">

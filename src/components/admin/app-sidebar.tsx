@@ -237,6 +237,12 @@ const reportItems: NavItem[] = [
         icon: PackageX,
         requiredPermission: "reports.returns",
       },
+      {
+        title: "Stock Transfers",
+        url: "/admin/reports/stock-transfers",
+        icon: ArrowRightLeft,
+        requiredPermission: "reports.stock_audit",
+      },
     ],
   },
   {

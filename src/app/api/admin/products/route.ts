@@ -61,6 +61,7 @@ const productCreateSchema = z.object({
   rackNumber: z.string().trim().optional().nullable(),
   rowNumber: z.string().trim().optional().nullable(),
   binLocation: z.string().trim().optional().nullable(),
+  weightGrams: z.coerce.number().min(0).optional().nullable(),
 });
 
 function revalidateHomePaths() {
@@ -250,6 +251,7 @@ export async function POST(req: Request) {
       rackNumber,
       rowNumber,
       binLocation,
+      weightGrams,
     } = parsed.data;
 
     const normalizedGiftBoxItems = Array.from(
@@ -368,6 +370,7 @@ export async function POST(req: Request) {
             rackNumber: rackNumber || null,
             rowNumber: rowNumber || null,
             binLocation: binLocation || null,
+            weightGrams: weightGrams ?? null,
           },
           select: {
             id: true,

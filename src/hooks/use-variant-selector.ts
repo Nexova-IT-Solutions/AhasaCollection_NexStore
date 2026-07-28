@@ -171,13 +171,16 @@ export function getColorStockMap(
   selectedSize: string
 ): Map<string, number> {
   const map = new Map<string, number>();
-  if (!selectedSize) return map;
 
-  variants
-    .filter((v) => v.size.toLowerCase() === selectedSize.toLowerCase())
-    .forEach((v) => {
-      map.set(v.color, v.stock);
-    });
+  const filtered = selectedSize
+    ? variants.filter((v) => v.size.toLowerCase() === selectedSize.toLowerCase())
+    : variants; // When no size exists, use all variants
+
+  filtered.forEach((v) => {
+    const colorKey = typeof v.color === "string" ? v.color.split("|")[0] : v.color;
+    // Accumulate stock across all matching variants for the same color
+    map.set(colorKey, (map.get(colorKey) ?? 0) + v.stock);
+  });
 
   return map;
 }

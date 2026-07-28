@@ -270,7 +270,7 @@ export function VariantSelectorModal({
                 {colors.map((color) => {
                   const [colorName, colorHex] = color.split('|');
                   const stock = colorStockMap.get(colorName);
-                  // If we have a size selected, only show relevant colors
+                  // Color is available when: no size-filtering is needed OR stock info is present
                   const isAvailableForSize =
                     sizes.length === 0 || !selectedSize || stock !== undefined;
                   const isOutOfStockColor =

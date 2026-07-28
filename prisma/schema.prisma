@@ -255,6 +255,7 @@ model Product {
   rackNumber            String?
   rowNumber             String?
   binLocation           String?
+  weightGrams           Float?
   itemsInside           GiftBoxItem[]   @relation("BoxToItems")
   parentBoxes           GiftBoxItem[]   @relation("ItemToBoxes")
   category              Category?       @relation(fields: [categoryId], references: [id])
