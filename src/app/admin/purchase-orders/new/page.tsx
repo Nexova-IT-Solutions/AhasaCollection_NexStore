@@ -11,7 +11,6 @@ import {
   Building2,
   Calendar as CalendarIcon,
   Package,
-  Search,
   Check,
   AlertCircle,
   Loader2,
@@ -29,8 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+
 import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import useSWR from "swr";
@@ -66,36 +64,24 @@ export default function NewPurchaseOrderPage() {
   const [remarks, setRemarks] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Items state
+  // Items state — start with one blank row for the user to fill in
   const [items, setItems] = useState<ItemRow[]>([
     {
       id: "1",
-      itemName: "Harry Potter Book",
-      sku: "HP001",
-      requestedQty: 50,
-      unit: "Books",
-      estimatedUnitCost: 10,
-      reason: "Stock below reorder level",
-    },
-    {
-      id: "2",
-      itemName: "Game of Thrones Book",
-      sku: "GOT001",
-      requestedQty: 20,
-      unit: "Books",
-      estimatedUnitCost: 12,
-      reason: "Customer demand",
+      itemName: "",
+      sku: "",
+      requestedQty: 1,
+      unit: "Pcs",
+      estimatedUnitCost: 0,
+      reason: "",
     },
   ]);
 
-  // Product Picker state
-  const [productPickerOpen, setProductPickerOpen] = useState(false);
 
   // Fetch session & metadata options
   const { data: sessionData } = useSWR("/api/admin/me", fetcher);
   const { data: suppliersData, isLoading: suppliersLoading } = useSWR("/api/admin/suppliers", fetcher);
   const { data: repositoriesData } = useSWR("/api/admin/repositories", fetcher);
-  const { data: productsData } = useSWR("/api/admin/products?pageSize=100", fetcher);
 
   useEffect(() => {
     const currentUserName = session?.user?.name || session?.user?.email || sessionData?.user?.name || sessionData?.user?.email;
@@ -106,7 +92,6 @@ export default function NewPurchaseOrderPage() {
 
   const suppliers = Array.isArray(suppliersData?.suppliers) ? suppliersData.suppliers : (Array.isArray(suppliersData) ? suppliersData : []);
   const repositories = Array.isArray(repositoriesData) ? repositoriesData : (Array.isArray(repositoriesData?.repositories) ? repositoriesData.repositories : []);
-  const existingProducts = Array.isArray(productsData?.products) ? productsData.products : [];
 
   const handleAddItemRow = () => {
     setItems((prev) => [
@@ -141,22 +126,7 @@ export default function NewPurchaseOrderPage() {
     );
   };
 
-  const handleSelectExistingProduct = (prod: any) => {
-    setItems((prev) => [
-      ...prev,
-      {
-        id: Math.random().toString(36).substring(2, 9),
-        productId: prod.id,
-        itemName: prod.name,
-        sku: prod.sku || "",
-        requestedQty: 1,
-        unit: "Pcs",
-        estimatedUnitCost: prod.costPrice || prod.price || 0,
-        reason: "Stock replenishment",
-      },
-    ]);
-    setProductPickerOpen(false);
-  };
+
 
   const totalEstimatedCost = items.reduce(
     (sum, item) => sum + (Number(item.requestedQty) || 0) * (Number(item.estimatedUnitCost) || 0),
@@ -430,40 +400,6 @@ export default function NewPurchaseOrderPage() {
             </CardTitle>
 
             <div className="flex items-center gap-2">
-              {/* Quick Pick Existing Catalog Product */}
-              <Popover open={productPickerOpen} onOpenChange={setProductPickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-9 text-xs font-semibold gap-1">
-                    <Search className="w-3.5 h-3.5" />
-                    Pick Existing Product
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="p-0 w-80" align="end">
-                  <Command>
-                    <CommandInput placeholder="Search catalog product…" />
-                    <CommandList>
-                      <CommandEmpty>No products found.</CommandEmpty>
-                      <CommandGroup heading="Catalog Products">
-                        {existingProducts.slice(0, 15).map((prod: any) => (
-                          <CommandItem
-                            key={prod.id}
-                            onSelect={() => handleSelectExistingProduct(prod)}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-sm">{prod.name}</span>
-                              <span className="text-[11px] text-slate-400">
-                                SKU: {prod.sku || "N/A"} | Cost: {formatPrice(prod.costPrice || prod.price)}
-                              </span>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
               <Button
                 type="button"
                 variant="outline"
