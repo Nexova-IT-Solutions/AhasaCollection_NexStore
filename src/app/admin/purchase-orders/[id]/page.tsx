@@ -110,6 +110,7 @@ export default function PurchaseOrderDetailPage({
 
   // Intake review state
   const [intakeItemsState, setIntakeItemsState] = useState<any[]>([]);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   // Payment modal state
   const [payAmount, setPayAmount] = useState(0);
