@@ -1207,8 +1207,8 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
               {fieldErrors.name ? <p className="text-sm text-destructive">{fieldErrors.name}</p> : null}
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Arabic Name (Optional)</Label>
-              <Input value={nameAr} onChange={(event) => setNameAr(event.target.value)} placeholder="e.g. علبة هدايا ذهبية مميزة" className="h-12 border-brand-border text-right" dir="auto" />
+              <Label className="text-sm font-bold text-[#1F1720] uppercase tracking-wider">Sinhala Name (Optional)</Label>
+              <Input value={nameAr} onChange={(event) => setNameAr(event.target.value)} placeholder="e.g. රන්වන් තෑගි පෙට්ටිය" className="h-12 border-brand-border" />
             </div>
           </div>
 

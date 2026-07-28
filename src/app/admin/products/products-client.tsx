@@ -537,7 +537,7 @@ export function ProductsClient({
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="h-8.5 w-8.5 border-gray-200 hover:bg-red-50 hover:text-red-650"
+                        className="h-8.5 w-8.5 border-gray-200 hover:bg-red-50 hover:text-red-600"
                         onClick={() => {
                           setAdjustProduct(product);
                           setAdjustQty(1);
@@ -685,7 +685,7 @@ export function ProductsClient({
                     }}
                     title="Deduct Stock"
                   >
-                    <MinusCircle className="w-4 h-4 text-gray-500 hover:text-red-650" />
+                    <MinusCircle className="w-4 h-4 text-gray-500 hover:text-red-600" />
                   </Button>
                   <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#EFF6FF]">
                     <Link href={`/admin/products/${product.id}/edit`}>
@@ -902,7 +902,7 @@ export function ProductsClient({
                 handleAdjust();
               }}
               disabled={loading || !adjustReason || adjustQty <= 0}
-              className="rounded-xl bg-red-650 text-white hover:bg-red-700 disabled:opacity-50"
+              className="rounded-xl bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
             >
               {loading ? "Removing..." : "Remove Stock"}
             </AlertDialogAction>
