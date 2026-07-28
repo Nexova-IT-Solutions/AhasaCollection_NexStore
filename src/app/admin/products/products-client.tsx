@@ -813,9 +813,13 @@ export function ProductsClient({
             <div className="rounded-xl bg-slate-50 border border-gray-100 p-3">
               <p className="text-[10px] font-extrabold text-[#6B5A64] uppercase tracking-wider">Source Placement</p>
               <p className="text-sm font-bold text-gray-850 mt-0.5">
-                {transferProduct?.repository?.name ? `Repository: ${transferProduct.repository.name}` : ""}
-                {transferProduct?.repository?.name && transferProduct?.outlet?.name ? " / " : ""}
-                {transferProduct?.outlet?.name ? `Outlet: ${transferProduct.outlet.name}` : "Central Warehouse"}
+                {transferProduct?.outlet?.name
+                  ? (transferProduct?.repository?.name
+                      ? `Repository: ${transferProduct.repository.name} / Outlet: ${transferProduct.outlet.name}`
+                      : `Outlet: ${transferProduct.outlet.name}`)
+                  : (transferProduct?.repository?.name
+                      ? `Repository: ${transferProduct.repository.name}`
+                      : "Central Warehouse")}
               </p>
             </div>
             <div className="space-y-2">
@@ -885,9 +889,13 @@ export function ProductsClient({
             <div className="rounded-xl bg-red-50/50 border border-red-100 p-3">
               <p className="text-[10px] font-extrabold text-[#A7066A] uppercase tracking-wider">Current Location</p>
               <p className="text-sm font-bold text-gray-800 mt-0.5">
-                {adjustProduct?.repository?.name ? `Repository: ${adjustProduct.repository.name}` : ""}
-                {adjustProduct?.repository?.name && adjustProduct?.outlet?.name ? " / " : ""}
-                {adjustProduct?.outlet?.name ? `Outlet: ${adjustProduct.outlet.name}` : "Central Warehouse"}
+                {adjustProduct?.outlet?.name
+                  ? (adjustProduct?.repository?.name
+                      ? `Repository: ${adjustProduct.repository.name} / Outlet: ${adjustProduct.outlet.name}`
+                      : `Outlet: ${adjustProduct.outlet.name}`)
+                  : (adjustProduct?.repository?.name
+                      ? `Repository: ${adjustProduct.repository.name}`
+                      : "Central Warehouse")}
               </p>
             </div>
             <div className="space-y-2">
