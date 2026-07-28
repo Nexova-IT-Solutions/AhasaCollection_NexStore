@@ -64,6 +64,8 @@ export default async function AdminProductEditPage({ params }: PageProps) {
             specialTouchOrder: true,
             isAvailableInBuilder: true,
             categoryId: true,
+            repositoryId: true,
+            outletId: true,
             sizes: true,
             colors: true,
             productImages: true,

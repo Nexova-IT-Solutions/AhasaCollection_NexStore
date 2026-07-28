@@ -123,6 +123,8 @@ export async function GET(_req: Request, props: RouteProps) {
         supplierId: true,
         lastSuppliedAt: true,
         categoryId: true,
+        repositoryId: true,
+        outletId: true,
         sizes: true,
         colors: true,
         productImages: true,
