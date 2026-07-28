@@ -712,6 +712,70 @@ export function ProductsClient({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Stock Transfer Dialog */}
+      <AlertDialog open={!!transferProduct} onOpenChange={(open) => !open && setTransferProduct(null)}>
+        <AlertDialogContent className="rounded-2xl border-brand-border bg-white shadow-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-[#1F1720]">Transfer Stock</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-[#6B5A64]">
+              Move stock for <span className="font-bold text-[#2563EB]">{transferProduct?.name}</span> to another outlet.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-750">Target Outlet</label>
+              <select
+                value={transferOutletId}
+                onChange={(e) => setTransferOutletId(e.target.value)}
+                className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              >
+                <option value="">Select an outlet...</option>
+                {outlets
+                  .filter((o) => o.id !== transferProduct?.outletId) // exclude current outlet
+                  .map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-750">Quantity (Max: {transferProduct?.stock})</label>
+              <input
+                type="number"
+                min={1}
+                max={transferProduct?.stock || 1}
+                value={transferQty}
+                onChange={(e) => setTransferQty(Math.max(1, Math.min(transferProduct?.stock || 9999, Number(e.target.value))))}
+                className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-750">Transfer Reason</label>
+              <textarea
+                value={transferReason}
+                onChange={(e) => setTransferReason(e.target.value)}
+                placeholder="Reason for stock transfer (e.g. Colombo outlet stock replenishment)"
+                className="w-full min-h-[80px] p-3 rounded-xl border border-brand-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl border-brand-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleTransfer();
+              }}
+              disabled={loading || !transferOutletId || !transferReason || transferQty <= 0}
+              className="rounded-xl bg-[#2563EB] text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {loading ? "Transferring..." : "Confirm Transfer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
