@@ -54,6 +54,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── Resolve target location: is it a Repository or an Outlet? ──
+    const targetRepo = await db.repository.findUnique({ where: { id: targetOutletId } });
+    const targetOutlet = targetRepo ? null : await db.outlet.findUnique({ where: { id: targetOutletId } });
+
+    const targetIsRepo = !!targetRepo;
+    const resolvedRepoId  = targetIsRepo ? targetOutletId : null;
+    const resolvedOutletId = targetIsRepo ? null : (targetOutlet ? targetOutletId : null);
+
     // Process inside a transaction
     await db.$transaction(async (tx) => {
       // 1. Deduct stock from source product
@@ -62,26 +70,29 @@ export async function POST(req: Request) {
         data: { stock: { decrement: quantity } },
       });
 
-      // 2. Find target product with same SKU/Details at destination outlet
+      // 2. Find existing product at the destination (match by SKU or name + correct placement field)
       let targetProduct = await tx.product.findFirst({
         where: {
           sku: sourceProduct.sku ? sourceProduct.sku : undefined,
           name: sourceProduct.sku ? undefined : sourceProduct.name,
-          outletId: targetOutletId,
+          ...(targetIsRepo
+            ? { repositoryId: resolvedRepoId }
+            : { outletId: resolvedOutletId }),
         },
       });
 
       if (targetProduct) {
-        // Increment stock and preserve source product repository assignment
+        // Update existing — increment stock and correct placement fields
         await tx.product.update({
           where: { id: targetProduct.id },
           data: {
             stock: { increment: quantity },
-            repositoryId: targetProduct.repositoryId || sourceProduct.repositoryId || undefined,
+            repositoryId: resolvedRepoId,
+            outletId: resolvedOutletId,
           },
         });
       } else {
-        // Create new row copying details including exact source repositoryId
+        // Create new product copy at destination with correct placement
         await tx.product.create({
           data: {
             name: sourceProduct.name,
@@ -100,8 +111,9 @@ export async function POST(req: Request) {
             isEGiftCard: sourceProduct.isEGiftCard,
             giftCardValue: sourceProduct.giftCardValue,
             isActive: true,
-            outletId: targetOutletId,
-            repositoryId: sourceProduct.repositoryId || undefined,
+            // ── Correct placement: set exactly one of repo/outlet, clear the other ──
+            repositoryId: resolvedRepoId,
+            outletId: resolvedOutletId,
             isNewArrival: sourceProduct.isNewArrival,
             isTrending: sourceProduct.isTrending,
             isTopRated: sourceProduct.isTopRated,
@@ -124,12 +136,14 @@ export async function POST(req: Request) {
       }
 
       // 3. Log the transfer for audit trail
+      // sourceOutletId records the actual source location (repo or outlet)
+      const sourceLocationId = sourceProduct.outletId || sourceProduct.repositoryId;
       await tx.stockTransferLog.create({
         data: {
           productId,
           productName: sourceProduct.name,
           productSku: sourceProduct.sku,
-          sourceOutletId: sourceProduct.outletId,
+          sourceOutletId: sourceLocationId,
           targetOutletId,
           quantity,
           reason,
