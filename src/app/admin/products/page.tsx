@@ -223,6 +223,9 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   const tab = isGiftboxesAvailable ? normalizeTab(params.tab) : "standard";
   const pageRaw = Number(params.page);
   const pageSizeRaw = Number(params.pageSize);
+  const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
+  const pageSize = Number.isFinite(pageSizeRaw) && pageSizeRaw >= 20 && pageSizeRaw <= 50 ? Math.floor(pageSizeRaw) : 20;
+
   const canViewCatalog = session && (
     ["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN"].includes(session.user.role as string) ||
     hasPermission(session, "catalog.manage_products") ||
