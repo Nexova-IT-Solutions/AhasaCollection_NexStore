@@ -120,6 +120,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Resolve default repository (Warehouse one)
+    let defaultRepoId: string | undefined = undefined;
+    const defaultRepo = (await db.repository.findFirst({
+      where: { name: { contains: "Warehouse", mode: "insensitive" } },
+    })) || (await db.repository.findFirst());
+    if (defaultRepo) {
+      defaultRepoId = defaultRepo.id;
+    }
+
     // Process rows sequentially in transaction
     await db.$transaction(async (tx) => {
       for (const item of rowsToCreate) {
@@ -147,6 +156,7 @@ export async function POST(req: Request) {
             price: item.price,
             costPrice: item.costPrice,
             stock: item.stock,
+            repositoryId: defaultRepoId,
             weightGrams: item.weightGrams,
             shortDescription: item.shortDescription,
             description: item.description,

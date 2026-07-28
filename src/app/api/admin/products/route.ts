@@ -300,6 +300,17 @@ export async function POST(req: Request) {
       })) : 0;
     }
 
+    // Resolve default repository (Warehouse one) if repositoryId is not provided
+    let effectiveRepoId = repositoryId;
+    if (!effectiveRepoId) {
+      const defaultRepo = (await db.repository.findFirst({
+        where: { name: { contains: "Warehouse", mode: "insensitive" } },
+      })) || (await db.repository.findFirst());
+      if (defaultRepo) {
+        effectiveRepoId = defaultRepo.id;
+      }
+    }
+
     const newProduct = await db.$transaction(
       async (tx) => {
         const productRecord = await tx.product.create({
@@ -362,7 +373,7 @@ export async function POST(req: Request) {
             costPrice: costPrice ?? null,
             ...(supplierId ? { supplier: { connect: { id: supplierId } } } : {}),
             ...(supplierId && supplyDate ? { lastSuppliedAt: new Date(supplyDate) } : {}),
-            ...(repositoryId ? { repository: { connect: { id: repositoryId } } } : {}),
+            ...(effectiveRepoId ? { repository: { connect: { id: effectiveRepoId } } } : {}),
             ...(outletId ? { outlet: { connect: { id: outletId } } } : {}),
             isbn: isbn || null,
             author: author || null,
