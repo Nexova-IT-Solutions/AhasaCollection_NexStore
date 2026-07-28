@@ -24,7 +24,11 @@ type TransferRecord = {
   productName: string;
   productSku?: string | null;
   sourceOutletName: string;
+  sourceLocationName?: string;
+  sourceIsRepository?: boolean;
   targetOutletName: string;
+  targetLocationName?: string;
+  targetIsRepository?: boolean;
   quantity: number;
   reason: string;
   performedByName: string;
@@ -252,7 +256,7 @@ export default function StockTransfersReportPage() {
                       Product
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B5A64] uppercase tracking-wider">
-                      From Outlet
+                      From Location / Repository
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#6B5A64] uppercase tracking-wider">
                       To Outlet
@@ -283,22 +287,42 @@ export default function StockTransfersReportPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge
-                          variant="outline"
-                          className="text-slate-600 border-slate-200 gap-1 font-medium"
-                        >
-                          <Building2 className="w-3 h-3" />
-                          {t.sourceOutletName}
-                        </Badge>
+                        {t.sourceIsRepository ? (
+                          <Badge
+                            variant="outline"
+                            className="text-purple-700 border-purple-200 bg-purple-50 gap-1 font-medium"
+                          >
+                            <Building2 className="w-3 h-3 text-purple-600" />
+                            {t.sourceOutletName}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-slate-600 border-slate-200 gap-1 font-medium"
+                          >
+                            <Building2 className="w-3 h-3" />
+                            {t.sourceOutletName}
+                          </Badge>
+                        )}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge
-                          variant="outline"
-                          className="text-blue-600 border-blue-200 bg-blue-50 gap-1 font-medium"
-                        >
-                          <Building2 className="w-3 h-3" />
-                          {t.targetOutletName}
-                        </Badge>
+                        {t.targetIsRepository ? (
+                          <Badge
+                            variant="outline"
+                            className="text-purple-700 border-purple-200 bg-purple-50 gap-1 font-medium"
+                          >
+                            <Building2 className="w-3 h-3 text-purple-600" />
+                            {t.targetOutletName}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 bg-blue-50 gap-1 font-medium"
+                          >
+                            <Building2 className="w-3 h-3" />
+                            {t.targetOutletName}
+                          </Badge>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm">

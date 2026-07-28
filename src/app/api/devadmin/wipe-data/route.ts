@@ -18,11 +18,21 @@ export async function POST(req: Request) {
 
     // Execute the wipe in a transaction, safely ordering deletions to respect foreign keys
     await prisma.$transaction(async (tx) => {
-      // 1. Delete deeply nested POS records
+      // 1. Delete Stock Transfer logs
+      await tx.stockTransferLog.deleteMany();
+
+      // 2. Delete Purchase Order related data
+      await tx.purchaseOrderReceiptItem.deleteMany();
+      await tx.purchaseOrderReceipt.deleteMany();
+      await tx.supplierPayment.deleteMany();
+      await tx.purchaseOrderItem.deleteMany();
+      await tx.purchaseOrder.deleteMany();
+
+      // 3. Delete deeply nested POS records
       await tx.shiftReconciliation.deleteMany();
       await tx.shiftCashCount.deleteMany();
       
-      // 2. Delete Order dependencies (Returns, Reviews, Items, History)
+      // 4. Delete Order dependencies (Returns, Reviews, Items, History)
       await tx.orderItemReturn.deleteMany();
       await tx.returnRequest.deleteMany();
       await tx.review.deleteMany();
@@ -30,25 +40,32 @@ export async function POST(req: Request) {
       await tx.orderStatusHistory.deleteMany();
       await tx.giftCardRedemption.deleteMany();
 
-      // 3. Break cyclical dependencies between Orders and GiftCards before deletion
+      // 5. Break cyclical dependencies between Orders and GiftCards before deletion
       await tx.order.updateMany({ data: { appliedGiftCardId: null } });
       await tx.giftCard.updateMany({ data: { purchasedInOrderId: null, orderId: null, orderItemId: null } });
 
-      // 4. Delete GiftCards and Orders
+      // 6. Delete GiftCards and Orders
       await tx.giftCard.deleteMany();
       await tx.order.deleteMany();
       
-      // 5. Delete POS Shifts (since orders referencing them are gone)
+      // 7. Delete POS Shifts (since orders referencing them are gone)
       await tx.posShift.deleteMany();
 
-      // 6. Delete Customer dependencies
+      // 8. Delete Product Catalog & Inventory Data
+      await tx.productSupply.deleteMany();
+      await tx.giftBoxItem.deleteMany();
+      await tx.productMood.deleteMany();
+      await tx.product.deleteMany();
+      await tx.category.deleteMany();
+
+      // 9. Delete Customer dependencies
       await tx.customerLedger.deleteMany();
       await tx.cart.deleteMany();
       await tx.session.deleteMany();
       await tx.account.deleteMany();
       await tx.address.deleteMany();
 
-      // 7. Finally, delete all non-admin users
+      // 10. Finally, delete all non-admin users
       await tx.user.deleteMany({
         where: {
           role: "USER"
@@ -56,7 +73,7 @@ export async function POST(req: Request) {
       });
     }, {
       maxWait: 10000, // 10 seconds max wait to start transaction
-      timeout: 30000, // 30 seconds max execution time for wiping
+      timeout: 45000, // 45 seconds max execution time for wiping
     });
 
     return NextResponse.json({ success: true, message: "Production data wiped successfully" });

@@ -66,9 +66,10 @@ export async function GET(req: Request) {
       db.stockTransferLog.count({ where }),
     ]);
 
-    // Resolve outlet names and performer info
-    const [outlets, performers] = await Promise.all([
+    // Resolve outlet, repository names and performer info
+    const [outlets, repositories, performers] = await Promise.all([
       db.outlet.findMany({ select: { id: true, name: true } }),
+      db.repository.findMany({ select: { id: true, name: true } }),
       db.user.findMany({
         where: { id: { in: [...new Set(transfers.map((t) => t.performedById))] } },
         select: { id: true, name: true, email: true },
@@ -76,14 +77,45 @@ export async function GET(req: Request) {
     ]);
 
     const outletMap = Object.fromEntries(outlets.map((o) => [o.id, o.name]));
+    const repoMap = Object.fromEntries(repositories.map((r) => [r.id, r.name]));
     const userMap = Object.fromEntries(performers.map((u) => [u.id, u.name || u.email]));
 
-    const enriched = transfers.map((t) => ({
-      ...t,
-      sourceOutletName: t.sourceOutletId ? (outletMap[t.sourceOutletId] ?? "Unknown") : "—",
-      targetOutletName: t.targetOutletId ? (outletMap[t.targetOutletId] ?? "Unknown") : "—",
-      performedByName: userMap[t.performedById] ?? "Unknown",
-    }));
+    const enriched = transfers.map((t) => {
+      let sourceName = "Warehouse one";
+      let sourceIsRepo = true;
+      if (t.sourceOutletId) {
+        if (outletMap[t.sourceOutletId]) {
+          sourceName = outletMap[t.sourceOutletId];
+          sourceIsRepo = false;
+        } else if (repoMap[t.sourceOutletId]) {
+          sourceName = repoMap[t.sourceOutletId];
+          sourceIsRepo = true;
+        }
+      }
+
+      let targetName = "Unknown";
+      let targetIsRepo = false;
+      if (t.targetOutletId) {
+        if (outletMap[t.targetOutletId]) {
+          targetName = outletMap[t.targetOutletId];
+          targetIsRepo = false;
+        } else if (repoMap[t.targetOutletId]) {
+          targetName = repoMap[t.targetOutletId];
+          targetIsRepo = true;
+        }
+      }
+
+      return {
+        ...t,
+        sourceOutletName: sourceIsRepo ? `Rep: ${sourceName}` : sourceName,
+        sourceLocationName: sourceName,
+        sourceIsRepository: sourceIsRepo,
+        targetOutletName: targetIsRepo ? `Rep: ${targetName}` : targetName,
+        targetLocationName: targetName,
+        targetIsRepository: targetIsRepo,
+        performedByName: userMap[t.performedById] ?? "Unknown",
+      };
+    });
 
     return NextResponse.json({ transfers: enriched, total, page, pageSize });
   } catch (error: any) {
