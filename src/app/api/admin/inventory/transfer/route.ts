@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { hasPermission } from "@/lib/permissions";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function POST(req: Request) {
