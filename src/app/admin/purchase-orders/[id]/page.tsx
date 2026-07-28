@@ -74,7 +74,7 @@ export default function PurchaseOrderDetailPage({
   const { data: categoriesData } = useSWR("/api/admin/categories", fetcher);
 
   const po = data?.purchaseOrder;
-  const categories = categoriesData || [];
+  const categories = Array.isArray(categoriesData) ? categoriesData : (Array.isArray(categoriesData?.categories) ? categoriesData.categories : []);
 
   // Modals state
   const [rejectModalOpen, setRejectModalOpen] = useState(false);

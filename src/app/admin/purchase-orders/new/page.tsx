@@ -101,9 +101,9 @@ export default function NewPurchaseOrderPage() {
     }
   }, [sessionData]);
 
-  const suppliers = suppliersData || [];
-  const outlets = outletsData || [];
-  const existingProducts = productsData?.products || [];
+  const suppliers = Array.isArray(suppliersData?.suppliers) ? suppliersData.suppliers : (Array.isArray(suppliersData) ? suppliersData : []);
+  const outlets = Array.isArray(outletsData) ? outletsData : (Array.isArray(outletsData?.outlets) ? outletsData.outlets : []);
+  const existingProducts = Array.isArray(productsData?.products) ? productsData.products : [];
 
   const handleAddItemRow = () => {
     setItems((prev) => [
