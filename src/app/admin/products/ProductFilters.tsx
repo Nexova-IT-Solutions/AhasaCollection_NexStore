@@ -208,46 +208,47 @@ export function ProductFilters({ initialFilters, hasStockAdmin }: ProductFilters
           </Select>
         </div>
 
-        {/* Repository Dropdown */}
-        <div className="w-full sm:w-[220px]">
-          <Select
-            value={initialFilters.repository || "all"}
-            onValueChange={(value) => updateSearchParams({ repository: value })}
-          >
-            <SelectTrigger className="h-11 rounded-xl border-brand-border">
-              <SelectValue placeholder="All Repositories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Repositories</SelectItem>
-              {repositories.map((repo) => (
-                <SelectItem key={repo.id} value={repo.id}>
-                  {repo.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Outlet Dropdown (Conditional on hasStockAdmin) */}
+        {/* Repository & Outlet Dropdowns (Only visible for Stock Admin) */}
         {hasStockAdmin && (
-          <div className="w-full sm:w-[220px]">
-            <Select
-              value={initialFilters.outlet || "all"}
-              onValueChange={(value) => updateSearchParams({ outlet: value })}
-            >
-              <SelectTrigger className="h-11 rounded-xl border-brand-border">
-                <SelectValue placeholder="All Outlets" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Outlets</SelectItem>
-                {outlets.map((outlet) => (
-                  <SelectItem key={outlet.id} value={outlet.id}>
-                    {outlet.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <>
+            <div className="w-full sm:w-[220px]">
+              <Select
+                value={initialFilters.repository || "all"}
+                onValueChange={(value) => updateSearchParams({ repository: value })}
+              >
+                <SelectTrigger className="h-11 rounded-xl border-brand-border">
+                  <SelectValue placeholder="All Repositories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Repositories</SelectItem>
+                  {repositories.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-[220px]">
+              <Select
+                value={initialFilters.outlet || "all"}
+                onValueChange={(value) => updateSearchParams({ outlet: value })}
+              >
+                <SelectTrigger className="h-11 rounded-xl border-brand-border">
+                  <SelectValue placeholder="All Outlets" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Outlets</SelectItem>
+                  {outlets.map((outlet) => (
+                    <SelectItem key={outlet.id} value={outlet.id}>
+                      {outlet.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
         )}
 
         {/* Stock Status */}

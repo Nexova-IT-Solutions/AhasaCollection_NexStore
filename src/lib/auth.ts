@@ -259,6 +259,7 @@ export const authOptions: NextAuthOptions = {
             select: {
               email: true,
               role: true,
+              outletId: true,
               customPermissions: true,
               template: {
                 select: {
@@ -271,6 +272,7 @@ export const authOptions: NextAuthOptions = {
           let mergedPermissions: Record<string, boolean> = {};
 
           if (dbUser) {
+            token.outletId = dbUser.outletId;
             if (dbUser.email === "devadmin@mail.com") {
               token.role = "DEV_ADMIN";
             } else {
@@ -304,6 +306,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
         session.user.templateId = token.templateId as string;
+        session.user.outletId = token.outletId as string | undefined;
         session.user.image = token.image as string | undefined;
         session.user.customPermissions = (token.customPermissions as Record<string, boolean>) || {};
       }
@@ -323,6 +326,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       templateId?: string | null;
+      outletId?: string | null;
       customPermissions?: Record<string, boolean>;
     }
   }
@@ -331,6 +335,7 @@ declare module "next-auth" {
     id: string;
     role: string;
     templateId?: string | null;
+    outletId?: string | null;
     customPermissions?: Record<string, boolean>;
   }
 }
@@ -340,6 +345,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: string;
     templateId?: string | null;
+    outletId?: string | null;
     image?: string | null;
     customPermissions?: Record<string, boolean>;
   }

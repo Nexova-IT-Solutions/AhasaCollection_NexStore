@@ -518,36 +518,40 @@ export function ProductsClient({
                         </Button>
                       )}
                       
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="h-8.5 w-8.5 border-gray-200 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                        onClick={() => {
-                          setTransferProduct(product);
-                          setTransferQty(1);
-                          setTransferReason("");
-                          setTransferOutletId("");
-                        }}
-                        title="Transfer Stock"
-                      >
-                        <Layers className="w-3.5 h-3.5 text-gray-500 hover:text-[#2563EB]" />
-                      </Button>
+                      {hasStockAdmin && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8.5 w-8.5 border-gray-200 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                          onClick={() => {
+                            setTransferProduct(product);
+                            setTransferQty(1);
+                            setTransferReason("");
+                            setTransferOutletId("");
+                          }}
+                          title="Transfer Stock"
+                        >
+                          <Layers className="w-3.5 h-3.5 text-gray-500 hover:text-[#2563EB]" />
+                        </Button>
+                      )}
 
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        className="h-8.5 w-8.5 border-gray-200 hover:bg-red-50 hover:text-red-600"
-                        onClick={() => {
-                          setAdjustProduct(product);
-                          setAdjustQty(1);
-                          setAdjustReason("");
-                        }}
-                        title="Deduct Stock"
-                      >
-                        <MinusCircle className="w-3.5 h-3.5 text-gray-500 hover:text-red-600" />
-                      </Button>
+                      {hasStockAdmin && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8.5 w-8.5 border-gray-200 hover:bg-red-50 hover:text-red-600"
+                          onClick={() => {
+                            setAdjustProduct(product);
+                            setAdjustQty(1);
+                            setAdjustReason("");
+                          }}
+                          title="Deduct Stock"
+                        >
+                          <MinusCircle className="w-3.5 h-3.5 text-gray-500 hover:text-red-600" />
+                        </Button>
+                      )}
 
                       <Button asChild variant="outline" size="icon" className="h-8.5 w-8.5 border-gray-200 hover:bg-gray-50">
                         <Link href={`/admin/products/${product.id}/edit`} aria-label={`Edit ${product.name}`}>
@@ -659,35 +663,39 @@ export function ProductsClient({
                       </Link>
                     </Button>
                   )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 border-brand-border hover:bg-[#EFF6FF]"
-                    onClick={() => {
-                      setTransferProduct(product);
-                      setTransferQty(1);
-                      setTransferReason("");
-                      setTransferOutletId("");
-                    }}
-                    title="Transfer Stock"
-                  >
-                    <Layers className="w-4 h-4 text-gray-500 hover:text-[#2563EB]" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 border-brand-border hover:bg-red-50"
-                    onClick={() => {
-                      setAdjustProduct(product);
-                      setAdjustQty(1);
-                      setAdjustReason("");
-                    }}
-                    title="Deduct Stock"
-                  >
-                    <MinusCircle className="w-4 h-4 text-gray-500 hover:text-red-600" />
-                  </Button>
+                  {hasStockAdmin && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 border-brand-border hover:bg-[#EFF6FF]"
+                      onClick={() => {
+                        setTransferProduct(product);
+                        setTransferQty(1);
+                        setTransferReason("");
+                        setTransferOutletId("");
+                      }}
+                      title="Transfer Stock"
+                    >
+                      <Layers className="w-4 h-4 text-gray-500 hover:text-[#2563EB]" />
+                    </Button>
+                  )}
+                  {hasStockAdmin && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 border-brand-border hover:bg-red-50"
+                      onClick={() => {
+                        setAdjustProduct(product);
+                        setAdjustQty(1);
+                        setAdjustReason("");
+                      }}
+                      title="Deduct Stock"
+                    >
+                      <MinusCircle className="w-4 h-4 text-gray-500 hover:text-red-600" />
+                    </Button>
+                  )}
                   <Button asChild variant="outline" size="icon" className="h-8 w-8 border-brand-border hover:bg-[#EFF6FF]">
                     <Link href={`/admin/products/${product.id}/edit`}>
                       <Pencil className="w-4 h-4" />
