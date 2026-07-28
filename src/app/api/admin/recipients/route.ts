@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       },
     });
 
-    revalidateTag("recipients");
+    revalidateTag("recipients", "max");
 
     return NextResponse.json(recipient, { status: 201 });
   } catch (error: any) {

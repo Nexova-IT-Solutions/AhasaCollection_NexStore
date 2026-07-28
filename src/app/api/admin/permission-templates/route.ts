@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       },
     });
 
-    revalidateTag("admin-permission-templates");
+    revalidateTag("admin-permission-templates", "max");
     return NextResponse.json(template, { status: 201 });
   } catch (error) {
     console.error("Create template error:", error);

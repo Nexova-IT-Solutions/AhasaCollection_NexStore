@@ -114,7 +114,7 @@ export async function POST(req: Request) {
     });
 
     revalidateStorefront();
-  revalidateTag("categories");
+  revalidateTag("categories", "max");
 
     return NextResponse.json(newCategory, { status: 201 });
   } catch (error: any) {
@@ -167,7 +167,7 @@ export async function PATCH(request: Request) {
     });
 
     revalidateStorefront();
-    revalidateTag("categories");
+    revalidateTag("categories", "max");
 
     return NextResponse.json(updated);
   } catch (error: any) {
@@ -202,7 +202,7 @@ export async function DELETE(req: Request) {
 
     await db.category.delete({ where: { id } });
     revalidateStorefront();
-    revalidateTag("categories");
+    revalidateTag("categories", "max");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

@@ -50,7 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       },
     });
 
-    revalidateTag("recipients");
+    revalidateTag("recipients", "max");
 
     return NextResponse.json(updated);
   } catch (error: any) {
@@ -76,7 +76,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     await (db as any).recipient.delete({ where: { id } });
 
-    revalidateTag("recipients");
+    revalidateTag("recipients", "max");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

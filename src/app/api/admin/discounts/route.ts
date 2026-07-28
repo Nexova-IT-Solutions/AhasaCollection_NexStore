@@ -143,7 +143,7 @@ export async function POST(req: Request) {
     });
 
     revalidateStorefront();
-    revalidateTag("discounts");
+    revalidateTag("discounts", "max");
     return NextResponse.json(discount, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Internal Error" }, { status: 500 });
@@ -191,7 +191,7 @@ export async function PATCH(req: Request) {
     });
 
     revalidateStorefront();
-    revalidateTag("discounts");
+    revalidateTag("discounts", "max");
     return NextResponse.json(discount);
   } catch (error) {
     return NextResponse.json({ message: "Internal Error" }, { status: 500 });
@@ -235,7 +235,7 @@ export async function DELETE(req: Request) {
 
     await discountModel.delete({ where: { id } });
     revalidateStorefront();
-    revalidateTag("discounts");
+    revalidateTag("discounts", "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

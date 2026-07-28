@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     });
 
     revalidateStorefront();
-  revalidateTag("occasions");
+  revalidateTag("occasions", "max");
 
     return NextResponse.json(newOccasion, { status: 201 });
   } catch (error: any) {
@@ -126,7 +126,7 @@ export async function PATCH(req: Request) {
     });
 
     revalidateStorefront();
-  revalidateTag("occasions");
+  revalidateTag("occasions", "max");
 
     return NextResponse.json(updated);
   } catch (error) {
@@ -146,7 +146,7 @@ export async function DELETE(req: Request) {
 
     await db.occasion.delete({ where: { id } });
     revalidateStorefront();
-    revalidateTag("occasions");
+    revalidateTag("occasions", "max");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

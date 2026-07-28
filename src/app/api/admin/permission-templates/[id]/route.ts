@@ -87,7 +87,7 @@ export async function DELETE(_req: Request, props: { params: Promise<{ id: strin
       where: { id },
     });
 
-    revalidateTag("admin-permission-templates");
+    revalidateTag("admin-permission-templates", "max");
     return NextResponse.json({ message: "Template deleted" });
   } catch (error) {
     return NextResponse.json({ message: "Internal Error" }, { status: 500 });

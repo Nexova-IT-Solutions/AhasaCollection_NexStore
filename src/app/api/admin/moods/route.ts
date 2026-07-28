@@ -129,7 +129,7 @@ export async function POST(req: Request) {
       },
     });
 
-    revalidateTag("moods");
+    revalidateTag("moods", "max");
 
     return NextResponse.json(mood, { status: 201 });
   } catch (error: any) {
@@ -172,7 +172,7 @@ export async function PATCH(req: Request) {
       },
     });
 
-    revalidateTag("moods");
+    revalidateTag("moods", "max");
 
     return NextResponse.json(updated);
   } catch (error: any) {
@@ -203,7 +203,7 @@ export async function DELETE(req: Request) {
 
     await moodClient.delete({ where: { id } });
 
-    revalidateTag("moods");
+    revalidateTag("moods", "max");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

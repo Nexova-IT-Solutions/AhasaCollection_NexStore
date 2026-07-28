@@ -475,7 +475,7 @@ export async function POST(req: Request) {
     }
 
     // @ts-ignore
-    revalidateTag("admin-users");
+    revalidateTag("admin-users", "max");
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error("User creation error:", error);

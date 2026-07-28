@@ -530,7 +530,7 @@ export async function PATCH(
     }
 
     // @ts-ignore
-    revalidateTag("admin-users");
+    revalidateTag("admin-users", "max");
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("User update error:", error);
@@ -638,7 +638,7 @@ export async function DELETE(
     });
 
     // @ts-ignore
-    revalidateTag("admin-users");
+    revalidateTag("admin-users", "max");
 
     if (result.anonymized) {
       return NextResponse.json({

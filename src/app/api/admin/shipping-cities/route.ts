@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       }
     });
 
-    revalidateTag("shipping-cities");
+    revalidateTag("shipping-cities", "max");
 
     return NextResponse.json(city, { status: 201 });
   } catch (error: any) {
@@ -127,7 +127,7 @@ export async function PATCH(req: Request) {
       }
     });
 
-    revalidateTag("shipping-cities");
+    revalidateTag("shipping-cities", "max");
 
     return NextResponse.json(updated);
   } catch (error: any) {
@@ -150,7 +150,7 @@ export async function DELETE(req: Request) {
 
     await db.city.delete({ where: { id } });
 
-    revalidateTag("shipping-cities");
+    revalidateTag("shipping-cities", "max");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
