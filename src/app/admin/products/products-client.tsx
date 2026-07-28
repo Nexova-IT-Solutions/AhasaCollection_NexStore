@@ -106,6 +106,7 @@ export function ProductsClient({
     occasion: string;
     stock: string;
     repository: string;
+    outlet: string;
     isTrending: boolean;
     isNewArrival: boolean;
     showInDiscountSection: boolean;
@@ -748,7 +749,7 @@ export function ProductsClient({
         </div>
       </div>
 
-      <ProductFilters initialFilters={initialFilters} />
+      <ProductFilters initialFilters={initialFilters} hasStockAdmin={hasStockAdmin} />
 
       <div className="mt-6">
         {renderProductsList(products)}

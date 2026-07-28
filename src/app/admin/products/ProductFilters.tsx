@@ -26,6 +26,7 @@ interface ProductFiltersProps {
     occasion: string;
     stock: string;
     repository: string;
+    outlet: string;
     isTrending: boolean;
     isNewArrival: boolean;
     showInDiscountSection: boolean;
@@ -34,9 +35,10 @@ interface ProductFiltersProps {
     showInChocolateSection: boolean;
     showInSoftToysSection: boolean;
   };
+  hasStockAdmin?: boolean;
 }
 
-export function ProductFilters({ initialFilters }: ProductFiltersProps) {
+export function ProductFilters({ initialFilters, hasStockAdmin }: ProductFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -46,6 +48,8 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [repositories, setRepositories] = useState<{ id: string; name: string }[]>([]);
   const [isLoadingRepositories, setIsLoadingRepositories] = useState(false);
+  const [outlets, setOutlets] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingOutlets, setIsLoadingOutlets] = useState(false);
 
 
 
@@ -94,6 +98,27 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
   useEffect(() => {
     fetchRepositories();
   }, [fetchRepositories]);
+
+  const fetchOutlets = useCallback(async () => {
+    setIsLoadingOutlets(true);
+    try {
+      const res = await fetch("/api/admin/outlets");
+      if (res.ok) {
+        const json = await res.json();
+        setOutlets(Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []));
+      }
+    } catch (error) {
+      console.error("Failed to fetch outlets", error);
+    } finally {
+      setIsLoadingOutlets(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasStockAdmin) {
+      fetchOutlets();
+    }
+  }, [hasStockAdmin, fetchOutlets]);
 
   const updateSearchParams = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -202,6 +227,28 @@ export function ProductFilters({ initialFilters }: ProductFiltersProps) {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Outlet Dropdown (Conditional on hasStockAdmin) */}
+        {hasStockAdmin && (
+          <div className="w-full sm:w-[220px]">
+            <Select
+              value={initialFilters.outlet || "all"}
+              onValueChange={(value) => updateSearchParams({ outlet: value })}
+            >
+              <SelectTrigger className="h-11 rounded-xl border-brand-border">
+                <SelectValue placeholder="All Outlets" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Outlets</SelectItem>
+                {outlets.map((outlet) => (
+                  <SelectItem key={outlet.id} value={outlet.id}>
+                    {outlet.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Stock Status */}
         <div className="w-full sm:w-[180px]">

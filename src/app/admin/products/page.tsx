@@ -25,6 +25,7 @@ type AdminProductsQueryInput = {
   occasion: string;
   stock: string;
   repository: string;
+  outlet: string;
   isTrending: boolean;
   isNewArrival: boolean;
   showInDiscountSection: boolean;
@@ -43,7 +44,7 @@ function normalizeTab(value: unknown): ProductsTab {
 
 function buildBaseWhere(input: Omit<AdminProductsQueryInput, "tab" | "page" | "pageSize">): Prisma.ProductWhereInput {
   const { 
-    q, category, occasion, stock, repository,
+    q, category, occasion, stock, repository, outlet,
     isTrending, isNewArrival, showInDiscountSection,
     isTopRated, isBestSeller, showInChocolateSection, showInSoftToysSection
   } = input;
@@ -80,6 +81,10 @@ function buildBaseWhere(input: Omit<AdminProductsQueryInput, "tab" | "page" | "p
 
   if (repository) {
     where.repositoryId = repository;
+  }
+
+  if (outlet) {
+    where.outletId = outlet;
   }
 
   return where;
@@ -180,6 +185,7 @@ type PageProps = {
     occasion?: string;
     stock?: string;
     repository?: string;
+    outlet?: string;
     trending?: string;
     newArrival?: string;
     discount?: string;
@@ -201,6 +207,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
   const occasion = params.occasion || "";
   const stock = params.stock || "all";
   const repository = params.repository || "";
+  const outlet = params.outlet || "";
   const isTrending = params.trending === "true";
   const isNewArrival = params.newArrival === "true";
   const showInDiscountSection = params.discount === "true";
@@ -230,6 +237,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     occasion,
     stock,
     repository,
+    outlet,
     isTrending,
     isNewArrival,
     showInDiscountSection,
@@ -252,6 +260,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
     if (occasion) qp.set("occasion", occasion);
     if (stock !== "all") qp.set("stock", stock);
     if (repository) qp.set("repository", repository);
+    if (outlet) qp.set("outlet", outlet);
     if (isTrending) qp.set("trending", "true");
     if (isNewArrival) qp.set("newArrival", "true");
     if (showInDiscountSection) qp.set("discount", "true");
@@ -316,6 +325,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
               occasion,
               stock,
               repository,
+              outlet,
               isTrending,
               isNewArrival,
               showInDiscountSection,
