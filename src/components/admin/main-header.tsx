@@ -11,6 +11,8 @@ import {
   MonitorSmartphone,
   Wifi,
   WifiOff,
+  Store,
+  ShieldCheck,
 } from "lucide-react"
 
 import { AdminBreadcrumb } from "@/components/admin/admin-breadcrumb"
@@ -33,6 +35,10 @@ type MainHeaderUser = {
   name?: string | null
   email?: string | null
   image?: string | null
+  role?: string | null
+  templateName?: string | null
+  outletName?: string | null
+  outletId?: string | null
 }
 
 type MainHeaderProps = {
@@ -117,6 +123,18 @@ export function MainHeader({ locale = "en", user }: MainHeaderProps) {
     toggleSidebar()
   }
 
+  const roleLabel =
+    user?.templateName ||
+    (user?.role === "DEV_ADMIN"
+      ? "Dev Admin"
+      : user?.role === "SUPER_ADMIN"
+      ? "Super Admin"
+      : user?.role === "POS_ADMIN"
+      ? "POS Admin"
+      : user?.role || "Staff")
+
+  const outletLabel = user?.outletName ? user.outletName : "All Outlets"
+
   return (
     <header className="h-16 flex-shrink-0 z-10 border-b border-brand-border bg-white/95 backdrop-blur-sm px-4 sm:px-6">
       <div className="flex h-full items-center gap-3">
@@ -189,66 +207,81 @@ export function MainHeader({ locale = "en", user }: MainHeaderProps) {
           )}
         </div>
 
-        {/* ── Right: User avatar + menu ────────────────────── */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label="Open user profile menu"
-              className="ml-auto inline-flex items-center justify-center rounded-full border border-transparent p-0.5 transition hover:border-[#A7066A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7066A]/30"
-            >
-              <Avatar className="size-9 ring-1 ring-border/60">
-                <AvatarImage src={user?.image ?? undefined} alt={displayName} />
-                <AvatarFallback className="bg-[#FCEAF4] text-xs font-semibold text-[#A7066A]">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            align="end"
-            sideOffset={12}
-            className="w-72 rounded-2xl border border-brand-border bg-white p-2 shadow-xl shadow-black/5"
+        {/* ── Right: Assigned Outlet & Role Badges + User avatar ────────────────────── */}
+        <div className="flex items-center gap-2.5 ml-auto">
+          {/* Assigned Outlet Badge */}
+          <Badge
+            variant="outline"
+            className="hidden sm:inline-flex bg-purple-50 text-purple-700 border-purple-200 text-xs font-semibold px-2.5 py-1 gap-1.5 items-center rounded-xl shadow-xs"
           >
-            <DropdownMenuLabel className="px-3 py-2">
-              <div className="space-y-0.5">
-                <p className="truncate text-sm font-medium text-slate-900">{displayName}</p>
-                <p className="truncate text-xs text-slate-500">{email}</p>
-              </div>
-            </DropdownMenuLabel>
+            <Store className="h-3.5 w-3.5 text-purple-600" />
+            <span>{outletLabel}</span>
+          </Badge>
 
-            <DropdownMenuSeparator className="my-2" />
+          {/* Access Template / Role Badge */}
+          <Badge
+            variant="outline"
+            className="hidden md:inline-flex bg-amber-50 text-amber-800 border-amber-200 text-xs font-semibold px-2.5 py-1 gap-1.5 items-center rounded-xl shadow-xs"
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-amber-600" />
+            <span>{roleLabel}</span>
+          </Badge>
 
-            {/*
-            <DropdownMenuItem asChild className="min-h-11 rounded-xl px-3 py-2.5 text-sm">
-              <Link href="/admin/profile/edit" className="flex w-full items-center gap-2">
-                <User className="size-4 text-slate-500" />
-                <span>Edit Profile</span>
-              </Link>
-            </DropdownMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Open user profile menu"
+                className="inline-flex items-center justify-center rounded-full border border-transparent p-0.5 transition hover:border-[#A7066A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7066A]/30"
+              >
+                <Avatar className="size-9 ring-1 ring-border/60">
+                  <AvatarImage src={user?.image ?? undefined} alt={displayName} />
+                  <AvatarFallback className="bg-[#FCEAF4] text-xs font-semibold text-[#A7066A]">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
 
-            <DropdownMenuItem asChild className="min-h-11 rounded-xl px-3 py-2.5 text-sm">
-              <Link href="/admin/settings/account" className="flex w-full items-center gap-2">
-                <Settings className="size-4 text-slate-500" />
-                <span>Account Settings</span>
-              </Link>
-            </DropdownMenuItem>
-            */}
-
-            <DropdownMenuItem
-              className="min-h-11 rounded-xl px-3 py-2.5 text-sm text-red-600 focus:bg-red-50 focus:text-red-700"
-              onSelect={() => {
-                void handleLogout()
-              }}
+            <DropdownMenuContent
+              align="end"
+              sideOffset={12}
+              className="w-72 rounded-2xl border border-brand-border bg-white p-2 shadow-xl shadow-black/5"
             >
-              <span className="flex items-center gap-2">
-                <LogOut className="size-4" />
-                <span>Logout</span>
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel className="px-3 py-2">
+                <div className="space-y-1.5">
+                  <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p>
+                  <p className="truncate text-xs text-slate-500">{email}</p>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 border border-purple-200">
+                      <Store className="h-3 w-3 text-purple-600" />
+                      {outletLabel}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-200">
+                      <ShieldCheck className="h-3 w-3 text-amber-600" />
+                      {roleLabel}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator className="my-2" />
+
+              <DropdownMenuItem
+                className="min-h-11 rounded-xl px-3 py-2.5 text-sm text-red-600 focus:bg-red-50 focus:text-red-700"
+                onSelect={() => {
+                  void handleLogout()
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <LogOut className="size-4" />
+                  <span>Logout</span>
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   )
