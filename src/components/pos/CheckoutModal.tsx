@@ -224,19 +224,19 @@ export function CheckoutModal() {
       }
 
       setSuccessOrder({
-        orderNumber: data.order.orderNumber,
-        total: data.order.total,
+        orderNumber: data.data.orderNumber,
+        total: data.data.total,
         subtotal,
         changeDue,
         paymentMethod: payment.method,
-        trackingNumber: data.order.trackingNumber || courierTrackingId || null,
+        trackingNumber: data.data.trackingNumber || courierTrackingId || null,
         items: items.map(i => ({ name: i.name, nameAr: i.nameAr || null, sku: i.sku, quantity: i.quantity, price: i.price, discountPercent: i.discountPercent })),
-        activatedCodes: data.order.activatedCodes ?? [],
+        activatedCodes: data.data.activatedCodes ?? [],
       });
-      setLastOrderNumber(data.order.orderNumber);
+      setLastOrderNumber(data.data.orderNumber);
       // Clear the cart so the success screen renders cleanly
       clearCart();
-      toast.success(`Order ${data.order.orderNumber} completed!`);
+      toast.success(`Order ${data.data.orderNumber} completed!`);
       fetchActiveShift();
     } catch (error) {
       console.error("Checkout error:", error);
