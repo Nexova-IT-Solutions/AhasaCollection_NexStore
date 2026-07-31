@@ -163,7 +163,7 @@ export function ProductFilters({ initialFilters, hasStockAdmin }: ProductFilters
                     updateSearchParams({ q, page: "1" });
                   }
                 }}
-                placeholder="Search by name or SKU..."
+                placeholder="Search by name, SKU, ISBN, Author, Publisher, Rack..."
                 className="h-11 pl-10 pr-10 rounded-xl border-brand-border focus:ring-[#A7066A]"
               />
               {q && (
