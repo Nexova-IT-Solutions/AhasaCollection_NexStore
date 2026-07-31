@@ -35,6 +35,12 @@ interface ProductItem {
   sizes?: string[];
   colors?: string[];
   productVariants?: unknown;
+  isbn?: string | null;
+  author?: string | null;
+  publisher?: string | null;
+  rackNumber?: string | null;
+  rowNumber?: string | null;
+  binLocation?: string | null;
 }
 
 interface CategoryOption {
@@ -254,7 +260,7 @@ export function PosProductGrid() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
-            placeholder="Search products by name or SKU..."
+            placeholder="Search by name, SKU, ISBN, Author, Publisher, Rack..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-[#A7066A] transition-colors text-sm"
@@ -395,16 +401,56 @@ export function PosProductGrid() {
 
                       {/* Info */}
                       <div className="p-2.5 flex-1 flex flex-col">
-                        <p className="text-xs font-medium text-slate-800 line-clamp-2 leading-tight mb-1">
+                        <p className="text-xs font-semibold text-slate-800 line-clamp-2 leading-tight mb-1">
                           {product.name}
                           {product.nameAr && <span className="block text-[#A7066A] mt-0.5 text-right font-semibold dir-rtl">{product.nameAr}</span>}
                         </p>
-                        {product.sku && (
-                          <p className="text-[10px] text-slate-400 mb-1.5">
-                            SKU: {product.sku}
-                          </p>
-                        )}
-                        <div className="mt-auto flex items-baseline gap-1.5">
+
+                        <div className="space-y-0.5 mb-2 text-[10px] text-slate-500">
+                          {product.sku && (
+                            <p className="font-mono text-slate-400">
+                              SKU: {product.sku}
+                            </p>
+                          )}
+                          
+                          {/* Book Specifications */}
+                          {(product.author || product.publisher || product.isbn) && (
+                            <div className="pt-0.5 border-t border-slate-100 text-[10px] text-slate-600 space-y-0.5">
+                              {product.author && (
+                                <p className="truncate"><span className="font-medium text-slate-400">Author:</span> {product.author}</p>
+                              )}
+                              {product.publisher && (
+                                <p className="truncate"><span className="font-medium text-slate-400">Pub:</span> {product.publisher}</p>
+                              )}
+                              {product.isbn && (
+                                <p className="font-mono text-[9px] text-slate-400">ISBN: {product.isbn}</p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Location Tags (Rack, Row, Bin) */}
+                          {(product.rackNumber || product.rowNumber || product.binLocation) && (
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {product.rackNumber && (
+                                <span className="bg-purple-50 text-purple-700 px-1 py-0.2 rounded text-[9px] font-medium border border-purple-100">
+                                  R: {product.rackNumber}
+                                </span>
+                              )}
+                              {product.rowNumber && (
+                                <span className="bg-blue-50 text-blue-700 px-1 py-0.2 rounded text-[9px] font-medium border border-blue-100">
+                                  Row: {product.rowNumber}
+                                </span>
+                              )}
+                              {product.binLocation && (
+                                <span className="bg-slate-100 text-slate-700 px-1 py-0.2 rounded text-[9px] font-medium border border-slate-200">
+                                  Bin: {product.binLocation}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-auto flex items-baseline gap-1.5 pt-1 border-t border-slate-100">
                           <span className="text-sm font-bold text-[#A7066A]">
                             {formatPrice(effectivePrice)}
                           </span>

@@ -79,7 +79,16 @@ export async function GET(req: Request) {
     }
 
     if (q) {
-      where.name = { contains: q, mode: "insensitive" };
+      where.OR = [
+        { name: { contains: q, mode: "insensitive" } },
+        { sku: { contains: q, mode: "insensitive" } },
+        { isbn: { contains: q, mode: "insensitive" } },
+        { author: { contains: q, mode: "insensitive" } },
+        { publisher: { contains: q, mode: "insensitive" } },
+        { rackNumber: { contains: q, mode: "insensitive" } },
+        { rowNumber: { contains: q, mode: "insensitive" } },
+        { binLocation: { contains: q, mode: "insensitive" } },
+      ];
     }
 
     const priceMin = priceMinParam ? Number(priceMinParam) : undefined;

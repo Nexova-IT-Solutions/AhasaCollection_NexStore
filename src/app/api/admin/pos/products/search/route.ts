@@ -45,6 +45,12 @@ export async function GET(req: NextRequest) {
       where.OR = [
         { name: { contains: query, mode: "insensitive" } },
         { sku: { contains: query, mode: "insensitive" } },
+        { isbn: { contains: query, mode: "insensitive" } },
+        { author: { contains: query, mode: "insensitive" } },
+        { publisher: { contains: query, mode: "insensitive" } },
+        { rackNumber: { contains: query, mode: "insensitive" } },
+        { rowNumber: { contains: query, mode: "insensitive" } },
+        { binLocation: { contains: query, mode: "insensitive" } },
       ];
     }
 
@@ -70,6 +76,12 @@ export async function GET(req: NextRequest) {
           isActive: true,
           isEGiftCard: true,
           giftCardValue: true,
+          isbn: true,
+          author: true,
+          publisher: true,
+          rackNumber: true,
+          rowNumber: true,
+          binLocation: true,
           category: { select: { id: true, name: true } },
           discount: {
             select: {
@@ -135,6 +147,12 @@ export async function GET(req: NextRequest) {
         sizes: p.sizes ?? [],
         colors: p.colors ?? [],
         productVariants: p.productVariants ?? [],
+        isbn: p.isbn ?? null,
+        author: p.author ?? null,
+        publisher: p.publisher ?? null,
+        rackNumber: p.rackNumber ?? null,
+        rowNumber: p.rowNumber ?? null,
+        binLocation: p.binLocation ?? null,
       };
     });
 
