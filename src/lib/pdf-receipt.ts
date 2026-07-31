@@ -209,8 +209,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     saleType = "Credit Sale";
   }
 
-  const curSymbol = (data.currencySymbol || "OMR").trim();
-  const decimals = typeof data.decimals === "number" ? data.decimals : 3;
+  const curSymbol = (data.currencySymbol || "LKR").trim();
+  const decimals = typeof data.decimals === "number" ? data.decimals : 2;
 
   if (format === "print") {
     const mode = data.companyDetails?.posPrintMode || "raw";
@@ -560,24 +560,24 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               const nameLine = item.nameAr ? `${item.name} - ${item.nameAr}` : item.name;
               hexLines.push(toW1256Hex(nameLine + '\n'));
               if (item.sku) hexLines.push(toW1256Hex(`SKU: ${item.sku}\n`));
-              const qtyLabel = `Qty/${String.fromCharCode(0x0627,0x0644,0x0643,0x0645,0x064A,0x0629)}: ${item.quantity} x OMR ${item.price.toFixed(3)}`;
-              const lineTotal = `OMR ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(3)}`;
+              const qtyLabel = `Qty/${String.fromCharCode(0x0627,0x0644,0x0643,0x0645,0x064A,0x0629)}: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
+              const lineTotal = `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
               hexLines.push(toW1256Hex(qtyLabel + '  ' + lineTotal + '\n'));
             });
             // Totals (right-align)
             hexLines.push(toW1256Hex(arabicSep + '\n'));
             hexLines.push('1B6102'); // Right align
             const subtotalLabel = `Subtotal / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639,0x20,0x0641,0x0631,0x0639,0x064A)}`;
-            hexLines.push(toW1256Hex(`${subtotalLabel}: OMR ${data.subtotal.toFixed(3)}\n`));
+            hexLines.push(toW1256Hex(`${subtotalLabel}: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n`));
             if (data.billDiscountAmount && data.billDiscountAmount > 0) {
               const discLabel = `Discount / ${String.fromCharCode(0x062E,0x0635,0x0645)}`;
-              hexLines.push(toW1256Hex(`${discLabel}: -OMR ${data.billDiscountAmount.toFixed(3)}\n`));
+              hexLines.push(toW1256Hex(`${discLabel}: -${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}\n`));
             }
             const totalLabel = `Total / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639)}`;
-            hexLines.push(toW1256Hex(`${totalLabel}: OMR ${data.total.toFixed(3)}\n`));
+            hexLines.push(toW1256Hex(`${totalLabel}: ${curSymbol} ${data.total.toFixed(decimals)}\n`));
             if (data.changeDue > 0) {
               const changeLabel = `Change / ${String.fromCharCode(0x0628,0x0627,0x0642,0x064A)}`;
-              hexLines.push(toW1256Hex(`${changeLabel}: OMR ${data.changeDue.toFixed(3)}\n`));
+              hexLines.push(toW1256Hex(`${changeLabel}: ${curSymbol} ${data.changeDue.toFixed(decimals)}\n`));
             }
             // Footer
             hexLines.push('1B6101'); // Center
