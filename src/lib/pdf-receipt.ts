@@ -668,8 +668,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
 
-    // Header Background
-    doc.setFillColor(37, 99, 235); // #A7066A (Brand color)
+    // Header Background (#A7066A Brand color)
+    doc.setFillColor(167, 6, 106);
     doc.rect(0, 0, pageWidth, 40, "F");
 
     // Header text
@@ -817,7 +817,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
       styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
@@ -831,21 +831,25 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     currentY = (doc as any).lastAutoTable.finalY + 15;
 
-    // Totals Area (Right aligned box)
+    // Totals Area (Right aligned box with clean brand background)
     let boxHeight = 40;
     if (data.billDiscountAmount && data.billDiscountAmount > 0) boxHeight += 10;
+
+    doc.setFillColor(253, 242, 248); // #FDF2F8 (Light pink tint)
+    doc.setDrawColor(251, 207, 232); // #FBCFE8 (Soft border)
     doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
     let totalY = currentY + 10;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
+    doc.setTextColor(71, 85, 105); // Slate 600
     
     doc.text("Subtotal:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.subtotal.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     
     if (data.billDiscountAmount && data.billDiscountAmount > 0) {
       totalY += 8;
+      doc.setTextColor(225, 29, 72); // Rose 600 for discount
       doc.text("Discount:", pageWidth - 110, totalY);
       doc.text(`-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     }
@@ -853,7 +857,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);
-    doc.setTextColor(37, 99, 235);
+    doc.setTextColor(167, 6, 106); // #A7066A Brand color
     doc.text("Total:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.total.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
 
