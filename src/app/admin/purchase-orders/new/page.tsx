@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,11 +9,13 @@ import {
   Plus,
   Trash2,
   Building2,
-  Calendar as CalendarIcon,
   Package,
   Check,
-  AlertCircle,
   Loader2,
+  Search,
+  X,
+  Info,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +47,142 @@ type ItemRow = {
   unit: string;
   estimatedUnitCost: number;
   reason: string;
+  /** true when product was picked from catalogue (restock) */
+  fromCatalogue?: boolean;
 };
+
+type ProductHit = {
+  id: string;
+  name: string;
+  sku: string | null;
+  stock: number;
+  costPrice: number | null;
+};
+
+// ── Inline product search dropdown for a single item row ────────────────────
+function ProductSearchCell({
+  itemId,
+  onSelect,
+}: {
+  itemId: string;
+  onSelect: (hit: ProductHit) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [results, setResults] = useState<ProductHit[]>([]);
+  const [loading, setLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Debounced search
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `/api/admin/products?search=${encodeURIComponent(query)}&pageSize=15&page=1`
+        );
+        const data = await res.json();
+        const products: ProductHit[] = (data.products ?? data ?? []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku ?? null,
+          stock: p.stock ?? 0,
+          costPrice: p.costPrice ?? null,
+        }));
+        setResults(products);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="flex items-center gap-1">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <input
+            className="w-full h-9 pl-8 pr-3 text-xs rounded-md border border-brand-border bg-white focus:outline-none focus:ring-2 focus:ring-[#A7066A]/30"
+            placeholder="Search by name or SKU…"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => { setQuery(""); setResults([]); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {open && (query.trim().length > 0) && (
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-lg border border-brand-border shadow-xl max-h-56 overflow-y-auto">
+          {loading && (
+            <div className="flex items-center gap-2 px-3 py-2.5 text-xs text-slate-500">
+              <Loader2 className="w-3 h-3 animate-spin" /> Searching…
+            </div>
+          )}
+          {!loading && results.length === 0 && (
+            <div className="px-3 py-2.5 text-xs text-slate-400">No products found.</div>
+          )}
+          {!loading && results.map((hit) => (
+            <button
+              key={hit.id}
+              type="button"
+              onClick={() => {
+                onSelect(hit);
+                setQuery("");
+                setResults([]);
+                setOpen(false);
+              }}
+              className="w-full flex items-start gap-2.5 px-3 py-2.5 hover:bg-slate-50 text-left border-b border-slate-100 last:border-b-0"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-[#1F1720] truncate">{hit.name}</p>
+                <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                  {hit.sku ?? "No SKU"} &bull; {hit.stock} in stock
+                </p>
+              </div>
+              {hit.costPrice != null && (
+                <span className="text-[10px] font-bold text-[#A7066A] shrink-0 mt-0.5">
+                  LKR {hit.costPrice.toFixed(2)}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ───────────────────────────────────────────────────────────────────────────
 
 export default function NewPurchaseOrderPage() {
   const router = useRouter();
@@ -64,7 +201,9 @@ export default function NewPurchaseOrderPage() {
   const [remarks, setRemarks] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Items state — start with one blank row for the user to fill in
+  const isRestock = requestType === "RESTOCK";
+
+  // Items state — start with one blank row
   const [items, setItems] = useState<ItemRow[]>([
     {
       id: "1",
@@ -74,9 +213,9 @@ export default function NewPurchaseOrderPage() {
       unit: "Pcs",
       estimatedUnitCost: 0,
       reason: "",
+      fromCatalogue: false,
     },
   ]);
-
 
   // Fetch session & metadata options
   const { data: sessionData } = useSWR("/api/admin/me", fetcher);
@@ -84,14 +223,18 @@ export default function NewPurchaseOrderPage() {
   const { data: repositoriesData } = useSWR("/api/admin/repositories", fetcher);
 
   useEffect(() => {
-    const currentUserName = session?.user?.name || session?.user?.email || sessionData?.user?.name || sessionData?.user?.email;
-    if (currentUserName && !requestedBy) {
-      setRequestedBy(currentUserName);
-    }
+    const currentUserName =
+      session?.user?.name || session?.user?.email ||
+      sessionData?.user?.name || sessionData?.user?.email;
+    if (currentUserName && !requestedBy) setRequestedBy(currentUserName);
   }, [session, sessionData, requestedBy]);
 
-  const suppliers = Array.isArray(suppliersData?.suppliers) ? suppliersData.suppliers : (Array.isArray(suppliersData) ? suppliersData : []);
-  const repositories = Array.isArray(repositoriesData) ? repositoriesData : (Array.isArray(repositoriesData?.repositories) ? repositoriesData.repositories : []);
+  const suppliers = Array.isArray(suppliersData?.suppliers)
+    ? suppliersData.suppliers
+    : Array.isArray(suppliersData) ? suppliersData : [];
+  const repositories = Array.isArray(repositoriesData)
+    ? repositoriesData
+    : Array.isArray(repositoriesData?.repositories) ? repositoriesData.repositories : [];
 
   const handleAddItemRow = () => {
     setItems((prev) => [
@@ -104,17 +247,14 @@ export default function NewPurchaseOrderPage() {
         unit: "Pcs",
         estimatedUnitCost: 0,
         reason: "",
+        fromCatalogue: false,
       },
     ]);
   };
 
   const handleRemoveItemRow = (id: string) => {
     if (items.length <= 1) {
-      toast({
-        title: "Item required",
-        description: "A purchase order must have at least one item.",
-        variant: "destructive",
-      });
+      toast({ title: "Item required", description: "A purchase order must have at least one item.", variant: "destructive" });
       return;
     }
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -126,7 +266,34 @@ export default function NewPurchaseOrderPage() {
     );
   };
 
+  // Called when user picks a product from the catalogue search
+  const handleProductSelect = (rowId: string, hit: ProductHit) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === rowId
+          ? {
+              ...item,
+              productId: hit.id,
+              itemName: hit.name,
+              sku: hit.sku ?? "",
+              estimatedUnitCost: hit.costPrice ?? item.estimatedUnitCost,
+              fromCatalogue: true,
+            }
+          : item
+      )
+    );
+  };
 
+  // Clear catalogue link for a row
+  const handleClearProduct = (rowId: string) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === rowId
+          ? { ...item, productId: undefined, itemName: "", sku: "", fromCatalogue: false }
+          : item
+      )
+    );
+  };
 
   const totalEstimatedCost = items.reduce(
     (sum, item) => sum + (Number(item.requestedQty) || 0) * (Number(item.estimatedUnitCost) || 0),
@@ -137,21 +304,13 @@ export default function NewPurchaseOrderPage() {
     e.preventDefault();
 
     if (!supplierId) {
-      toast({
-        title: "Supplier required",
-        description: "Please select a supplier from the list.",
-        variant: "destructive",
-      });
+      toast({ title: "Supplier required", description: "Please select a supplier from the list.", variant: "destructive" });
       return;
     }
 
     const invalidItems = items.filter((i) => !i.itemName.trim() || Number(i.requestedQty) <= 0);
     if (invalidItems.length > 0) {
-      toast({
-        title: "Invalid Item details",
-        description: "All items must have a name and a quantity greater than 0.",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid Item details", description: "All items must have a name and a quantity greater than 0.", variant: "destructive" });
       return;
     }
 
@@ -175,10 +334,7 @@ export default function NewPurchaseOrderPage() {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to create Purchase Order");
-      }
+      if (!res.ok) throw new Error(data.message || "Failed to create Purchase Order");
 
       toast({
         title: "Purchase Order Created",
@@ -187,11 +343,7 @@ export default function NewPurchaseOrderPage() {
 
       router.push(`/admin/purchase-orders/${data.purchaseOrder.id}`);
     } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err.message || "Something went wrong",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: err.message || "Something went wrong", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -217,7 +369,6 @@ export default function NewPurchaseOrderPage() {
             </p>
           </div>
         </div>
-
         <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 font-bold text-xs py-1 px-3">
           Status: PENDING APPROVAL
         </Badge>
@@ -274,7 +425,7 @@ export default function NewPurchaseOrderPage() {
                 />
               </div>
 
-              {/* Warehouse (Repositories only, no outlets) */}
+              {/* Warehouse */}
               <div className="space-y-2">
                 <Label className="text-xs font-bold text-[#1F1720] uppercase tracking-wider">
                   Warehouse
@@ -301,7 +452,7 @@ export default function NewPurchaseOrderPage() {
                 </Select>
               </div>
 
-              {/* Supplier Selection (System Suppliers) */}
+              {/* Supplier */}
               <div className="space-y-2">
                 <Label className="text-xs font-bold text-[#1F1720] uppercase tracking-wider flex items-center justify-between">
                   <span>Supplier *</span>
@@ -313,9 +464,7 @@ export default function NewPurchaseOrderPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {suppliers.length === 0 ? (
-                      <SelectItem value="none" disabled>
-                        No suppliers registered
-                      </SelectItem>
+                      <SelectItem value="none" disabled>No suppliers registered</SelectItem>
                     ) : (
                       suppliers.map((sup: any) => (
                         <SelectItem key={sup.id} value={sup.id}>
@@ -332,7 +481,13 @@ export default function NewPurchaseOrderPage() {
                 <Label className="text-xs font-bold text-[#1F1720] uppercase tracking-wider">
                   Request Type
                 </Label>
-                <Select value={requestType} onValueChange={setRequestType}>
+                <Select value={requestType} onValueChange={(val) => {
+                  setRequestType(val);
+                  // Clear catalogue links when switching away from RESTOCK
+                  if (val !== "RESTOCK") {
+                    setItems((prev) => prev.map((i) => ({ ...i, fromCatalogue: false, productId: undefined })));
+                  }
+                }}>
                   <SelectTrigger className="h-11 border-brand-border">
                     <SelectValue />
                   </SelectTrigger>
@@ -398,39 +553,57 @@ export default function NewPurchaseOrderPage() {
               <Package className="w-4 h-4 text-[#A7066A]" />
               Items Section
             </CardTitle>
-
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddItemRow}
-                className="h-9 text-xs font-semibold gap-1 bg-white"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Item Row
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddItemRow}
+              className="h-9 text-xs font-semibold gap-1 bg-white"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Item Row
+            </Button>
           </CardHeader>
 
-          <CardContent className="p-0">
+          {/* Restock info banner */}
+          {isRestock && (
+            <div className="flex items-start gap-3 mx-5 mt-4 px-4 py-3 rounded-xl bg-blue-50 border border-blue-200">
+              <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-semibold text-blue-800">Restock Mode — Search from Catalogue</p>
+                <p className="text-[11px] text-blue-600 mt-0.5">
+                  Use the <strong>Search Product</strong> box on each row to select an existing product.
+                  Product Name and SKU will auto-fill from the catalogue.{" "}
+                  <strong>Do not change the Product Name or SKU</strong> — modifying them may cause a mismatch
+                  during inventory intake and create duplicate records.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <CardContent className="p-0 mt-4">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[900px]">
+              <table className="w-full text-sm min-w-[1000px]">
                 <thead className="bg-slate-100/70 border-b border-brand-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase w-[220px]">
+                    {isRestock && (
+                      <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase w-[200px]">
+                        Search Product
+                      </th>
+                    )}
+                    <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase w-[200px]">
                       Item Name *
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase w-[130px]">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase w-[120px]">
                       SKU
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-bold text-[#6B5A64] uppercase w-[100px]">
+                    <th className="px-4 py-3 text-center text-xs font-bold text-[#6B5A64] uppercase w-[90px]">
                       Qty *
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-bold text-[#6B5A64] uppercase w-[110px]">
+                    <th className="px-4 py-3 text-center text-xs font-bold text-[#6B5A64] uppercase w-[100px]">
                       Unit
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-bold text-[#6B5A64] uppercase w-[140px]">
+                    <th className="px-4 py-3 text-right text-xs font-bold text-[#6B5A64] uppercase w-[130px]">
                       Est. Unit Cost (LKR)
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold text-[#6B5A64] uppercase">
@@ -442,26 +615,80 @@ export default function NewPurchaseOrderPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-border/50 bg-white">
-                  {items.map((item, index) => (
+                  {items.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/50">
-                      <td className="px-4 py-3">
+                      {/* Product search cell — only in RESTOCK mode */}
+                      {isRestock && (
+                        <td className="px-4 py-3 align-top">
+                          {item.fromCatalogue ? (
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1">
+                                  <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                                  <span className="text-[11px] font-semibold text-emerald-700 truncate">
+                                    Linked to catalogue
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                                  {item.sku || "—"}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                title="Change product"
+                                onClick={() => handleClearProduct(item.id)}
+                                className="shrink-0 text-slate-400 hover:text-[#A7066A] transition-colors"
+                              >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <ProductSearchCell
+                              itemId={item.id}
+                              onSelect={(hit) => handleProductSelect(item.id, hit)}
+                            />
+                          )}
+                        </td>
+                      )}
+
+                      {/* Item Name */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           value={item.itemName}
                           onChange={(e) => handleItemChange(item.id, "itemName", e.target.value)}
                           placeholder="e.g. Harry Potter Book"
                           required
-                          className="h-10 text-sm font-semibold border-brand-border"
+                          readOnly={isRestock && item.fromCatalogue}
+                          className={`h-10 text-sm font-semibold border-brand-border ${
+                            isRestock && item.fromCatalogue
+                              ? "bg-slate-50 text-slate-500 cursor-not-allowed"
+                              : ""
+                          }`}
                         />
+                        {isRestock && item.fromCatalogue && (
+                          <p className="text-[10px] text-amber-600 mt-1 flex items-center gap-1">
+                            <Info className="w-2.5 h-2.5" /> Do not change — linked to catalogue
+                          </p>
+                        )}
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* SKU */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           value={item.sku}
                           onChange={(e) => handleItemChange(item.id, "sku", e.target.value)}
                           placeholder="e.g. HP001"
-                          className="h-10 text-xs font-mono border-brand-border"
+                          readOnly={isRestock && item.fromCatalogue}
+                          className={`h-10 text-xs font-mono border-brand-border ${
+                            isRestock && item.fromCatalogue
+                              ? "bg-slate-50 text-slate-500 cursor-not-allowed"
+                              : ""
+                          }`}
                         />
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* Qty */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           type="number"
                           min="1"
@@ -473,15 +700,19 @@ export default function NewPurchaseOrderPage() {
                           className="h-10 text-center font-bold text-sm border-brand-border"
                         />
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* Unit */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           value={item.unit}
                           onChange={(e) => handleItemChange(item.id, "unit", e.target.value)}
-                          placeholder="Books / Pcs"
+                          placeholder="Pcs"
                           className="h-10 text-center text-xs border-brand-border"
                         />
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* Est. Unit Cost */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           type="number"
                           step="0.01"
@@ -493,7 +724,9 @@ export default function NewPurchaseOrderPage() {
                           className="h-10 text-right font-bold text-sm border-brand-border"
                         />
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* Reason */}
+                      <td className="px-4 py-3 align-top">
                         <Input
                           value={item.reason}
                           onChange={(e) => handleItemChange(item.id, "reason", e.target.value)}
@@ -501,7 +734,9 @@ export default function NewPurchaseOrderPage() {
                           className="h-10 text-xs border-brand-border"
                         />
                       </td>
-                      <td className="px-3 py-3 text-center">
+
+                      {/* Delete */}
+                      <td className="px-3 py-3 text-center align-top">
                         <Button
                           type="button"
                           variant="ghost"
