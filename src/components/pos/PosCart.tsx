@@ -58,18 +58,6 @@ export function PosCart() {
   const getBillDiscountAmount = usePosCart((s) => s.getBillDiscountAmount);
   const getTotal = usePosCart((s) => s.getTotal);
 
-  const billDiscountAmount = getBillDiscountAmount();
-  const rawTotal = getTotal();
-  const effectiveTotal = appliedVoucher
-    ? Math.max(0, rawTotal - appliedVoucher.deduction)
-    : rawTotal;
-
-  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
-  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
-
-  const { data: discountData } = useSWR("/api/admin/pos/discounts", fetcher);
-  const activeDiscounts = discountData?.discounts || [];
-
   // ─── Voucher state ─────────────────────────────────────────
   const [voucherInput, setVoucherInput] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -80,6 +68,18 @@ export function PosCart() {
     deduction: number;
   } | null>(null);
   const [voucherError, setVoucherError] = useState<string | null>(null);
+
+  const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
+  const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
+
+  const { data: discountData } = useSWR("/api/admin/pos/discounts", fetcher);
+  const activeDiscounts = discountData?.discounts || [];
+
+  const billDiscountAmount = getBillDiscountAmount();
+  const rawTotal = getTotal();
+  const effectiveTotal = appliedVoucher
+    ? Math.max(0, rawTotal - appliedVoucher.deduction)
+    : rawTotal;
 
   const { formatPrice } = useCurrency();
 
