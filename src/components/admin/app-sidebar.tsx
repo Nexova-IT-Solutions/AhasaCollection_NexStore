@@ -149,7 +149,7 @@ const operationsItems: NavItem[] = [
     title: "Returns",
     url: "/admin/returns",
     icon: ArrowRightLeft,
-    requiredPermission: "pos.manage_returns",
+    requiredPermission: "SYSTEM_DEV_ONLY",
   },
   {
     title: "Purchase Orders",
