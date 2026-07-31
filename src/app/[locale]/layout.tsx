@@ -22,16 +22,16 @@ const geistMono = Geist_Mono({
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
-  title: "SPC - Premium Pet Supplies & Care in Sohar",
-  description: "Discover premium pet products and services at SPC. High-quality pet food, accessories, toys, and care items for your beloved pets in Sohar.",
-  keywords: ["pet supplies Sohar", "pet shop Sohar", "dog food", "cat food", "pet accessories", "SPC"],
-  authors: [{ name: "SPC" }],
+  title: "Ahasa Collection — Premium Fashion & Lifestyle Store",
+  description: "Explore premium fashion, clothing, accessories, and gifts at Ahasa Collection. Handpicked quality products with fast delivery.",
+  keywords: ["Ahasa Collection", "Ahasa POS", "fashion Sri Lanka", "clothing store", "lifestyle accessories", "online shopping"],
+  authors: [{ name: "Ahasa Collection" }],
   icons: {
     icon: "/logo/logo.png",
   },
   openGraph: {
-    title: "SPC - Premium Pet Supplies & Care",
-    description: "Premium pet products and services for every pet in Sohar",
+    title: "Ahasa Collection — Premium Fashion & Lifestyle Store",
+    description: "Explore premium fashion, clothing, accessories, and gifts at Ahasa Collection.",
     type: "website",
     locale: "en_LK",
   },
