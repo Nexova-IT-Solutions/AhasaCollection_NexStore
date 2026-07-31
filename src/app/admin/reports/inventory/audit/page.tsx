@@ -36,6 +36,10 @@ interface AuditRecord {
   categoryName: string;
   supplierId: string;
   supplierName: string;
+  outletId?: string;
+  outletName?: string;
+  repositoryId?: string;
+  repositoryName?: string;
 }
 
 import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
@@ -56,6 +60,8 @@ export default function StockAuditReportPage() {
         columns: [
           { header: "SKU", key: "sku", type: "string" },
           { header: "Product Name", key: "name", type: "string" },
+          { header: "Outlet", key: "outletName", type: "string" },
+          { header: "Repository", key: "repositoryName", type: "string" },
           { header: "Category", key: "categoryName", type: "string" },
           { header: "Supplier", key: "supplierName", type: "string" },
           { header: "Stock Count", key: "stock", type: "number", alignment: "center" },
@@ -335,6 +341,12 @@ export default function StockAuditReportPage() {
                           Product Name
                         </TableHead>
                         <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider print:text-black">
+                          Outlet
+                        </TableHead>
+                        <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider print:text-black">
+                          Repository
+                        </TableHead>
+                        <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider print:text-black">
                           Category
                         </TableHead>
                         <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider print:text-black">
@@ -359,6 +371,12 @@ export default function StockAuditReportPage() {
                           </TableCell>
                           <TableCell className="font-semibold text-slate-900 text-xs print:text-black">
                             {p.name}
+                          </TableCell>
+                          <TableCell className="text-xs text-slate-600 print:text-black font-medium">
+                            {p.outletName || "Global / Unassigned"}
+                          </TableCell>
+                          <TableCell className="text-xs text-slate-600 print:text-black font-medium">
+                            {p.repositoryName || "Main Warehouse"}
                           </TableCell>
                           <TableCell className="text-xs text-slate-500 print:text-black">
                             {p.categoryName}

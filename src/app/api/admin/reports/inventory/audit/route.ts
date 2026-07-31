@@ -55,6 +55,18 @@ export async function GET(req: NextRequest) {
             name: true,
           },
         },
+        outlet: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        repository: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: [
         { category: { name: "asc" } },
@@ -73,6 +85,10 @@ export async function GET(req: NextRequest) {
       categoryName: p.category?.name || "Uncategorized",
       supplierId: p.supplier?.id || "no-supplier",
       supplierName: p.supplier?.name || "No Supplier Assigned",
+      outletId: p.outlet?.id || "no-outlet",
+      outletName: p.outlet?.name || "Global / Unassigned",
+      repositoryId: p.repository?.id || "no-repository",
+      repositoryName: p.repository?.name || "Main Warehouse",
     }));
 
     return NextResponse.json({
