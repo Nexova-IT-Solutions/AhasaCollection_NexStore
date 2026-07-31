@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+
 /**
  * GET /api/admin/reports/category-sales
  *
@@ -21,6 +23,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const outletFilter = await getReportOutletFilter(req);
     const { searchParams } = new URL(req.url);
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
@@ -35,15 +38,25 @@ export async function GET(req: NextRequest) {
     let end = endDateParam ? new Date(endDateParam) : new Date();
     end.setHours(23, 59, 59, 999);
 
+    const orderWhere: any = {
+      paymentStatus: "PAID",
+      createdAt: {
+        gte: start,
+        lte: end,
+      },
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      orderWhere.posShift = {
+        operator: {
+          outletId: outletFilter.effectiveOutletId,
+        },
+      };
+    }
+
     const orderItems = await db.orderItem.findMany({
       where: {
-        order: {
-          paymentStatus: "PAID",
-          createdAt: {
-            gte: start,
-            lte: end,
-          },
-        },
+        order: orderWhere,
       },
       include: {
         product: {

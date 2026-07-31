@@ -41,6 +41,8 @@ interface OutOfStockProduct {
 }
 
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function OutOfStockReportPage() {
   const { formatPrice } = useCurrency();
   const [products, setProducts] = useState<OutOfStockProduct[]>([]);
@@ -48,6 +50,7 @@ export default function OutOfStockReportPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOutletId, setSelectedOutletId] = useState("");
 
   const handleExportExcel = async () => {
     try {
@@ -75,7 +78,11 @@ export default function OutOfStockReportPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/reports/inventory/out-of-stock");
+      const params = new URLSearchParams();
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
+      const res = await fetch(`/api/admin/reports/inventory/out-of-stock?${params}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {
@@ -91,7 +98,7 @@ export default function OutOfStockReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedOutletId]);
 
   useEffect(() => {
     fetchData();
@@ -130,6 +137,12 @@ export default function OutOfStockReportPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <Button
             onClick={fetchData}
             disabled={isLoading}

@@ -95,6 +95,8 @@ const formatMethod = (method: string) => {
   return map[method] || method;
 };
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function SalesSummaryPage() {
   const { data: session, status } = useSession();
   const { formatPrice, symbol } = useCurrency();
@@ -109,6 +111,7 @@ export default function SalesSummaryPage() {
   const todayStr = now.toISOString().split("T")[0];
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(todayStr);
+  const [selectedOutletId, setSelectedOutletId] = useState("");
 
   const handleExportExcel = async () => {
     if (!data) return;
@@ -145,6 +148,9 @@ export default function SalesSummaryPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ startDate, endDate });
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
       const res = await fetch(`/api/admin/reports/sales-summary?${params}`);
       const json = await res.json();
 
@@ -160,7 +166,7 @@ export default function SalesSummaryPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, selectedOutletId]);
 
   useEffect(() => {
     fetchData();
@@ -195,15 +201,21 @@ export default function SalesSummaryPage() {
           </p>
         </div>
 
-        {/* Date Range Picker */}
-        <div className="flex items-end gap-3">
+        {/* Date & Outlet Range Picker */}
+        <div className="flex flex-wrap items-end gap-3">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">From</Label>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="h-9 text-xs w-[150px]"
+              className="h-9 text-xs w-[140px]"
             />
           </div>
           <div className="space-y-1">
@@ -212,7 +224,7 @@ export default function SalesSummaryPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="h-9 text-xs w-[150px]"
+              className="h-9 text-xs w-[140px]"
             />
           </div>
           <Button

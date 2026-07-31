@@ -200,6 +200,8 @@ function VarianceBadge({ value }: { value: number | null }) {
   );
 }
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function CashCloseReportPage() {
   const { formatPrice, symbol } = useCurrency();
   const [data, setData] = useState<CashCloseData | null>(null);
@@ -210,8 +212,7 @@ export default function CashCloseReportPage() {
   const today = new Date().toISOString().split("T")[0];
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-
-
+  const [selectedOutletId, setSelectedOutletId] = useState("");
 
   const handleExportExcel = async () => {
     if (!data) return;
@@ -251,6 +252,9 @@ export default function CashCloseReportPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ startDate, endDate });
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
       const res = await fetch(`/api/admin/reports/cash-close?${params}`);
       const json = await res.json();
 
@@ -266,7 +270,7 @@ export default function CashCloseReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, selectedOutletId]);
 
   useEffect(() => {
     fetchData();
@@ -312,8 +316,14 @@ export default function CashCloseReportPage() {
           </p>
         </div>
 
-        {/* Date Range Picker */}
-        <div className="flex items-end gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+        {/* Date & Outlet Range Picker */}
+        <div className="flex flex-wrap items-end gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <div className="space-y-1">
             <Label className="text-xs text-slate-400 font-bold uppercase tracking-wider">From</Label>
             <Input

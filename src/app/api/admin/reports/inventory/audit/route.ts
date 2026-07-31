@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+
 const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
 /**
@@ -22,10 +24,18 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const outletFilter = await getReportOutletFilter(req);
+
+    const productWhere: any = {
+      isActive: true,
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      productWhere.outletId = outletFilter.effectiveOutletId;
+    }
+
     const products = await db.product.findMany({
-      where: {
-        isActive: true,
-      },
+      where: productWhere,
       select: {
         id: true,
         name: true,

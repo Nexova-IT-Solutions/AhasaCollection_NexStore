@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
-import { getFeatureToggles } from "@/lib/queries/feature-toggles";
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
 
 /**
  * GET /api/admin/reports/sales-summary?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const outletFilter = await getReportOutletFilter(req);
     const { searchParams } = new URL(req.url);
     const startDateStr = searchParams.get("startDate");
     const endDateStr = searchParams.get("endDate");
@@ -45,12 +46,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const orderWhere: any = {
+      createdAt: { gte: startDate, lte: endDate },
+      paymentStatus: "PAID",
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      orderWhere.posShift = {
+        operator: {
+          outletId: outletFilter.effectiveOutletId,
+        },
+      };
+    }
+
     // ─── Fetch PAID orders with items and product cost ─────────
     const orders = await db.order.findMany({
-      where: {
-        createdAt: { gte: startDate, lte: endDate },
-        paymentStatus: "PAID",
-      },
+      where: orderWhere,
       select: {
         id: true,
         total: true,

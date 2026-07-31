@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+
 /** Asia/Colombo is UTC+5:30 */
 const COLOMBO_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
 
@@ -190,10 +192,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const outletFilter = await getReportOutletFilter(req);
+
+    const shiftWhere: any = {
+      openedAt: { gte: startDate, lte: endDate },
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      shiftWhere.operator = {
+        outletId: outletFilter.effectiveOutletId,
+      };
+    }
+
     const shifts = await db.posShift.findMany({
-      where: {
-        openedAt: { gte: startDate, lte: endDate },
-      },
+      where: shiftWhere,
       include: {
         operator: {
           select: { id: true, name: true, email: true },

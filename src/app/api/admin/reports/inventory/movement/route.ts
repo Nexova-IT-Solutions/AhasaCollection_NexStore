@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
 
 const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
@@ -117,6 +118,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Invalid date format" }, { status: 400 });
     }
 
+    const outletFilter = await getReportOutletFilter(req);
+
     // ─── Fetch active suppliers list (for the filter dropdown) ────────────────
     const suppliers = await db.supplier.findMany({
       where: { isActive: true },
@@ -129,13 +132,23 @@ export async function GET(req: NextRequest) {
       ? { supplierId: supplierFilter }
       : {};
 
+    const orderWhere: any = {
+      createdAt:     { gte: startDate, lte: endDate },
+      paymentStatus: "PAID",
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      orderWhere.posShift = {
+        operator: {
+          outletId: outletFilter.effectiveOutletId,
+        },
+      };
+    }
+
     // ─── Fetch PAID order items in the date range ─────────────────────────────
     const items = await db.orderItem.findMany({
       where: {
-        order: {
-          createdAt:     { gte: startDate, lte: endDate },
-          paymentStatus: "PAID",
-        },
+        order: orderWhere,
         // If supplier filter is set, only include items whose product matches
         ...(supplierFilter
           ? { product: { supplierId: supplierFilter } }

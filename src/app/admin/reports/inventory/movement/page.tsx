@@ -151,6 +151,8 @@ function ProductExpandableRow({ p, columns, fmt }: { p: ProductRow; columns: "fa
   );
 }
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 // ─── Inner Page (needs useSearchParams so wrapped in Suspense) ────────────────
 
 function MovementReportInner() {
@@ -168,6 +170,7 @@ function MovementReportInner() {
   const [supplierId,    setSupplierId]    = useState(searchParams.get("supplierId")    || "");
   const [discountStatus,setDiscountStatus]= useState<DiscountStatus>((searchParams.get("discountStatus") as DiscountStatus) || "all");
   const [stockStatus,   setStockStatus]   = useState<StockStatus>((searchParams.get("stockStatus") as StockStatus) || "all");
+  const [selectedOutletId, setSelectedOutletId] = useState(searchParams.get("outletId") || "");
 
   const [data,      setData]      = useState<MovementReportData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -176,7 +179,7 @@ function MovementReportInner() {
   // ── Sync filters → URL ──
   const syncUrl = useCallback((overrides?: Partial<{
     startDate: string; endDate: string; supplierId: string;
-    discountStatus: string; stockStatus: string;
+    discountStatus: string; stockStatus: string; outletId: string;
   }>) => {
     const p = new URLSearchParams();
     p.set("startDate",      overrides?.startDate      ?? startDate);
@@ -184,8 +187,9 @@ function MovementReportInner() {
     if (overrides?.supplierId    ?? supplierId)     p.set("supplierId",     overrides?.supplierId    ?? supplierId);
     if ((overrides?.discountStatus ?? discountStatus) !== "all") p.set("discountStatus", overrides?.discountStatus ?? discountStatus);
     if ((overrides?.stockStatus    ?? stockStatus)    !== "all") p.set("stockStatus",    overrides?.stockStatus    ?? stockStatus);
+    if (overrides?.outletId ?? selectedOutletId) p.set("outletId", overrides?.outletId ?? selectedOutletId);
     router.replace(`${pathname}?${p.toString()}`, { scroll: false });
-  }, [router, pathname, startDate, endDate, supplierId, discountStatus, stockStatus]);
+  }, [router, pathname, startDate, endDate, supplierId, discountStatus, stockStatus, selectedOutletId]);
 
   // ── Fetch report ──
   const fetchData = useCallback(async () => {
@@ -194,6 +198,7 @@ function MovementReportInner() {
     try {
       const params = new URLSearchParams({ startDate, endDate, limit: "30", discountStatus, stockStatus });
       if (supplierId) params.set("supplierId", supplierId);
+      if (selectedOutletId) params.set("outletId", selectedOutletId);
       const res  = await fetch(`/api/admin/reports/inventory/movement?${params}`);
       const json = await res.json();
       if (!res.ok || !json.success) { setError(json.message || "Failed to load report"); return; }
@@ -203,7 +208,7 @@ function MovementReportInner() {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate, supplierId, discountStatus, stockStatus]);
+  }, [startDate, endDate, supplierId, discountStatus, stockStatus, selectedOutletId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -292,6 +297,12 @@ function MovementReportInner() {
           <p className="text-sm text-slate-500 mt-1">Velocity · Discount Tracking · Supplier & Variant Breakdown</p>
         </div>
         <div className="flex items-end gap-3 flex-wrap">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">From</Label>
             <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="h-9 text-xs w-[145px]" />

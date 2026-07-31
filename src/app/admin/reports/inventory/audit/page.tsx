@@ -38,12 +38,16 @@ interface AuditRecord {
   supplierName: string;
 }
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function StockAuditReportPage() {
   const { formatPrice } = useCurrency();
   const [products, setProducts] = useState<AuditRecord[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<AuditRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOutletId, setSelectedOutletId] = useState("");
+
   const handleExportExcel = async () => {
     try {
       await ExcelExportUtility.exportToExcel({
@@ -78,7 +82,11 @@ export default function StockAuditReportPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/reports/inventory/audit");
+      const params = new URLSearchParams();
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
+      const res = await fetch(`/api/admin/reports/inventory/audit?${params}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {
@@ -105,7 +113,7 @@ export default function StockAuditReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedOutletId]);
 
   useEffect(() => {
     fetchData();
@@ -186,6 +194,12 @@ export default function StockAuditReportPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <Button
             onClick={fetchData}
             disabled={isLoading}

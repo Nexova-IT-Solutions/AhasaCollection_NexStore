@@ -50,6 +50,8 @@ interface CategorySalesItem {
 }
 
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function CategorySalesPage() {
   const { formatPrice } = useCurrency();
   const { data: session, status } = useSession();
@@ -69,6 +71,7 @@ export default function CategorySalesPage() {
 
   const [startDate, setStartDate] = useState(past30Days.toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(now.toISOString().split("T")[0]);
+  const [selectedOutletId, setSelectedOutletId] = useState("");
 
   const handleExportExcel = async () => {
     try {
@@ -120,6 +123,9 @@ export default function CategorySalesPage() {
     setError(null);
     try {
       const params = new URLSearchParams({ startDate, endDate });
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
       const res = await fetch(`/api/admin/reports/category-sales?${params}`);
       const json = await res.json();
 
@@ -135,7 +141,7 @@ export default function CategorySalesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, selectedOutletId]);
 
   useEffect(() => {
     if (session && hasPermission(session, "reports.category_sales")) {
@@ -189,8 +195,14 @@ export default function CategorySalesPage() {
           </p>
         </div>
 
-        {/* Date Filters */}
+        {/* Date & Outlet Filters */}
         <div className="flex flex-wrap items-end gap-3">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            className="w-[180px]"
+          />
+
           <div className="space-y-1">
             <Label className="text-[11px] font-semibold text-slate-500">From Date</Label>
             <Input
