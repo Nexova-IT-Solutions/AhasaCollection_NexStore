@@ -65,28 +65,40 @@ export function ReportOutletSelect({
     );
   }
 
-  // If user is tagged to an outlet (not Super Admin / Dev Admin / Stock Admin), show locked badge
+  // If user is tagged to an outlet (and not global admin), render a disabled/read-only Select pre-selected to their outlet
   if (isTaggedToOutlet) {
     return (
-      <div className={`flex flex-col space-y-1 ${className}`}>
-        <span className="text-xs text-slate-500 font-medium">Outlet Scope</span>
-        <div className="flex items-center gap-1.5 h-9 px-3 bg-amber-50/80 border border-amber-200 text-amber-900 rounded-md font-semibold text-xs shadow-sm">
-          <Lock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-          <span className="truncate">{userOutletName}</span>
-        </div>
+      <div className={`flex flex-col space-y-1 min-w-[190px] ${className}`}>
+        <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
+          <span>Outlet</span>
+          <Lock className="w-3 h-3 text-amber-600" />
+        </span>
+        <Select value={userOutletId || ""} disabled>
+          <SelectTrigger className="h-9 text-xs border-amber-200 bg-amber-50/60 text-amber-900 font-semibold cursor-not-allowed">
+            <div className="flex items-center gap-2 truncate">
+              <Store className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <SelectValue>{userOutletName}</SelectValue>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {userOutletId && (
+              <SelectItem value={userOutletId}>{userOutletName}</SelectItem>
+            )}
+          </SelectContent>
+        </Select>
       </div>
     );
   }
 
-  // Otherwise, user is untagged or an admin — show dropdown filter
+  // Otherwise, user is untagged or an admin — show active dropdown filter
   return (
-    <div className={`flex flex-col space-y-1 ${className}`}>
+    <div className={`flex flex-col space-y-1 min-w-[190px] ${className}`}>
       <span className="text-xs text-slate-500 font-medium">Filter Outlet</span>
       <Select value={value || "all"} onValueChange={(val) => onChange(val === "all" ? "" : val)}>
         <SelectTrigger className="h-9 text-xs border-slate-200 bg-white font-medium focus:ring-[#A7066A]">
           <div className="flex items-center gap-2 truncate">
             <Store className="w-3.5 h-3.5 text-[#A7066A] shrink-0" />
-            <SelectValue placeholder="All Outlets" />
+            <SelectValue placeholder="All Outlets & Warehouses" />
           </div>
         </SelectTrigger>
         <SelectContent>

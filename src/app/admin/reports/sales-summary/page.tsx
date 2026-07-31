@@ -202,29 +202,29 @@ export default function SalesSummaryPage() {
         </div>
 
         {/* Date & Outlet Range Picker */}
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-end gap-3 shrink-0">
           <ReportOutletSelect
             value={selectedOutletId}
             onChange={setSelectedOutletId}
-            className="w-[180px]"
+            className="w-full sm:w-[200px]"
           />
 
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-[130px]">
             <Label className="text-xs text-slate-500">From</Label>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="h-9 text-xs w-[140px]"
+              className="h-9 text-xs w-full"
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-[130px]">
             <Label className="text-xs text-slate-500">To</Label>
             <Input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="h-9 text-xs w-[140px]"
+              className="h-9 text-xs w-full"
             />
           </div>
           <Button
