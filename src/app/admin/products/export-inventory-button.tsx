@@ -5,13 +5,22 @@ import { Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function ExportInventoryButton() {
+interface ExportInventoryButtonProps {
+  searchParams?: Record<string, string>;
+}
+
+export function ExportInventoryButton({ searchParams = {} }: ExportInventoryButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleExport = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/products/export");
+      const qp = new URLSearchParams();
+      Object.entries(searchParams).forEach(([k, v]) => {
+        if (v) qp.set(k, v);
+      });
+
+      const res = await fetch(`/api/admin/products/export?${qp.toString()}`);
       if (!res.ok) {
         if (res.status === 403) {
           throw new Error("Unauthorized to export inventory.");

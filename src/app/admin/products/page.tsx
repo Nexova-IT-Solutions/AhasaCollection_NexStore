@@ -326,7 +326,16 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
 
           <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
             {["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) && (
-              <ExportInventoryButton />
+              <ExportInventoryButton
+                searchParams={{
+                  q,
+                  category,
+                  occasion,
+                  stock,
+                  repository,
+                  outlet,
+                }}
+              />
             )}
             
             {hasStockAdmin && <BulkUploadButton />}

@@ -16,9 +16,44 @@ export async function GET(req: Request) {
   try {
     const outletFilter = await getReportOutletFilter(req);
 
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q") || "";
+    const category = searchParams.get("category") || "";
+    const occasion = searchParams.get("occasion") || "";
+    const stock = searchParams.get("stock") || "all";
+    const repository = searchParams.get("repository") || "";
+    const outlet = searchParams.get("outlet") || "";
+
     const productWhere: any = {};
     if (outletFilter.effectiveOutletId) {
       productWhere.outletId = outletFilter.effectiveOutletId;
+    } else if (outlet) {
+      productWhere.outletId = outlet;
+    }
+
+    if (repository) {
+      productWhere.repositoryId = repository;
+    }
+
+    if (q) {
+      productWhere.OR = [
+        { name: { contains: q, mode: "insensitive" } },
+        { sku: { contains: q, mode: "insensitive" } },
+      ];
+    }
+
+    if (category) {
+      productWhere.categoryId = category;
+    }
+
+    if (occasion) {
+      productWhere.occasions = { some: { id: occasion } };
+    }
+
+    if (stock === "in") {
+      productWhere.stock = { gt: 0 };
+    } else if (stock === "out") {
+      productWhere.stock = 0;
     }
 
     const products = await db.product.findMany({
@@ -44,7 +79,7 @@ export async function GET(req: Request) {
     // 1. Merged Header Banner
     worksheet.mergeCells(`A1:${lastColLetter}1`);
     const bannerCell = worksheet.getCell("A1");
-    bannerCell.value = `AL ZINA TRADING ESTABLISHMENT SPC — INVENTORY BACKUP`;
+    bannerCell.value = `AHASA COLLECTION — INVENTORY BACKUP`;
     bannerCell.font = {
       name: "Segoe UI",
       size: 14,
@@ -90,7 +125,7 @@ export async function GET(req: Request) {
       { header: "SKU", width: 20 },
       { header: "Stock", width: 40 },
       { header: "Supplier", width: 30 },
-      { header: "Base Price (OMR)", width: 18 },
+      { header: "Base Price (LKR)", width: 18 },
     ];
 
     columnConfig.forEach((col, index) => {
@@ -118,7 +153,10 @@ export async function GET(req: Request) {
         const variantStrings = p.productVariants
           .map((v: any) => {
             if (!v || typeof v !== "object") return null;
-            const combination = [v.color, v.size].filter(Boolean).join("-");
+            // Clean out hex color codes like Blue|#121eca -> Blue
+            const cleanColor = v.color ? String(v.color).replace(/\|#[a-fA-F0-9]{3,6}/g, "").trim() : "";
+            const cleanSize = v.size ? String(v.size).trim() : "";
+            const combination = [cleanColor, cleanSize].filter(Boolean).join("-");
             if (combination) {
               return `${combination}-${v.stock || 0}`;
             }
