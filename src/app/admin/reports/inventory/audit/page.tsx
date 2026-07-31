@@ -373,10 +373,10 @@ export default function StockAuditReportPage() {
                             {p.name}
                           </TableCell>
                           <TableCell className="text-xs text-slate-600 print:text-black font-medium">
-                            {p.outletName || "Global / Unassigned"}
+                            {p.outletName || "—"}
                           </TableCell>
                           <TableCell className="text-xs text-slate-600 print:text-black font-medium">
-                            {p.repositoryName || "Main Warehouse"}
+                            {p.repositoryName || "—"}
                           </TableCell>
                           <TableCell className="text-xs text-slate-500 print:text-black">
                             {p.categoryName}

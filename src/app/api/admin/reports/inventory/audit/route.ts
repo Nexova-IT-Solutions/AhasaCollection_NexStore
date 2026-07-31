@@ -86,9 +86,9 @@ export async function GET(req: NextRequest) {
       supplierId: p.supplier?.id || "no-supplier",
       supplierName: p.supplier?.name || "No Supplier Assigned",
       outletId: p.outlet?.id || "no-outlet",
-      outletName: p.outlet?.name || "Global / Unassigned",
+      outletName: p.outlet?.name || "—",
       repositoryId: p.repository?.id || "no-repository",
-      repositoryName: p.repository?.name || "Main Warehouse",
+      repositoryName: p.repository?.name || "—",
     }));
 
     return NextResponse.json({
