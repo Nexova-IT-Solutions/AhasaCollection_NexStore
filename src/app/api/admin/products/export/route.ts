@@ -4,21 +4,25 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as ExcelJS from "exceljs";
 
-export async function GET() {
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+
+export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "STOREFRONT_ADMIN"].includes(session.user.role)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
-  // The request says owner and manager. SUPER_ADMIN is owner, ADMIN is manager.
-  // We'll restrict this to SUPER_ADMIN, DEV_ADMIN, and ADMIN roles.
-  if (!["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role)) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-  }
-
   try {
+    const outletFilter = await getReportOutletFilter(req);
+
+    const productWhere: any = {};
+    if (outletFilter.effectiveOutletId) {
+      productWhere.outletId = outletFilter.effectiveOutletId;
+    }
+
     const products = await db.product.findMany({
+      where: productWhere,
       select: {
         name: true,
         sku: true,
