@@ -243,7 +243,7 @@ export async function POST(req: Request) {
       createdCount,
       updatedCount,
       errors,
-      message: `Import complete: ${createdCount} product(s) created, ${updatedCount} product(s) had their stock updated (duplicate SKU).`,
+      message: `Import complete: ${createdCount} product(s) created, ${updatedCount} product(s) had their stock updated.`,
     });
   } catch (error: any) {
     console.error("Bulk Product Upload Error:", error);
