@@ -237,6 +237,7 @@ export function PosCart() {
                     </div>
                   </div>
                 </div>
+              </div>
             ))}
           </div>
         )}
