@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
 import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+import { getFeatureToggles } from "@/lib/queries/feature-toggles";
 
 /**
  * GET /api/admin/reports/sales-summary?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
