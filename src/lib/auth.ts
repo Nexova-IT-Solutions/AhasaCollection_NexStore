@@ -287,14 +287,24 @@ export const authOptions: NextAuthOptions = {
             }
             // First load template-level permissions if available
             if (dbUser.template?.permissions && typeof dbUser.template.permissions === "object") {
-              mergedPermissions = { ...dbUser.template.permissions as Record<string, boolean> };
+              const rawTpl = dbUser.template.permissions as Record<string, any>;
+              for (const secKey of Object.keys(rawTpl)) {
+                const secVal = rawTpl[secKey];
+                if (typeof secVal === "object" && secVal !== null) {
+                  for (const permKey of Object.keys(secVal)) {
+                    mergedPermissions[`${secKey}.${permKey}`] = Boolean(secVal[permKey]);
+                  }
+                } else {
+                  mergedPermissions[secKey] = Boolean(secVal);
+                }
+              }
             }
             // Overwrite with direct custom overrides
             if (dbUser.customPermissions && typeof dbUser.customPermissions === "object") {
-              mergedPermissions = {
-                ...mergedPermissions,
-                ...dbUser.customPermissions as Record<string, boolean>,
-              };
+              const rawCustom = dbUser.customPermissions as Record<string, any>;
+              for (const key of Object.keys(rawCustom)) {
+                mergedPermissions[key] = Boolean(rawCustom[key]);
+              }
             }
           }
 

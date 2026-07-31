@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import useSWR from "swr";
 import { Store, Lock } from "lucide-react";
 import {
@@ -10,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -30,6 +30,7 @@ export function ReportOutletSelect({
   onChange,
   className = "",
 }: ReportOutletSelectProps) {
+  const { data: session } = useSession();
   const { data: meData, isLoading: meLoading } = useSWR("/api/admin/me", fetcher);
   const { data: outletsData, isLoading: outletsLoading } = useSWR(
     "/api/admin/outlets",
@@ -38,16 +39,20 @@ export function ReportOutletSelect({
 
   const outlets: Outlet[] = Array.isArray(outletsData) ? outletsData : [];
 
-  const user = meData;
-  const userOutletId = user?.outletId || null;
-  const userOutletName = user?.outlet?.name || "My Outlet";
-  const userRole = user?.role || "";
+  // Determine user info using session first, then meData as fallback
+  const sessionUser = session?.user as any;
+  const userOutletId = sessionUser?.outletId || meData?.outletId || null;
+  const userOutletName = sessionUser?.outletName || meData?.outlet?.name || "My Outlet";
+  const userRole = sessionUser?.role || meData?.role || "";
+
+  const customPerms = sessionUser?.customPermissions || meData?.customPermissions || {};
+  const templatePerms = sessionUser?.template?.permissions || meData?.template?.permissions || {};
 
   // Only SUPER_ADMIN, DEV_ADMIN, or users explicitly granted catalog.stock_admin permission can view/filter all outlets
   const hasStockAdminPerm =
-    user?.customPermissions?.["catalog.stock_admin"] === true ||
-    user?.template?.permissions?.catalog?.stock_admin === true ||
-    user?.template?.permissions?.["catalog.stock_admin"] === true;
+    customPerms["catalog.stock_admin"] === true ||
+    templatePerms?.catalog?.stock_admin === true ||
+    templatePerms?.["catalog.stock_admin"] === true;
 
   const canFilterAllOutlets =
     userRole === "SUPER_ADMIN" ||
