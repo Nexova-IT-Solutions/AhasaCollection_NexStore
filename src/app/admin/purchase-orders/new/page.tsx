@@ -63,9 +63,11 @@ type ProductHit = {
 // ── Inline product search dropdown for a single item row ────────────────────
 function ProductSearchCell({
   itemId,
+  branchId,
   onSelect,
 }: {
   itemId: string;
+  branchId?: string;
   onSelect: (hit: ProductHit) => void;
 }) {
   const [query, setQuery] = useState("");
@@ -123,19 +125,35 @@ function ProductSearchCell({
     const t = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `/api/admin/products?q=${encodeURIComponent(query.trim())}&pageSize=15&page=1`
-        );
+        let url = `/api/admin/products?q=${encodeURIComponent(query.trim())}&pageSize=30&page=1`;
+        if (branchId && branchId !== "main") {
+          url += `&repositoryId=${encodeURIComponent(branchId)}`;
+        }
+        const res = await fetch(url);
         const data = await res.json();
         const raw = data.items ?? data.products ?? data ?? [];
-        const products: ProductHit[] = (Array.isArray(raw) ? raw : []).map((p: any) => ({
+        
+        const productsList: ProductHit[] = (Array.isArray(raw) ? raw : []).map((p: any) => ({
           id: p.id,
           name: p.name,
-          sku: p.sku ?? null,
+          sku: p.sku ? String(p.sku).trim() : null,
           stock: p.stock ?? 0,
           costPrice: p.costPrice ?? null,
         }));
-        setResults(products);
+
+        // Deduplicate by SKU (or ID if no SKU)
+        const seen = new Set<string>();
+        const uniqueProducts: ProductHit[] = [];
+
+        for (const item of productsList) {
+          const key = item.sku ? item.sku.toUpperCase() : item.id;
+          if (!seen.has(key)) {
+            seen.add(key);
+            uniqueProducts.push(item);
+          }
+        }
+
+        setResults(uniqueProducts);
       } catch {
         setResults([]);
       } finally {
@@ -143,7 +161,7 @@ function ProductSearchCell({
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [query]);
+  }, [query, branchId]);
 
   const handleOpen = () => {
     updatePosition();
@@ -695,6 +713,7 @@ export default function NewPurchaseOrderPage() {
                           ) : (
                             <ProductSearchCell
                               itemId={item.id}
+                              branchId={branchId}
                               onSelect={(hit) => handleProductSelect(item.id, hit)}
                             />
                           )}

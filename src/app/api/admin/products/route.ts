@@ -120,6 +120,12 @@ export async function GET(req: Request) {
       where.categoryId = category;
     }
 
+    const repositoryId = searchParams.get("repositoryId")?.trim() || "";
+
+    if (repositoryId) {
+      where.repositoryId = repositoryId;
+    }
+
     if (occasion) {
       where.occasions = {
         some: {
