@@ -14,6 +14,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Download, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 type BulkProductUploadModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,12 +31,19 @@ export function BulkProductUploadModal({
 }: BulkProductUploadModalProps) {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
+  const [targetDestination, setTargetDestination] = useState<string>("default");
   const [isUploading, setIsUploading] = useState(false);
   const [result, setResult] = useState<{
     createdCount: number;
     errors: string[];
     message: string;
   } | null>(null);
+
+  const { data: repositoriesData } = useSWR(open ? "/api/admin/repositories" : null, fetcher);
+  const { data: outletsData } = useSWR(open ? "/api/admin/outlets" : null, fetcher);
+
+  const repositories = Array.isArray(repositoriesData) ? repositoriesData : [];
+  const outlets = Array.isArray(outletsData) ? outletsData : [];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -53,6 +64,12 @@ export function BulkProductUploadModal({
     try {
       const formData = new FormData();
       formData.append("file", file);
+
+      if (targetDestination.startsWith("repo:")) {
+        formData.append("targetRepositoryId", targetDestination.replace("repo:", ""));
+      } else if (targetDestination.startsWith("outlet:")) {
+        formData.append("targetOutletId", targetDestination.replace("outlet:", ""));
+      }
 
       const res = await fetch("/api/admin/products/bulk-upload", {
         method: "POST",
@@ -120,10 +137,42 @@ export function BulkProductUploadModal({
             </a>
           </div>
 
+          {/* Target Location Step */}
+          <div className="space-y-1.5">
+            <label className="font-bold text-slate-800 text-xs block">
+              2. Select Target Stock Location (Outlet or Warehouse)
+            </label>
+            <select
+              value={targetDestination}
+              onChange={(e) => setTargetDestination(e.target.value)}
+              className="w-full h-9 rounded-xl border border-slate-200 bg-white text-xs px-3 py-1.5 font-medium text-slate-800 focus:border-[#A7066A] focus:outline-none"
+            >
+              <option value="default">Default Warehouse (Warehouse One / As defined in Excel)</option>
+              {repositories.length > 0 && (
+                <optgroup label="Warehouses / Repositories">
+                  {repositories.map((repo: any) => (
+                    <option key={repo.id} value={`repo:${repo.id}`}>
+                      🏬 {repo.name} {repo.code ? `(${repo.code})` : ""}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {outlets.length > 0 && (
+                <optgroup label="Store Outlets">
+                  {outlets.map((outlet: any) => (
+                    <option key={outlet.id} value={`outlet:${outlet.id}`}>
+                      🏪 Outlet: {outlet.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+          </div>
+
           {/* Upload Dropzone Step */}
           <div className="space-y-2">
             <label className="font-bold text-slate-800 text-xs block">
-              2. Choose Excel or CSV File
+              3. Choose Excel or CSV File
             </label>
             <div className="relative border-2 border-dashed border-brand-border rounded-xl p-6 bg-slate-50/60 hover:bg-slate-100/70 transition-colors text-center cursor-pointer">
               <Upload className="w-8 h-8 text-[#A7066A] mx-auto mb-2 opacity-80" />

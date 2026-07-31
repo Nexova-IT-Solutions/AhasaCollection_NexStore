@@ -35,6 +35,7 @@ export async function GET() {
       { header: "Row Location", key: "rowNumber", width: 15 },
       { header: "Bin Location", key: "binLocation", width: 15 },
       { header: "Image URL", key: "imageUrl", width: 40 },
+      { header: "Target Outlet or Warehouse", key: "targetLocation", width: 30 },
     ];
 
     // Style Header Row

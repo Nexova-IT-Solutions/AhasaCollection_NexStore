@@ -15,6 +15,8 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    const targetRepositoryId = (formData.get("targetRepositoryId") as string | null) || undefined;
+    const targetOutletId = (formData.get("targetOutletId") as string | null) || undefined;
 
     if (!file) {
       return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
@@ -74,6 +76,7 @@ export async function POST(req: Request) {
       const rowNumberStr = getCellVal(14);
       const binLocation = getCellVal(15);
       const imageUrl = getCellVal(16);
+      const targetRepoOrOutletName = getCellVal(17);
 
       if (!name) {
         errors.push(`Row ${rowNumber}: Product name is required.`);
@@ -110,6 +113,7 @@ export async function POST(req: Request) {
         rowNumber: rowNumberStr || null,
         binLocation: binLocation || null,
         imageUrl: imageUrl || null,
+        targetRepoOrOutletName: targetRepoOrOutletName || null,
       });
     });
 
@@ -120,7 +124,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Resolve default repository (Warehouse one)
+    // Pre-load all repositories & outlets for matching by name
+    const allRepositories = await db.repository.findMany();
+    const repoMap = new Map<string, string>();
+    allRepositories.forEach((r) => repoMap.set(r.name.toLowerCase().trim(), r.id));
+
+    const allOutlets = await db.outlet.findMany();
+    const outletMap = new Map<string, string>();
+    allOutlets.forEach((o) => outletMap.set(o.name.toLowerCase().trim(), o.id));
+
+    // Fallback default repository (Warehouse One)
     let defaultRepoId: string | undefined = undefined;
     const defaultRepo = (await db.repository.findFirst({
       where: { name: { contains: "Warehouse", mode: "insensitive" } },
@@ -173,6 +186,26 @@ export async function POST(req: Request) {
           categoryMap.set(catKey, categoryId);
         }
 
+        // Resolve destination Repository vs Outlet for this product
+        let itemRepoId: string | undefined = targetRepositoryId;
+        let itemOutletId: string | undefined = targetOutletId;
+
+        if (item.targetRepoOrOutletName) {
+          const targetKey = item.targetRepoOrOutletName.toLowerCase().trim();
+          if (repoMap.has(targetKey)) {
+            itemRepoId = repoMap.get(targetKey);
+            itemOutletId = undefined;
+          } else if (outletMap.has(targetKey)) {
+            itemOutletId = outletMap.get(targetKey);
+            itemRepoId = undefined;
+          }
+        }
+
+        // Fallback to default repository if neither repository nor outlet was specified
+        if (!itemRepoId && !itemOutletId) {
+          itemRepoId = defaultRepoId;
+        }
+
         await tx.product.create({
           data: {
             name: item.name,
@@ -181,7 +214,8 @@ export async function POST(req: Request) {
             price: item.price,
             costPrice: item.costPrice,
             stock: item.stock,
-            repositoryId: defaultRepoId,
+            repositoryId: itemRepoId,
+            outletId: itemOutletId,
             weightGrams: item.weightGrams,
             shortDescription: item.shortDescription,
             description: item.description,
