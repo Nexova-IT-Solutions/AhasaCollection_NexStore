@@ -62,6 +62,7 @@ export interface ReceiptData {
   orderNumber: string;
   total: number;
   subtotal: number;
+  billDiscountAmount?: number;
   changeDue: number;
   paymentMethod: string;
   date: string;
@@ -303,6 +304,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           <span>${isEnglish ? 'Subtotal:' : 'Subtotal / උප එකතුව:'}</span>
           <span style="font-weight: bold;">${isEnglish ? `${curSymbol} ${data.subtotal.toFixed(decimals)}` : `${curSymbol} ${data.subtotal.toFixed(decimals)}`}</span>
         </div>
+        ${data.billDiscountAmount && data.billDiscountAmount > 0 ? `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span>${isEnglish ? 'Discount:' : 'Discount / වට්ටම්:'}</span>
+            <span style="font-weight: bold;">-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
+          </div>
+        ` : ''}
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px;">
           <span style="font-weight: bold;">${isEnglish ? 'Total:' : 'Total / මුළු මුදල:'}</span>
           <span style="font-weight: bold;">${isEnglish ? `${curSymbol} ${data.total.toFixed(decimals)}` : `${curSymbol} ${data.total.toFixed(decimals)}`}</span>
@@ -454,6 +461,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `${SEP}\n`,
         '\x1B\x61\x02', // Right align for totals
         isEnglish ? `Subtotal: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n` : `Subtotal / උප එකතුව: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n`,
+        data.billDiscountAmount && data.billDiscountAmount > 0
+          ? (isEnglish ? `Discount: -${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}\n` : `Discount / වට්ටම්: -${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}\n`)
+          : '',
         isEnglish ? `Total: ${curSymbol} ${data.total.toFixed(decimals)}\n` : `Total / මුළු මුදල: ${curSymbol} ${data.total.toFixed(decimals)}\n`
       );
       
@@ -559,6 +569,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             hexLines.push('1B6102'); // Right align
             const subtotalLabel = `Subtotal / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639,0x20,0x0641,0x0631,0x0639,0x064A)}`;
             hexLines.push(toW1256Hex(`${subtotalLabel}: OMR ${data.subtotal.toFixed(3)}\n`));
+            if (data.billDiscountAmount && data.billDiscountAmount > 0) {
+              const discLabel = `Discount / ${String.fromCharCode(0x062E,0x0635,0x0645)}`;
+              hexLines.push(toW1256Hex(`${discLabel}: -OMR ${data.billDiscountAmount.toFixed(3)}\n`));
+            }
             const totalLabel = `Total / ${String.fromCharCode(0x0645,0x062C,0x0645,0x0648,0x0639)}`;
             hexLines.push(toW1256Hex(`${totalLabel}: OMR ${data.total.toFixed(3)}\n`));
             if (data.changeDue > 0) {
@@ -818,9 +832,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     currentY = (doc as any).lastAutoTable.finalY + 15;
 
     // Totals Area (Right aligned box)
-    doc.setDrawColor(220, 220, 220);
-    doc.setFillColor(250, 250, 250);
-    doc.roundedRect(pageWidth - 115, currentY, 100, 40, 3, 3, "FD");
+    let boxHeight = 40;
+    if (data.billDiscountAmount && data.billDiscountAmount > 0) boxHeight += 10;
+    doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
     let totalY = currentY + 10;
     doc.setFont("Amiri", "normal");
@@ -830,6 +844,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.text("Subtotal:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.subtotal.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     
+    if (data.billDiscountAmount && data.billDiscountAmount > 0) {
+      totalY += 8;
+      doc.text("Discount:", pageWidth - 110, totalY);
+      doc.text(`-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
+    }
+
     totalY += 12;
     doc.setFont("Amiri", "normal");
     doc.setFontSize(14);

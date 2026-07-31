@@ -23,6 +23,10 @@ interface PosCartState {
   notes: string;
   isScanning: boolean;
 
+  // Bill level discount
+  billDiscountType: "PERCENTAGE" | "FIXED" | null;
+  billDiscountValue: number;
+
   // Cart Actions
   addItem: (product: {
     id: string;
@@ -74,6 +78,7 @@ interface PosCartState {
 
   // Notes
   setNotes: (notes: string) => void;
+  setBillDiscount: (type: "PERCENTAGE" | "FIXED" | null, value: number) => void;
 
   // UI Actions
   openCheckout: () => void;
@@ -85,6 +90,7 @@ interface PosCartState {
 
   // Computed
   getSubtotal: () => number;
+  getBillDiscountAmount: () => number;
   getTotal: () => number;
   getItemCount: () => number;
   getChangeDue: () => number;
@@ -112,6 +118,8 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
   lastOrderNumber: null,
   notes: "",
   isScanning: false,
+  billDiscountType: null,
+  billDiscountValue: 0,
 
   // ─── Cart Actions ──────────────────────────────────────────
   addItem: (product) => {
@@ -321,15 +329,7 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
     }));
   },
 
-  clearCart: () => {
-    set({
-      items: [],
-      customer: null,
-      payment: { ...defaultPayment },
-      notes: "",
-      lastOrderNumber: null,
-    });
-  },
+  clearCart: () => set({ items: [], customer: null, notes: "", payment: { ...defaultPayment }, billDiscountType: null, billDiscountValue: 0, lastOrderNumber: null }),
 
   // ─── Barcode Scan Action ────────────────────────────────────
   scanBarcode: async (barcode: string) => {
@@ -506,8 +506,9 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
 
   resetPayment: () => set({ payment: { ...defaultPayment } }),
 
-  // ─── Notes ─────────────────────────────────────────────────
+  // ─── Notes & Bill Discount ─────────────────────────────────
   setNotes: (notes) => set({ notes }),
+  setBillDiscount: (type, value) => set({ billDiscountType: type, billDiscountValue: Math.max(0, value || 0) }),
 
   // ─── UI Actions ────────────────────────────────────────────
   openCheckout: () => set({ isCheckoutOpen: true }),
@@ -522,10 +523,21 @@ export const usePosCart = create<PosCartState>()((set, get) => ({
     return get().items.reduce((sum, item) => sum + item.subtotal, 0);
   },
 
+  getBillDiscountAmount: () => {
+    const subtotal = get().getSubtotal();
+    const { billDiscountType, billDiscountValue } = get();
+    if (!billDiscountType || billDiscountValue <= 0 || subtotal <= 0) return 0;
+    if (billDiscountType === "PERCENTAGE") {
+      return (subtotal * Math.min(100, billDiscountValue)) / 100;
+    }
+    return Math.min(subtotal, billDiscountValue);
+  },
+
   getTotal: () => {
     const subtotal = get().getSubtotal();
+    const billDiscount = get().getBillDiscountAmount();
     const giftCardDeduction = get().payment.giftCardDeduction;
-    return Math.max(0, subtotal - giftCardDeduction);
+    return Math.max(0, subtotal - billDiscount - giftCardDeduction);
   },
 
   getItemCount: () => {

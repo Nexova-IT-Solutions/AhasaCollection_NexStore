@@ -46,6 +46,7 @@ export function CheckoutModal() {
   const setLastOrderNumber = usePosCart((s) => s.setLastOrderNumber);
   const clearCart = usePosCart((s) => s.clearCart);
   const getSubtotal = usePosCart((s) => s.getSubtotal);
+  const getBillDiscountAmount = usePosCart((s) => s.getBillDiscountAmount);
   const getTotal = usePosCart((s) => s.getTotal);
   const fetchActiveShift = usePosCart((s) => s.fetchActiveShift);
 
@@ -62,7 +63,7 @@ export function CheckoutModal() {
   const [courierTrackingId, setCourierTrackingId] = useState("");
   const [courierReference, setCourierReference] = useState("");
   const [successOrder, setSuccessOrder] = useState<{
-    orderNumber: string; total: number; subtotal: number; changeDue: number;
+    orderNumber: string; total: number; subtotal: number; changeDue: number; billDiscountAmount?: number;
     paymentMethod: string;
     trackingNumber?: string | null;
     items: { name: string; quantity: number; price: number; discountPercent?: number }[];
@@ -70,6 +71,7 @@ export function CheckoutModal() {
   } | null>(null);
 
   const subtotal = getSubtotal();
+  const billDiscountAmount = getBillDiscountAmount();
   const total = getTotal();
   const changeDue = payment.method === "POS_CASH"
     ? Math.max(0, payment.cashTendered - total) : 0;
@@ -227,6 +229,7 @@ export function CheckoutModal() {
         orderNumber: data.data.orderNumber,
         total: data.data.total,
         subtotal,
+        billDiscountAmount,
         changeDue,
         paymentMethod: payment.method,
         trackingNumber: data.data.trackingNumber || courierTrackingId || null,
@@ -253,6 +256,7 @@ export function CheckoutModal() {
       orderNumber: successOrder.orderNumber,
       total: successOrder.total,
       subtotal: successOrder.subtotal,
+      billDiscountAmount: successOrder.billDiscountAmount,
       changeDue: successOrder.changeDue,
       paymentMethod: successOrder.paymentMethod,
       date: format(new Date(), "PPpp"),
@@ -273,6 +277,7 @@ export function CheckoutModal() {
       orderNumber: successOrder.orderNumber,
       total: successOrder.total,
       subtotal: successOrder.subtotal,
+      billDiscountAmount: successOrder.billDiscountAmount,
       changeDue: successOrder.changeDue,
       paymentMethod: successOrder.paymentMethod,
       date: format(new Date(), "PPpp"),
