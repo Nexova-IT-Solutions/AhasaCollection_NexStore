@@ -59,7 +59,10 @@ export function PosCart() {
   const getTotal = usePosCart((s) => s.getTotal);
 
   const billDiscountAmount = getBillDiscountAmount();
-  const effectiveTotal = getTotal();
+  const rawTotal = getTotal();
+  const effectiveTotal = appliedVoucher
+    ? Math.max(0, rawTotal - appliedVoucher.deduction)
+    : rawTotal;
 
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
@@ -77,10 +80,6 @@ export function PosCart() {
     deduction: number;
   } | null>(null);
   const [voucherError, setVoucherError] = useState<string | null>(null);
-
-  const effectiveTotal = appliedVoucher
-    ? Math.max(0, subtotal - appliedVoucher.deduction)
-    : subtotal;
 
   const { formatPrice } = useCurrency();
 
