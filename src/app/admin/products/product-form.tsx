@@ -216,9 +216,15 @@ type ProductInput = {
   itemsInside?: GiftBoxItemSelection[];
   productImages: unknown;
   productVariants: unknown;
-  costPrice?: number | null;
   supplierId?: string | null;
   lastSuppliedAt?: string | null;
+  isbn?: string | null;
+  author?: string | null;
+  publisher?: string | null;
+  rackNumber?: string | null;
+  rowNumber?: string | null;
+  binLocation?: string | null;
+  weightGrams?: number | null;
 };
 
 type ProductFormProps = {
@@ -387,13 +393,13 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
   const [outletOptions, setOutletOptions] = useState<{ id: string; name: string }[]>([]);
   const [repositoryId, setRepositoryId] = useState("");
   const [outletId, setOutletId] = useState("");
-  const [isbn, setIsbn] = useState("");
-  const [author, setAuthor] = useState("");
-  const [publisher, setPublisher] = useState("");
-  const [rackNumber, setRackNumber] = useState("");
-  const [rowNumber, setRowNumber] = useState("");
-  const [binLocation, setBinLocation] = useState("");
-  const [weightGrams, setWeightGrams] = useState<number | "">("");
+  const [isbn, setIsbn] = useState(product?.isbn || "");
+  const [author, setAuthor] = useState(product?.author || "");
+  const [publisher, setPublisher] = useState(product?.publisher || "");
+  const [rackNumber, setRackNumber] = useState(product?.rackNumber || "");
+  const [rowNumber, setRowNumber] = useState(product?.rowNumber || "");
+  const [binLocation, setBinLocation] = useState(product?.binLocation || "");
+  const [weightGrams, setWeightGrams] = useState<number | "">(product?.weightGrams != null ? Number(product.weightGrams) : "");
 
   const [sizeInput, setSizeInput] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
