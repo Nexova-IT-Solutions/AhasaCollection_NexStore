@@ -329,7 +329,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
               <ExportInventoryButton />
             )}
             
-            <BulkUploadButton />
+            {hasStockAdmin && <BulkUploadButton />}
 
             <Button asChild className="bg-[#A7066A] hover:bg-[#8A0558] text-white shadow-lg shadow-[#A7066A]/20 w-full md:w-auto">
               <Link href="/admin/products/new">

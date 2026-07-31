@@ -3,10 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ExcelJS from "exceljs";
 
+import { hasPermission } from "@/lib/permissions";
+
 export async function GET() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN", "PRODUCT_MANAGER"].includes(session.user.role as string)) {
+  const hasStockAdmin = session && (
+    ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role as string) ||
+    hasPermission(session, "catalog.stock_admin")
+  );
+
+  if (!hasStockAdmin) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

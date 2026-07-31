@@ -3,13 +3,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
-import ExcelJS from "exceljs";
+import { hasPermission } from "@/lib/permissions";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["SUPER_ADMIN", "DEV_ADMIN", "STOREFRONT_ADMIN", "ADMIN", "PRODUCT_MANAGER"].includes(session.user.role as string)) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+  const hasStockAdmin = session && (
+    ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role as string) ||
+    hasPermission(session, "catalog.stock_admin")
+  );
+
+  if (!hasStockAdmin) {
+    return NextResponse.json({ message: "Unauthorized: Stock Admin permission required" }, { status: 403 });
   }
 
   try {
