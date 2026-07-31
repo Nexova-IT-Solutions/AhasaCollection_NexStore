@@ -50,10 +50,15 @@ export async function getReportOutletFilter(
     role = "DEV_ADMIN";
   }
 
+  const hasStockAdminPerm =
+    session.user.customPermissions?.["catalog.stock_admin"] === true ||
+    session.user.template?.permissions?.catalog?.stock_admin === true ||
+    session.user.template?.permissions?.["catalog.stock_admin"] === true;
+
   const isGlobalAdmin =
     role === "SUPER_ADMIN" ||
     role === "DEV_ADMIN" ||
-    session.user.customPermissions?.["catalog.stock_admin"] === true;
+    hasStockAdminPerm;
 
   const userOutletId = dbUser.outletId || null;
   const isTaggedToOutlet = !!userOutletId && !isGlobalAdmin;

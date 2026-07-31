@@ -42,10 +42,17 @@ export function ReportOutletSelect({
   const userOutletId = user?.outletId || null;
   const userOutletName = user?.outlet?.name || "My Outlet";
   const userRole = user?.role || "";
+
+  // Check custom permissions as well as template permissions for catalog.stock_admin
+  const hasStockAdminPerm =
+    user?.customPermissions?.["catalog.stock_admin"] === true ||
+    user?.template?.permissions?.catalog?.stock_admin === true ||
+    user?.template?.permissions?.["catalog.stock_admin"] === true;
+
   const isGlobalAdmin =
     userRole === "SUPER_ADMIN" ||
     userRole === "DEV_ADMIN" ||
-    user?.customPermissions?.["catalog.stock_admin"] === true;
+    hasStockAdminPerm;
 
   const isTaggedToOutlet = !!userOutletId && !isGlobalAdmin;
 
