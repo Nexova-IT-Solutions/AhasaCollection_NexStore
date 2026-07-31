@@ -116,11 +116,11 @@ export function ReportOutletSelect({
         <SelectTrigger className="h-9 text-xs border-slate-200 bg-white font-medium focus:ring-[#A7066A]">
           <div className="flex items-center gap-2 truncate">
             <Store className="w-3.5 h-3.5 text-[#A7066A] shrink-0" />
-            <SelectValue placeholder="All Outlets & Warehouses" />
+            <SelectValue placeholder="All Outlets" />
           </div>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Outlets & Warehouses</SelectItem>
+          <SelectItem value="all">All Outlets</SelectItem>
           {outlets.map((outlet) => (
             <SelectItem key={outlet.id} value={outlet.id}>
               {outlet.name}
