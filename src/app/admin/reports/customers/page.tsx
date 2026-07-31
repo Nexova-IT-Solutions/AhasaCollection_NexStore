@@ -49,6 +49,8 @@ const formatDate = (iso: string | null) => {
   });
 };
 
+import { ReportOutletSelect } from "@/components/admin/reports/ReportOutletSelect";
+
 export default function CustomerInsightsPage() {
   const { formatPrice } = useCurrency();
   const [customers, setCustomers] = useState<CustomerRecord[]>([]);
@@ -56,17 +58,18 @@ export default function CustomerInsightsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOutletId, setSelectedOutletId] = useState("");
 
   const handleExportExcel = async () => {
     try {
       await ExcelExportUtility.exportToExcel({
-        title: "Customer Lifetime Value (LTV) & Insights Report",
+        title: "Customer Insights & LTV Report",
         filename: "Customer_Insights_Report",
         columns: [
           { header: "Customer Name", key: "name", type: "string" },
           { header: "Email Address", key: "email", type: "string" },
           { header: "Phone Number", key: "phone", type: "string" },
-          { header: "Registration Date", key: "joinedDate", type: "date" },
+          { header: "Date Joined", key: "joinedDate", type: "date" },
           { header: "Lifetime Order Count", key: "orderCount", type: "number", alignment: "center" },
           { header: "Lifetime Spend (LKR)", key: "totalPurchaseValue", type: "currency", alignment: "right" },
           { header: "Last Purchase Date", key: "lastPurchaseDate", type: "date" },
@@ -83,7 +86,11 @@ export default function CustomerInsightsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/reports/customers");
+      const params = new URLSearchParams();
+      if (selectedOutletId) {
+        params.set("outletId", selectedOutletId);
+      }
+      const res = await fetch(`/api/admin/reports/customers?${params}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {
@@ -99,7 +106,7 @@ export default function CustomerInsightsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedOutletId]);
 
   useEffect(() => {
     fetchData();
@@ -142,6 +149,13 @@ export default function CustomerInsightsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ReportOutletSelect
+            value={selectedOutletId}
+            onChange={setSelectedOutletId}
+            hideLabel
+            className="w-[200px]"
+          />
+
           <Button
             onClick={fetchData}
             disabled={isLoading}

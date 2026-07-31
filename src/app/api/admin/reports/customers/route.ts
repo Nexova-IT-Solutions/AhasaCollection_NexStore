@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+import { getReportOutletFilter } from "@/lib/report-outlet-filter";
+
 const ALLOWED_ROLES = ["SUPER_ADMIN", "DEV_ADMIN", "ADMIN", "POS_ADMIN", "STOREFRONT_ADMIN"];
 
 /**
@@ -24,6 +26,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const outletFilter = await getReportOutletFilter(req);
+
+    const orderWhere: any = {
+      paymentStatus: "PAID",
+    };
+
+    if (outletFilter.effectiveOutletId) {
+      orderWhere.posShift = {
+        operator: {
+          outletId: outletFilter.effectiveOutletId,
+        },
+      };
+    }
+
     // Query users with USER role, including paid orders
     const users = await db.user.findMany({
       where: {
@@ -37,9 +53,7 @@ export async function GET(req: NextRequest) {
         phoneNumber: true,
         createdAt: true,
         orders: {
-          where: {
-            paymentStatus: "PAID",
-          },
+          where: orderWhere,
           select: {
             total: true,
             createdAt: true,

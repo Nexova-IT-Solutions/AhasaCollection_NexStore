@@ -140,7 +140,8 @@ export default function OutOfStockReportPage() {
           <ReportOutletSelect
             value={selectedOutletId}
             onChange={setSelectedOutletId}
-            className="w-[180px]"
+            hideLabel
+            className="w-[200px]"
           />
 
           <Button
