@@ -22,16 +22,15 @@ const geistMono = Geist_Mono({
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export const metadata: Metadata = {
-  title: "Ahasa Collection — Premium Fashion & Lifestyle Store",
-  description: "Explore premium fashion, clothing, accessories, and gifts at Ahasa Collection. Handpicked quality products with fast delivery.",
-  keywords: ["Ahasa Collection", "Ahasa POS", "fashion Sri Lanka", "clothing store", "lifestyle accessories", "online shopping"],
+  title: "Ahasa Collection",
+  description: "",
   authors: [{ name: "Ahasa Collection" }],
   icons: {
     icon: "/logo/logo.png",
   },
   openGraph: {
-    title: "Ahasa Collection — Premium Fashion & Lifestyle Store",
-    description: "Explore premium fashion, clothing, accessories, and gifts at Ahasa Collection.",
+    title: "Ahasa Collection",
+    description: "",
     type: "website",
     locale: "en_LK",
   },
