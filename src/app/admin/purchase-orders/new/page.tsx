@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -71,18 +72,47 @@ function ProductSearchCell({
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<ProductHit[]>([]);
   const [loading, setLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Position the portal dropdown under the input
+  const updatePosition = () => {
+    if (!inputWrapperRef.current) return;
+    const rect = inputWrapperRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: Math.max(rect.width, 260),
+      zIndex: 9999,
+    });
+  };
 
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (inputWrapperRef.current && !inputWrapperRef.current.contains(e.target as Node)) {
+        // Also allow clicking inside the portal dropdown
+        const portal = document.getElementById(`product-search-portal-${itemId}`);
+        if (portal && portal.contains(e.target as Node)) return;
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [itemId]);
+
+  // Reposition on scroll/resize
+  useEffect(() => {
+    if (!open) return;
+    const onScroll = () => updatePosition();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open]);
 
   // Debounced search
   useEffect(() => {
@@ -94,7 +124,7 @@ function ProductSearchCell({
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/admin/products?q=${encodeURIComponent(query)}&pageSize=15&page=1`
+          `/api/admin/products?q=${encodeURIComponent(query.trim())}&pageSize=15&page=1`
         );
         const data = await res.json();
         const raw = data.items ?? data.products ?? data ?? [];
@@ -115,25 +145,77 @@ function ProductSearchCell({
     return () => clearTimeout(t);
   }, [query]);
 
+  const handleOpen = () => {
+    updatePosition();
+    setOpen(true);
+  };
+
+  const dropdown = open && query.trim().length > 0 ? (
+    <div
+      id={`product-search-portal-${itemId}`}
+      style={dropdownStyle}
+      className="bg-white rounded-xl border border-brand-border shadow-2xl max-h-60 overflow-y-auto"
+    >
+      {loading && (
+        <div className="flex items-center gap-2 px-3 py-2.5 text-xs text-slate-500">
+          <Loader2 className="w-3 h-3 animate-spin" /> Searching…
+        </div>
+      )}
+      {!loading && results.length === 0 && (
+        <div className="px-3 py-2.5 text-xs text-slate-400">No products found for &quot;{query}&quot;</div>
+      )}
+      {!loading && results.map((hit) => (
+        <button
+          key={hit.id}
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault(); // keep focus from leaving input
+            onSelect(hit);
+            setQuery("");
+            setResults([]);
+            setOpen(false);
+          }}
+          className="w-full flex items-start gap-2.5 px-3 py-2.5 hover:bg-slate-50 text-left border-b border-slate-100 last:border-b-0 transition-colors"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-[#1F1720] truncate">{hit.name}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+              {hit.sku ?? "No SKU"} &bull; {hit.stock} in stock
+            </p>
+          </div>
+          {hit.costPrice != null && (
+            <span className="text-[10px] font-bold text-[#A7066A] shrink-0 mt-0.5">
+              LKR {hit.costPrice.toFixed(2)}
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  ) : null;
+
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={inputWrapperRef} className="relative">
       <div className="flex items-center gap-1">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
           <input
-            className="w-full h-9 pl-8 pr-3 text-xs rounded-md border border-brand-border bg-white focus:outline-none focus:ring-2 focus:ring-[#A7066A]/30"
+            className="w-full h-9 pl-8 pr-7 text-xs rounded-md border border-brand-border bg-white focus:outline-none focus:ring-2 focus:ring-[#A7066A]/30"
             placeholder="Search by name or SKU…"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setOpen(true);
+              if (e.target.value.trim()) {
+                handleOpen();
+              } else {
+                setOpen(false);
+              }
             }}
-            onFocus={() => setOpen(true)}
+            onFocus={handleOpen}
           />
           {query && (
             <button
               type="button"
-              onClick={() => { setQuery(""); setResults([]); }}
+              onClick={() => { setQuery(""); setResults([]); setOpen(false); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
               <X className="w-3 h-3" />
@@ -142,43 +224,10 @@ function ProductSearchCell({
         </div>
       </div>
 
-      {open && (query.trim().length > 0) && (
-        <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-lg border border-brand-border shadow-xl max-h-56 overflow-y-auto">
-          {loading && (
-            <div className="flex items-center gap-2 px-3 py-2.5 text-xs text-slate-500">
-              <Loader2 className="w-3 h-3 animate-spin" /> Searching…
-            </div>
-          )}
-          {!loading && results.length === 0 && (
-            <div className="px-3 py-2.5 text-xs text-slate-400">No products found.</div>
-          )}
-          {!loading && results.map((hit) => (
-            <button
-              key={hit.id}
-              type="button"
-              onClick={() => {
-                onSelect(hit);
-                setQuery("");
-                setResults([]);
-                setOpen(false);
-              }}
-              className="w-full flex items-start gap-2.5 px-3 py-2.5 hover:bg-slate-50 text-left border-b border-slate-100 last:border-b-0"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-[#1F1720] truncate">{hit.name}</p>
-                <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  {hit.sku ?? "No SKU"} &bull; {hit.stock} in stock
-                </p>
-              </div>
-              {hit.costPrice != null && (
-                <span className="text-[10px] font-bold text-[#A7066A] shrink-0 mt-0.5">
-                  LKR {hit.costPrice.toFixed(2)}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Render dropdown via portal so it escapes overflow:hidden parents */}
+      {typeof window !== "undefined" && dropdown
+        ? createPortal(dropdown, document.body)
+        : null}
     </div>
   );
 }
