@@ -149,8 +149,8 @@ export function PosCart() {
         <CustomerSearch />
       </div>
 
-      {/* Cart Items */}
-      <ScrollArea className="flex-1">
+      {/* Cart Items & Order Widgets (Scrollable) */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-slate-300">
             <ShoppingBag className="h-16 w-16 mb-3 stroke-1" />
@@ -359,7 +359,7 @@ export function PosCart() {
             )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Totals & Actions */}
       <div className="p-4 border-t border-slate-200 bg-slate-50/80 space-y-3 shrink-0">
