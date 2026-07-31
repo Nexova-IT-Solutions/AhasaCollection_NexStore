@@ -186,7 +186,7 @@ const operationsItems: NavItem[] = [
     title: "Shipping",
     url: "/admin/settings/shipping",
     icon: Truck,
-    requiredPermission: "system.manage_templates",
+    requiredPermission: "SYSTEM_DEV_ONLY",
   },
 ]
 
