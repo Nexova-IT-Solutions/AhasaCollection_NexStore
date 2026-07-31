@@ -131,6 +131,7 @@ export async function GET(req: Request) {
     if (q) {
       where.OR = [
         { name: { contains: q, mode: "insensitive" } },
+        { sku: { contains: q, mode: "insensitive" } },
         { id: { contains: q, mode: "insensitive" } },
         { category: { name: { contains: q, mode: "insensitive" } } },
         { occasions: { some: { name: { contains: q, mode: "insensitive" } } } },

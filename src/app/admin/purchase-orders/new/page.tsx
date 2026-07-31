@@ -94,10 +94,11 @@ function ProductSearchCell({
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/admin/products?search=${encodeURIComponent(query)}&pageSize=15&page=1`
+          `/api/admin/products?q=${encodeURIComponent(query)}&pageSize=15&page=1`
         );
         const data = await res.json();
-        const products: ProductHit[] = (data.products ?? data ?? []).map((p: any) => ({
+        const raw = data.items ?? data.products ?? data ?? [];
+        const products: ProductHit[] = (Array.isArray(raw) ? raw : []).map((p: any) => ({
           id: p.id,
           name: p.name,
           sku: p.sku ?? null,
