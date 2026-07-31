@@ -33,7 +33,16 @@ export async function getReportOutletFilter(
   // Fetch fresh DB user to be 100% accurate on outletId & role
   const dbUser = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, role: true, outletId: true, email: true },
+    select: {
+      id: true,
+      role: true,
+      outletId: true,
+      email: true,
+      customPermissions: true,
+      template: {
+        select: { permissions: true },
+      },
+    },
   });
 
   if (!dbUser) {
@@ -50,10 +59,13 @@ export async function getReportOutletFilter(
     role = "DEV_ADMIN";
   }
 
+  const customPerms = (dbUser.customPermissions as any) || {};
+  const templatePerms = (dbUser.template?.permissions as any) || {};
+
   const hasStockAdminPerm =
-    session.user.customPermissions?.["catalog.stock_admin"] === true ||
-    session.user.template?.permissions?.catalog?.stock_admin === true ||
-    session.user.template?.permissions?.["catalog.stock_admin"] === true;
+    customPerms["catalog.stock_admin"] === true ||
+    templatePerms?.catalog?.stock_admin === true ||
+    templatePerms?.["catalog.stock_admin"] === true;
 
   const isGlobalAdmin =
     role === "SUPER_ADMIN" ||

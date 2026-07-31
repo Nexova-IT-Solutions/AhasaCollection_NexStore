@@ -43,18 +43,18 @@ export function ReportOutletSelect({
   const userOutletName = user?.outlet?.name || "My Outlet";
   const userRole = user?.role || "";
 
-  // Check custom permissions as well as template permissions for catalog.stock_admin
+  // Only SUPER_ADMIN, DEV_ADMIN, or users explicitly granted catalog.stock_admin permission can view/filter all outlets
   const hasStockAdminPerm =
     user?.customPermissions?.["catalog.stock_admin"] === true ||
     user?.template?.permissions?.catalog?.stock_admin === true ||
     user?.template?.permissions?.["catalog.stock_admin"] === true;
 
-  const isGlobalAdmin =
+  const canFilterAllOutlets =
     userRole === "SUPER_ADMIN" ||
     userRole === "DEV_ADMIN" ||
     hasStockAdminPerm;
 
-  const isTaggedToOutlet = !!userOutletId && !isGlobalAdmin;
+  const isTaggedToOutlet = !!userOutletId && !canFilterAllOutlets;
 
   // Auto-lock selected value if user is tagged to an outlet
   useEffect(() => {
