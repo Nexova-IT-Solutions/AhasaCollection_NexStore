@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { hasPermission } from "@/lib/permissions";
+import ExcelJS from "exceljs";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
