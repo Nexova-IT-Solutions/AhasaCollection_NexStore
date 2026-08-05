@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
-    "build": "NODE_OPTIONS='--max-old-space-size=2048' prisma generate && npx rimraf \".next/cache/*\" && next build",
+    "build": "prisma generate && next build",
     "start": "NODE_ENV=production node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
