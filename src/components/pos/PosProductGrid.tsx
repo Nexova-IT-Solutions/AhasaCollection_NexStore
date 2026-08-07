@@ -313,8 +313,15 @@ export function PosProductGrid() {
           className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 select-none cursor-grab active:cursor-grabbing scroll-smooth whitespace-nowrap"
         >
           <button
+            type="button"
             onClick={() => setSelectedCategory("")}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedCategory("");
+              }
+            }}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:ring-offset-2 ${
               !selectedCategory
                 ? "bg-[#A7066A] text-white shadow-sm"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -324,9 +331,16 @@ export function PosProductGrid() {
           </button>
           {categories.map((cat) => (
             <button
+              type="button"
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedCategory(cat.id);
+                }
+              }}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:ring-offset-2 ${
                 selectedCategory === cat.id
                   ? "bg-[#A7066A] text-white shadow-sm"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
