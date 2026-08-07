@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { ShieldAlert, Database, Plus, Trash2, Edit2, Check, X } from "lucide-react";
+import { ShieldAlert, Database, Plus, Trash2, Edit2, Check, X, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 interface Outlet {
   id: string;
@@ -20,6 +29,10 @@ export default function OutletsPage() {
   const [editingName, setEditingName] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // State for in-app delete modal
+  const [deleteTarget, setDeleteTarget] = useState<Outlet | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch outlets
   const fetchOutlets = async () => {
@@ -121,31 +134,31 @@ export default function OutletsPage() {
     }
   };
 
-  // Delete outlet with options
-  const handleDelete = async (id: string, outletName: string) => {
-    const deleteWithContent = confirm(
-      `DELETE OPTIONS FOR '${outletName}':\n\n` +
-      `Click OK to DELETE ALL RELATED CONTENT (all products tagged to this outlet and all orders made from this outlet).\n\n` +
-      `Click CANCEL to only delete the outlet metadata and unassign products/staff.`
-    );
+  // Delete outlet handler with deleteWithContent flag
+  const executeDelete = async (deleteWithContent: boolean) => {
+    if (!deleteTarget) return;
 
-    if (!confirm(`Are you sure you want to proceed with deleting '${outletName}'? This action cannot be undone.`)) {
-      return;
-    }
-
+    setIsDeleting(true);
     try {
       const res = await fetch("/api/admin/outlets", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, deleteWithContent }),
+        body: JSON.stringify({ id: deleteTarget.id, deleteWithContent }),
       });
 
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) throw new Error("Failed to delete outlet");
 
-      toast.success(`Outlet '${outletName}' deleted successfully!`);
+      toast.success(
+        deleteWithContent
+          ? `Outlet '${deleteTarget.name}' and all associated products/orders deleted!`
+          : `Outlet '${deleteTarget.name}' deleted!`
+      );
+      setDeleteTarget(null);
       fetchOutlets();
     } catch (error) {
       toast.error("Failed to delete outlet");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -271,9 +284,9 @@ export default function OutletsPage() {
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(outlet.id, outlet.name)}
+                        onClick={() => setDeleteTarget(outlet)}
                         className="p-2 text-red-400 hover:text-red-600 border border-red-100 rounded-md hover:bg-red-50"
-                        title="Delete Outlet & Content"
+                        title="Delete Outlet"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -285,6 +298,71 @@ export default function OutletsPage() {
           </ul>
         )}
       </div>
+
+      {/* In-App Custom Delete Modal */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <AlertDialogTitle className="text-xl font-bold text-gray-900">
+                Delete Outlet Options
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm text-gray-600 mt-2">
+              Choose how you want to delete <span className="font-bold text-gray-900">&quot;{deleteTarget?.name}&quot;</span>. Select an action below:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="my-4 space-y-3">
+            {/* Option 1: Soft Delete metadata */}
+            <div className="rounded-xl border border-gray-200 p-3 bg-gray-50 hover:bg-gray-100/80 transition-colors">
+              <p className="text-xs font-bold text-gray-800">Option 1: Delete Outlet Metadata Only</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                Deletes the outlet entry. Products and staff will be unassigned without deleting their records.
+              </p>
+            </div>
+
+            {/* Option 2: Deep Delete outlet + all content */}
+            <div className="rounded-xl border border-red-200 p-3 bg-red-50/50 hover:bg-red-50 transition-colors">
+              <p className="text-xs font-bold text-red-800">Option 2: Delete Outlet & ALL Related Content</p>
+              <p className="text-[11px] text-red-600 mt-0.5">
+                Permanently deletes all products tagged to this outlet and all orders made from this outlet.
+              </p>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-6">
+            {/* Cancel Button */}
+            <AlertDialogCancel
+              disabled={isDeleting}
+              className="w-full sm:w-auto rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            {/* Button 1: Delete Metadata Only */}
+            <button
+              onClick={() => executeDelete(false)}
+              disabled={isDeleting}
+              className="w-full sm:w-auto rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : "Delete Outlet Only"}
+            </button>
+
+            {/* Button 2: Delete Outlet + All Content */}
+            <button
+              onClick={() => executeDelete(true)}
+              disabled={isDeleting}
+              className="w-full sm:w-auto rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {isDeleting ? "Purging..." : "Delete All Content"}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
