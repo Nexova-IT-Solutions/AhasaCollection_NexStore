@@ -54,51 +54,18 @@ export function VariantSelectorModal({
   const { formatPrice } = useCurrency();
   const [isValidating, setIsValidating] = useState(false);
 
-  // Auto-select first size and color when modal opens
-  useEffect(() => {
-    if (open && product) {
-      if (product.sizes && product.sizes.length > 0) {
-        setSelectedSize(product.sizes[0]);
+  // Reset selections when modal opens with a new product
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (isOpen) {
+        setSelectedSize("");
+        setSelectedColor("");
+        setIsValidating(false);
       }
-      if (product.colors && product.colors.length > 0 && (!product.sizes || product.sizes.length === 0)) {
-        setSelectedColor(product.colors[0]);
-      }
-    }
-  }, [open, product]);
-
-  // When size changes, auto-select first in-stock color for that size
-  useEffect(() => {
-    if (selectedSize && colors.length > 0) {
-      const firstAvailableColor = colors.find((c) => {
-        const cName = c.split('|')[0];
-        const stock = colorStockMap.get(cName) ?? 0;
-        return stock > 0;
-      });
-      if (firstAvailableColor) {
-        setSelectedColor(firstAvailableColor);
-      } else if (colors[0]) {
-        setSelectedColor(colors[0]);
-      }
-    }
-  }, [selectedSize, colors, colorStockMap]);
-
-  // ─── Keyboard Event Handler for Modal Navigation ──────────────
-  useEffect(() => {
-    if (!open) return;
-
-    const handleModalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        // If Enter is pressed and we have a valid in-stock variant matching, trigger confirm!
-        if (canConfirm && matchingVariant && !isValidating) {
-          e.preventDefault();
-          handleConfirm();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleModalKeyDown);
-    return () => window.removeEventListener("keydown", handleModalKeyDown);
-  }, [open, canConfirm, matchingVariant, isValidating]);
+      onOpenChange(isOpen);
+    },
+    [onOpenChange]
+  );
 
   // ─── Derived Data ─────────────────────────────────────────────
 
@@ -134,6 +101,113 @@ export function VariantSelectorModal({
       }) ?? null
     );
   }, [variants, selectedSize, selectedColor, sizes.length, colors.length]);
+
+  const isOutOfStock = matchingVariant ? matchingVariant.stock <= 0 : false;
+  const isLowStock =
+    matchingVariant
+      ? matchingVariant.stock > 0 && matchingVariant.stock < 3
+      : false;
+
+  const canConfirm = useMemo(() => {
+    if (!product) return false;
+    if (sizes.length > 0 && !selectedSize) return false;
+    if (colors.length > 0 && !selectedColor) return false;
+    if (isOutOfStock) return false;
+    if (!matchingVariant) return false;
+    return true;
+  }, [product, sizes.length, colors.length, selectedSize, selectedColor, isOutOfStock, matchingVariant]);
+
+  const handleConfirm = useCallback(async () => {
+    if (!canConfirm || !matchingVariant || !product) return;
+
+    const selection: VariantSelection = {
+      variantId: matchingVariant.variantId,
+      size: matchingVariant.size,
+      color: matchingVariant.color,
+      sku: matchingVariant.sku,
+      stock: matchingVariant.stock,
+      price: matchingVariant.price,
+    };
+
+    if (enableServerValidation) {
+      setIsValidating(true);
+      try {
+        const res = await fetch("/api/cart/validate-variant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: product.id,
+            variantId: matchingVariant.variantId,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          toast.error(data.message || "This variant is currently unavailable.", {
+            position: "top-center",
+          });
+          setIsValidating(false);
+          return;
+        }
+      } catch {
+        toast.error("Failed to validate variant. Please try again.", {
+          position: "top-center",
+        });
+        setIsValidating(false);
+        return;
+      }
+      setIsValidating(false);
+    }
+
+    await onConfirm(selection);
+    handleOpenChange(false);
+  }, [canConfirm, matchingVariant, product, enableServerValidation, onConfirm, handleOpenChange]);
+
+  // Auto-select first size and color when modal opens
+  useEffect(() => {
+    if (open && product) {
+      if (product.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
+      }
+      if (product.colors && product.colors.length > 0 && (!product.sizes || product.sizes.length === 0)) {
+        setSelectedColor(product.colors[0]);
+      }
+    }
+  }, [open, product]);
+
+  // When size changes, auto-select first in-stock color for that size
+  useEffect(() => {
+    if (selectedSize && colors.length > 0) {
+      const firstAvailableColor = colors.find((c) => {
+        const cName = c.split('|')[0];
+        const stock = colorStockMap.get(cName) ?? 0;
+        return stock > 0;
+      });
+      if (firstAvailableColor) {
+        setSelectedColor(firstAvailableColor);
+      } else if (colors[0]) {
+        setSelectedColor(colors[0]);
+      }
+    }
+  }, [selectedSize, colors, colorStockMap]);
+
+  // ─── Keyboard Event Handler for Modal Navigation ──────────────
+  useEffect(() => {
+    if (!open) return;
+
+    const handleModalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (canConfirm && matchingVariant && !isValidating) {
+          e.preventDefault();
+          handleConfirm();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleModalKeyDown);
+    return () => window.removeEventListener("keydown", handleModalKeyDown);
+  }, [open, canConfirm, matchingVariant, isValidating, handleConfirm]);
 
   // Debug-safe effect to log the matching process
   useEffect(() => {
