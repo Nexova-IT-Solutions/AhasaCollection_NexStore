@@ -252,6 +252,14 @@ export function PosProductGrid() {
   };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  const displayProducts = useMemo(() => products.filter((p) => !p.isEGiftCard), [products]);
+
+  // Reset selected highlight index to 0 when products list changes
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [products]);
 
   // Default mouse cursor focus to search box on terminal load
   useEffect(() => {
@@ -263,18 +271,30 @@ export function PosProductGrid() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle Enter key press in search box to add item to right side cart panel
+  // Handle Enter key and Arrow key navigation in search box
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (displayProducts.length === 0) return;
+
     if (e.key === "Enter") {
       e.preventDefault();
-      const validProducts = products.filter((p) => !p.isEGiftCard && p.stock > 0);
-      if (validProducts.length > 0) {
-        const firstMatch = validProducts[0];
-        handleAddToCart(firstMatch);
-        setSearchQuery("");
-      } else if (products.length > 0 && products[0].stock <= 0) {
-        toast.error(`${products[0].name} is out of stock`);
+      const targetProduct = displayProducts[selectedIndex] || displayProducts[0];
+      if (targetProduct) {
+        if (targetProduct.stock > 0) {
+          handleAddToCart(targetProduct);
+          setSearchQuery("");
+        } else {
+          toast.error(`${targetProduct.name} is out of stock`);
+        }
       }
+    } else if (e.key === "ArrowRight") {
+      setSelectedIndex((prev) => Math.min(prev + 1, displayProducts.length - 1));
+    } else if (e.key === "ArrowLeft") {
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "ArrowDown") {
+      // Move 4 items down (grid column width)
+      setSelectedIndex((prev) => Math.min(prev + 4, displayProducts.length - 1));
+    } else if (e.key === "ArrowUp") {
+      setSelectedIndex((prev) => Math.max(prev - 4, 0));
     }
   };
 
@@ -353,7 +373,7 @@ export function PosProductGrid() {
                 {totalCount} product{totalCount !== 1 ? "s" : ""} found
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {products.filter(p => !p.isEGiftCard).map((product) => {
+                {displayProducts.map((product, index) => {
                   const hasDiscount =
                     (product.salePrice && product.salePrice < product.price) ||
                     (product.discountValue && product.discountValue > 0);
@@ -362,15 +382,21 @@ export function PosProductGrid() {
                       ? product.salePrice
                       : product.price;
                   const isOutOfStock = product.stock <= 0;
+                  const isSelected = index === selectedIndex;
 
                   return (
                     <button
                       key={product.id}
-                      onClick={() => handleAddToCart(product)}
+                      onClick={() => {
+                        setSelectedIndex(index);
+                        handleAddToCart(product);
+                      }}
                       disabled={isOutOfStock}
                       className={`group relative flex flex-col bg-white rounded-xl border transition-all duration-200 overflow-hidden text-left ${
                         isOutOfStock
                           ? "opacity-50 cursor-not-allowed border-slate-200"
+                          : isSelected
+                          ? "border-[#A7066A] ring-2 ring-[#A7066A] ring-offset-1 shadow-lg shadow-pink-100/80 scale-[1.01] z-10 cursor-pointer"
                           : "border-slate-200 hover:border-[#A7066A] hover:shadow-lg hover:shadow-pink-100/50 active:scale-[0.97] cursor-pointer"
                       }`}
                     >
