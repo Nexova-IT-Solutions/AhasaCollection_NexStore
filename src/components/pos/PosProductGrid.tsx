@@ -366,7 +366,6 @@ export function PosProductGrid() {
                       ? product.salePrice
                       : product.price;
                   const isOutOfStock = product.stock <= 0;
-                  const isSelected = index === selectedIndex;
 
                   return (
                     <button
