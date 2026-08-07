@@ -54,18 +54,51 @@ export function VariantSelectorModal({
   const { formatPrice } = useCurrency();
   const [isValidating, setIsValidating] = useState(false);
 
-  // Reset selections when modal opens with a new product
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      if (isOpen) {
-        setSelectedSize("");
-        setSelectedColor("");
-        setIsValidating(false);
+  // Auto-select first size and color when modal opens
+  useEffect(() => {
+    if (open && product) {
+      if (product.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
       }
-      onOpenChange(isOpen);
-    },
-    [onOpenChange]
-  );
+      if (product.colors && product.colors.length > 0 && (!product.sizes || product.sizes.length === 0)) {
+        setSelectedColor(product.colors[0]);
+      }
+    }
+  }, [open, product]);
+
+  // When size changes, auto-select first in-stock color for that size
+  useEffect(() => {
+    if (selectedSize && colors.length > 0) {
+      const firstAvailableColor = colors.find((c) => {
+        const cName = c.split('|')[0];
+        const stock = colorStockMap.get(cName) ?? 0;
+        return stock > 0;
+      });
+      if (firstAvailableColor) {
+        setSelectedColor(firstAvailableColor);
+      } else if (colors[0]) {
+        setSelectedColor(colors[0]);
+      }
+    }
+  }, [selectedSize, colors, colorStockMap]);
+
+  // ─── Keyboard Event Handler for Modal Navigation ──────────────
+  useEffect(() => {
+    if (!open) return;
+
+    const handleModalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        // If Enter is pressed and we have a valid in-stock variant matching, trigger confirm!
+        if (canConfirm && matchingVariant && !isValidating) {
+          e.preventDefault();
+          handleConfirm();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleModalKeyDown);
+    return () => window.removeEventListener("keydown", handleModalKeyDown);
+  }, [open, canConfirm, matchingVariant, isValidating]);
 
   // ─── Derived Data ─────────────────────────────────────────────
 
@@ -237,7 +270,7 @@ export function VariantSelectorModal({
                       key={size}
                       onClick={() => handleSizeSelect(size)}
                       className={cn(
-                        "relative px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200",
+                        "relative px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:ring-offset-2",
                         "hover:shadow-md active:scale-95",
                         isActive
                           ? "border-[#A7066A] bg-[#A7066A] text-white shadow-lg shadow-pink-200/50"
