@@ -166,7 +166,12 @@ export const authOptions: NextAuthOptions = {
         if (!db) return null; // Safety guard
 
         const user = await db.user.findUnique({
-          where: { email: credentials.email }
+          where: { email: credentials.email },
+          include: {
+            outlet: {
+              select: { isActive: true }
+            }
+          }
         });
 
         if (!user || !user.password) return null;
@@ -178,9 +183,13 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) return null;
 
-        // Check if account is active
+        // Check if account or tagged outlet is suspended/disabled
         if (user.isActive === false) {
           throw new Error("ACCOUNT_SUSPENDED");
+        }
+
+        if (user.outlet && user.outlet.isActive === false) {
+          throw new Error("OUTLET_DISABLED");
         }
 
         // Return user object containing ID, email, name, role, and templateId to callbacks
@@ -209,11 +218,14 @@ export const authOptions: NextAuthOptions = {
           console.log(`[Auth-Debug] Checking status for email: ${user.email}`);
           const dbUser = await db.user.findUnique({
             where: { email: user.email },
-            select: { isActive: true }
+            select: {
+              isActive: true,
+              outlet: { select: { isActive: true } }
+            }
           });
 
-          if (dbUser && dbUser.isActive === false) {
-            console.warn(`[Auth-Warn] Blocked sign-in for suspended account: ${user.email}`);
+          if (dbUser && (dbUser.isActive === false || (dbUser.outlet && dbUser.outlet.isActive === false))) {
+            console.warn(`[Auth-Warn] Blocked sign-in for suspended account/outlet: ${user.email}`);
             return false;
           }
         } catch (error) {

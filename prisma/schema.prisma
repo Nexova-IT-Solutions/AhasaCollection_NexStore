@@ -995,6 +995,7 @@ model Repository {
 model Outlet {
   id        String    @id @default(cuid())
   name      String
+  isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]

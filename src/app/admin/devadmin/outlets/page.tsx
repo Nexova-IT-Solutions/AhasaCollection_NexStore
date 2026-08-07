@@ -8,6 +8,7 @@ import { ShieldAlert, Database, Plus, Trash2, Edit2, Check, X } from "lucide-rea
 interface Outlet {
   id: string;
   name: string;
+  isActive: boolean;
   createdAt: string;
 }
 
@@ -97,9 +98,38 @@ export default function OutletsPage() {
     }
   };
 
-  // Delete outlet
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this outlet? Any assigned products or staff members will have their outlet set to none.")) {
+  // Toggle active/disabled status
+  const handleToggleStatus = async (outlet: Outlet) => {
+    const nextStatus = !outlet.isActive;
+    try {
+      const res = await fetch("/api/admin/outlets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: outlet.id, isActive: nextStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
+      toast.success(
+        nextStatus
+          ? `Outlet '${outlet.name}' enabled!`
+          : `Outlet '${outlet.name}' disabled! Users tagged to this outlet are now blocked from logging in.`
+      );
+      fetchOutlets();
+    } catch (error) {
+      toast.error("Failed to toggle outlet status");
+    }
+  };
+
+  // Delete outlet with options
+  const handleDelete = async (id: string, outletName: string) => {
+    const deleteWithContent = confirm(
+      `DELETE OPTIONS FOR '${outletName}':\n\n` +
+      `Click OK to DELETE ALL RELATED CONTENT (all products tagged to this outlet and all orders made from this outlet).\n\n` +
+      `Click CANCEL to only delete the outlet metadata and unassign products/staff.`
+    );
+
+    if (!confirm(`Are you sure you want to proceed with deleting '${outletName}'? This action cannot be undone.`)) {
       return;
     }
 
@@ -107,12 +137,12 @@ export default function OutletsPage() {
       const res = await fetch("/api/admin/outlets", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, deleteWithContent }),
       });
 
       if (!res.ok) throw new Error("Failed to delete");
 
-      toast.success("Outlet deleted successfully!");
+      toast.success(`Outlet '${outletName}' deleted successfully!`);
       fetchOutlets();
     } catch (error) {
       toast.error("Failed to delete outlet");
@@ -127,7 +157,7 @@ export default function OutletsPage() {
           Outlets Management
         </h1>
         <p className="mt-2 text-gray-600">
-          Manage system outlets used for retail locations and staff assignment.
+          Manage system outlets used for retail locations, staff assignments, and access control.
         </p>
       </div>
 
@@ -193,25 +223,57 @@ export default function OutletsPage() {
                   </div>
                 ) : (
                   <>
-                    <div>
-                      <span className="text-gray-900 font-medium">{outlet.name}</span>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Created: {new Date(outlet.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-900 font-medium">{outlet.name}</span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              outlet.isActive !== false
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {outlet.isActive !== false ? "Active" : "Disabled (Login Blocked)"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Created: {new Date(outlet.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex space-x-2">
+
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleToggleStatus(outlet)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors border ${
+                          outlet.isActive !== false
+                            ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                        }`}
+                        title={
+                          outlet.isActive !== false
+                            ? "Disable outlet and block tagged users from logging in"
+                            : "Enable outlet"
+                        }
+                      >
+                        {outlet.isActive !== false ? "Disable Outlet" : "Enable Outlet"}
+                      </button>
+
                       <button
                         onClick={() => {
                           setEditingId(outlet.id);
                           setEditingName(outlet.name);
                         }}
                         className="p-2 text-gray-400 hover:text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50"
+                        title="Edit Outlet Name"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(outlet.id)}
+                        onClick={() => handleDelete(outlet.id, outlet.name)}
                         className="p-2 text-red-400 hover:text-red-600 border border-red-100 rounded-md hover:bg-red-50"
+                        title="Delete Outlet & Content"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
