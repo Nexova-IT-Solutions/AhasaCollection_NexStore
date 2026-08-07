@@ -252,14 +252,7 @@ export function PosProductGrid() {
   };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-
   const displayProducts = useMemo(() => products.filter((p) => !p.isEGiftCard), [products]);
-
-  // Reset selected highlight index to 0 when products list changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [products]);
 
   // Default mouse cursor focus to search box on terminal load
   useEffect(() => {
