@@ -222,21 +222,6 @@ export function VariantSelectorModal({
     }
   }, [selectedSize, selectedColor, matchingVariant]);
 
-  const isOutOfStock = matchingVariant ? matchingVariant.stock <= 0 : false;
-  const isLowStock =
-    matchingVariant
-      ? matchingVariant.stock > 0 && matchingVariant.stock < 3
-      : false;
-
-  const canConfirm = useMemo(() => {
-    if (!product) return false;
-    if (sizes.length > 0 && !selectedSize) return false;
-    if (colors.length > 0 && !selectedColor) return false;
-    if (isOutOfStock) return false;
-    if (!matchingVariant) return false;
-    return true;
-  }, [product, sizes.length, colors.length, selectedSize, selectedColor, isOutOfStock, matchingVariant]);
-
   // ─── Handlers ─────────────────────────────────────────────────
 
   const handleSizeSelect = (size: string) => {
@@ -250,53 +235,6 @@ export function VariantSelectorModal({
     const stock = colorStockMap.get(colorName) ?? 0;
     if (sizes.length > 0 && selectedSize && stock <= 0) return; // Don't allow selecting out-of-stock colors if size is picked
     setSelectedColor(color);
-  };
-
-  const handleConfirm = async () => {
-    if (!canConfirm || !matchingVariant || !product) return;
-
-    const selection: VariantSelection = {
-      variantId: matchingVariant.variantId,
-      size: matchingVariant.size,
-      color: matchingVariant.color,
-      sku: matchingVariant.sku,
-      stock: matchingVariant.stock,
-      price: matchingVariant.price,
-    };
-
-    if (enableServerValidation) {
-      setIsValidating(true);
-      try {
-        const res = await fetch("/api/cart/validate-variant", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productId: product.id,
-            variantId: matchingVariant.variantId,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          toast.error(data.message || "This variant is currently unavailable.", {
-            position: "top-center",
-          });
-          setIsValidating(false);
-          return;
-        }
-      } catch {
-        toast.error("Failed to validate variant. Please try again.", {
-          position: "top-center",
-        });
-        setIsValidating(false);
-        return;
-      }
-      setIsValidating(false);
-    }
-
-    await onConfirm(selection);
-    handleOpenChange(false);
   };
 
   if (!product) return null;
