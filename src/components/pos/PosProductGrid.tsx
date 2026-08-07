@@ -271,13 +271,13 @@ export function PosProductGrid() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle Enter key and Arrow key navigation in search box
+  // Handle Enter key press in search box to add top matching item to cart
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (displayProducts.length === 0) return;
 
     if (e.key === "Enter") {
       e.preventDefault();
-      const targetProduct = displayProducts[selectedIndex] || displayProducts[0];
+      const targetProduct = displayProducts.find((p) => p.stock > 0) || displayProducts[0];
       if (targetProduct) {
         if (targetProduct.stock > 0) {
           handleAddToCart(targetProduct);
@@ -286,15 +286,6 @@ export function PosProductGrid() {
           toast.error(`${targetProduct.name} is out of stock`);
         }
       }
-    } else if (e.key === "ArrowRight") {
-      setSelectedIndex((prev) => Math.min(prev + 1, displayProducts.length - 1));
-    } else if (e.key === "ArrowLeft") {
-      setSelectedIndex((prev) => Math.max(prev - 1, 0));
-    } else if (e.key === "ArrowDown") {
-      // Move 4 items down (grid column width)
-      setSelectedIndex((prev) => Math.min(prev + 4, displayProducts.length - 1));
-    } else if (e.key === "ArrowUp") {
-      setSelectedIndex((prev) => Math.max(prev - 4, 0));
     }
   };
 
@@ -387,17 +378,12 @@ export function PosProductGrid() {
                   return (
                     <button
                       key={product.id}
-                      onClick={() => {
-                        setSelectedIndex(index);
-                        handleAddToCart(product);
-                      }}
+                      onClick={() => handleAddToCart(product)}
                       disabled={isOutOfStock}
                       className={`group relative flex flex-col bg-white rounded-xl border transition-all duration-200 overflow-hidden text-left ${
                         isOutOfStock
                           ? "opacity-50 cursor-not-allowed border-slate-200"
-                          : isSelected
-                          ? "border-[#A7066A] ring-2 ring-[#A7066A] ring-offset-1 shadow-lg shadow-pink-100/80 scale-[1.01] z-10 cursor-pointer"
-                          : "border-slate-200 hover:border-[#A7066A] hover:shadow-lg hover:shadow-pink-100/50 active:scale-[0.97] cursor-pointer"
+                          : "border-slate-200 hover:border-[#A7066A] hover:shadow-lg hover:shadow-pink-100/50 active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#A7066A] focus:ring-offset-1 focus:border-[#A7066A] cursor-pointer"
                       }`}
                     >
                       {/* Image */}
