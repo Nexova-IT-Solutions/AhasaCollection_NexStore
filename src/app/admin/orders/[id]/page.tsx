@@ -97,6 +97,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
           unitPrice: true,
           salePrice: true,
           subtotal: true,
+          returnedQuantity: true,
           discountName: true,
           discountValue: true,
         },
@@ -283,7 +284,7 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 p-0 pt-0">
                 <StatBox label="Subtotal" value={formatCurr(order.subtotal)} />
-                <StatBox label="Discount Savings" value={formatCurr(getDiscountSavings(order.items))} />
+                <StatBox label="Discount Savings" value={formatCurr(getDiscountSavings(order))} />
                 <StatBox label="Delivery Fee" value={order.deliveryFee === 0 ? "FREE" : formatCurr(order.deliveryFee)} />
                 <StatBox label="Final Total" value={formatCurr(order.total)} emphasized />
                 {order.refundedAmount > 0 && (
@@ -579,11 +580,17 @@ function InsightRow({
   return content;
 }
 
-function getDiscountSavings(items: Array<{ unitPrice: number; salePrice?: number | null; quantity: number }>) {
-  return items.reduce((total, item) => {
+function getDiscountSavings(order: { subtotal: number; total: number; deliveryFee?: number; items: Array<{ unitPrice: number; salePrice?: number | null; quantity: number }> }) {
+  const itemSavings = order.items.reduce((total, item) => {
     const unitPrice = item.unitPrice || 0;
     const salePrice = item.salePrice ?? unitPrice;
     const savings = Math.max(unitPrice - salePrice, 0) * item.quantity;
     return total + savings;
   }, 0);
+
+  if (itemSavings > 0) return itemSavings;
+
+  // Fallback to order-level bill discount (subtotal + deliveryFee - total)
+  const overallDiff = Math.max(0, (order.subtotal || 0) + (order.deliveryFee || 0) - (order.total || 0));
+  return overallDiff;
 }
