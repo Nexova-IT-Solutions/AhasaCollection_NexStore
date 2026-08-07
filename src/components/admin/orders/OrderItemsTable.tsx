@@ -7,10 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ReturnItemModal } from "./ReturnItemModal";
-import { formatPriceClient } from "@/lib/currency-client"; // using client formatter if exists, or simple formatter
-
-// Simple currency formatter since we are on client side
-const formatCurr = (val: number) => `OMR ${val.toFixed(3)}`;
+import { useCurrency } from "@/components/CurrencyProvider";
 
 interface OrderItem {
   id: string;
@@ -32,6 +29,7 @@ interface OrderItemsTableProps {
 }
 
 export function OrderItemsTable({ items, orderId }: OrderItemsTableProps) {
+  const { formatPrice } = useCurrency();
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
   const [optimisticReturned, setOptimisticReturned] = useState<Record<string, number>>({});
 
@@ -100,7 +98,7 @@ export function OrderItemsTable({ items, orderId }: OrderItemsTableProps) {
                   {item.quantity}
                 </TableCell>
                 <TableCell className="font-mono text-xs text-[#6B5A64]">{item.sku || "-"}</TableCell>
-                <TableCell className="text-[#6B5A64]">{formatCurr(item.salePrice || item.unitPrice)}</TableCell>
+                <TableCell className="text-[#6B5A64]">{formatPrice(item.salePrice || item.unitPrice)}</TableCell>
                 <TableCell className="text-[#6B5A64]">
                   {item.discountName ? (
                     <div className="space-y-0.5">
@@ -111,7 +109,7 @@ export function OrderItemsTable({ items, orderId }: OrderItemsTableProps) {
                     "-"
                   )}
                 </TableCell>
-                <TableCell className="text-right font-semibold text-[#1F1720]">{formatCurr(item.subtotal)}</TableCell>
+                <TableCell className="text-right font-semibold text-[#1F1720]">{formatPrice(item.subtotal)}</TableCell>
                 <TableCell className="text-right pr-6">
                   {canReturn ? (
                     <Button 

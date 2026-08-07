@@ -51,53 +51,56 @@ export async function POST(
     const proportion = quantity / orderItem.quantity;
     const refundAmount = proportion * orderItem.subtotal;
 
-    // Use a Prisma transaction to ensure all operations succeed or fail together
-    const result = await db.$transaction(async (tx) => {
-      // 1. Create the return record
-      const returnRecord = await tx.orderItemReturn.create({
-        data: {
-          orderItemId,
-          orderId,
-          quantity,
-          refundAmount,
-          reason,
-          restocked: restock,
-        },
-      });
-
-      // 2. Update OrderItem returnedQuantity
-      await tx.orderItem.update({
-        where: { id: orderItemId },
-        data: { returnedQuantity: { increment: quantity } },
-      });
-
-      // 3. Update Order refundedAmount
-      await tx.order.update({
-        where: { id: orderId },
-        data: { refundedAmount: { increment: refundAmount } },
-      });
-
-      // 4. Update Product stock if restock is true and it's linked to a product
-      if (restock && orderItem.productId && orderItem.productId !== "digital-gift-card") {
-        await tx.product.updateMany({
-          where: { id: orderItem.productId },
-          data: { stock: { increment: quantity } },
+    // Use a Prisma transaction to ensure all operations succeed or fail together (set 15s timeout)
+    const result = await db.$transaction(
+      async (tx) => {
+        // 1. Create the return record
+        const returnRecord = await tx.orderItemReturn.create({
+          data: {
+            orderItemId,
+            orderId,
+            quantity,
+            refundAmount,
+            reason,
+            restocked: restock,
+          },
         });
-      }
 
-      // 5. Add an Order Status History note for the audit log
-      await tx.orderStatusHistory.create({
-        data: {
-          orderId: orderId,
-          status: order.orderStatus,
-          note: `Returned ${quantity}x ${orderItem.productName}. Reason: ${reason || "None"}. ${restock ? "Inventory restocked." : "Inventory not restocked."}`,
-          changedByUserId: session?.user?.id,
-          changedByName: session?.user?.name,
+        // 2. Update OrderItem returnedQuantity
+        await tx.orderItem.update({
+          where: { id: orderItemId },
+          data: { returnedQuantity: { increment: quantity } },
+        });
+
+        // 3. Update Order refundedAmount
+        await tx.order.update({
+          where: { id: orderId },
+          data: { refundedAmount: { increment: refundAmount } },
+        });
+
+        // 4. Update Product stock if restock is true and it's linked to a product
+        if (restock && orderItem.productId && orderItem.productId !== "digital-gift-card") {
+          await tx.product.updateMany({
+            where: { id: orderItem.productId },
+            data: { stock: { increment: quantity } },
+          });
         }
-      });
 
-      return returnRecord;
-    });
+        // 5. Add an Order Status History note for the audit log
+        await tx.orderStatusHistory.create({
+          data: {
+            orderId: orderId,
+            status: order.orderStatus,
+            note: `Returned ${quantity}x ${orderItem.productName}. Reason: ${reason || "None"}. ${restock ? "Inventory restocked." : "Inventory not restocked."}`,
+            changedByUserId: session?.user?.id,
+            changedByName: session?.user?.name,
+          },
+        });
+
+        return returnRecord;
+      },
+      { timeout: 15000 }
+    );
 
     return NextResponse.json({ success: true, returnRecord: result });
   } catch (error) {
