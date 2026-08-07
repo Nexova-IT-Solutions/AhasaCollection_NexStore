@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import { Search, Package, Tag, Loader2, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
