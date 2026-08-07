@@ -251,6 +251,33 @@ export function PosProductGrid() {
     setVariantProduct(null);
   };
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Default mouse cursor focus to search box on terminal load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle Enter key press in search box to add item to right side cart panel
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const validProducts = products.filter((p) => !p.isEGiftCard && p.stock > 0);
+      if (validProducts.length > 0) {
+        const firstMatch = validProducts[0];
+        handleAddToCart(firstMatch);
+        setSearchQuery("");
+      } else if (products.length > 0 && products[0].stock <= 0) {
+        toast.error(`${products[0].name} is out of stock`);
+      }
+    }
+  };
+
   const { formatPrice } = useCurrency();
 
   return (
@@ -260,9 +287,12 @@ export function PosProductGrid() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
+            ref={searchInputRef}
+            autoFocus
             placeholder="Search by name, SKU, ISBN, Author, Publisher, Rack..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             className="pl-10 h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-[#A7066A] transition-colors text-sm"
             id="pos-product-search"
           />

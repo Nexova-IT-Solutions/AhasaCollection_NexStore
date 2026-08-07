@@ -409,10 +409,10 @@ export function PosCart() {
 
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" onClick={clearCart} disabled={items.length === 0} className="h-11 text-xs border-slate-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
-            <Trash2 className="h-3.5 w-3.5 mr-1.5" />Clear
+            <Trash2 className="h-3.5 w-3.5 mr-1.5" />Clear <kbd className="ml-1 text-[9px] bg-slate-100 px-1 py-0.5 rounded text-slate-500 font-mono">F8</kbd>
           </Button>
           <Button onClick={openCheckout} disabled={items.length === 0 || !activeShift} className="h-11 text-xs bg-[#A7066A] hover:bg-[#8A0558] text-white shadow-lg shadow-pink-200/50 transition-all">
-            <Receipt className="h-3.5 w-3.5 mr-1.5" />Charge
+            <Receipt className="h-3.5 w-3.5 mr-1.5" />Charge <kbd className="ml-1 text-[9px] bg-[#8A0558] px-1 py-0.5 rounded text-pink-100 font-mono">F10</kbd>
           </Button>
         </div>
 

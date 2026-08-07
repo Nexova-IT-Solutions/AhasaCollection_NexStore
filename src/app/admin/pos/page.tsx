@@ -148,8 +148,13 @@ export default function PosTerminalPage() {
         const searchInput = document.getElementById("pos-product-search");
         if (searchInput) searchInput.focus();
       }
-      // F9: Open checkout
-      if (e.key === "F9") {
+      // F8: Clear Cart
+      if (e.key === "F8") {
+        e.preventDefault();
+        usePosCart.getState().clearCart();
+      }
+      // F10 / F9: Open Charge / Checkout
+      if (e.key === "F10" || e.key === "F9") {
         e.preventDefault();
         const { items, activeShift, openCheckout } = usePosCart.getState();
         if (items.length > 0 && activeShift) {
@@ -243,8 +248,12 @@ export default function PosTerminalPage() {
             Search
           </span>
           <span>
-            <kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">F9</kbd>{" "}
-            Checkout
+            <kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">F8</kbd>{" "}
+            Clear
+          </span>
+          <span>
+            <kbd className="px-1 py-0.5 rounded bg-[#A7066A] text-white font-mono text-[9px]">F10</kbd>{" "}
+            Charge
           </span>
           <span>
             <kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">F12</kbd>{" "}
