@@ -138,12 +138,16 @@ export function ProductsClient({
   const [transferQty, setTransferQty] = useState(1);
   const [transferReason, setTransferReason] = useState("");
   const [outlets, setOutlets] = useState<{ id: string; name: string }[]>([]);
+  const [repositories, setRepositories] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    fetch("/api/admin/outlets")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setOutlets(data);
+    Promise.all([
+      fetch("/api/admin/outlets").then((res) => res.json()),
+      fetch("/api/admin/repositories").then((res) => res.json()),
+    ])
+      .then(([outletsData, reposData]) => {
+        if (Array.isArray(outletsData)) setOutlets(outletsData);
+        if (Array.isArray(reposData)) setRepositories(reposData);
       })
       .catch((err) => console.error(err));
   }, []);
@@ -806,7 +810,7 @@ export function ProductsClient({
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-bold text-[#1F1720]">Transfer Stock</AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-[#6B5A64]">
-              Move stock for <span className="font-bold text-[#2563EB]">{transferProduct?.name}</span> to another outlet.
+              Move stock for <span className="font-bold text-[#2563EB]">{transferProduct?.name}</span> to an outlet or repository.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-4 py-4">
@@ -823,20 +827,35 @@ export function ProductsClient({
               </p>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-750">Target Outlet</label>
+              <label className="text-xs font-bold text-gray-750">Target Destination (Outlet or Repository)</label>
               <select
                 value={transferOutletId}
                 onChange={(e) => setTransferOutletId(e.target.value)}
                 className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               >
-                <option value="">Select an outlet...</option>
-                {outlets
-                  .filter((o) => o.id !== transferProduct?.outlet?.id) // exclude current outlet correctly
-                  .map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name}
-                    </option>
-                  ))}
+                <option value="">Select an outlet or warehouse...</option>
+                {outlets.length > 0 && (
+                  <optgroup label="Store Outlets">
+                    {outlets
+                      .filter((o) => o.id !== transferProduct?.outlet?.id)
+                      .map((o) => (
+                        <option key={o.id} value={o.id}>
+                          🏪 Outlet: {o.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                )}
+                {repositories.length > 0 && (
+                  <optgroup label="Warehouses / Repositories">
+                    {repositories
+                      .filter((r) => r.id !== transferProduct?.repository?.id)
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>
+                          🏬 Warehouse: {r.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                )}
               </select>
             </div>
             <div className="space-y-2">

@@ -47,9 +47,12 @@ export async function POST(req: Request) {
       );
     }
 
-    if (sourceProduct.outletId === targetOutletId) {
+    if (
+      (sourceProduct.outletId && sourceProduct.outletId === targetOutletId) ||
+      (sourceProduct.repositoryId && sourceProduct.repositoryId === targetOutletId)
+    ) {
       return NextResponse.json(
-        { message: "Source and target outlets cannot be the same" },
+        { message: "Source and target locations cannot be the same" },
         { status: 400 }
       );
     }
