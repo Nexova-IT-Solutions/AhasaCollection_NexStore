@@ -171,7 +171,7 @@ function canvasToEscposHex(canvas: HTMLCanvasElement): string {
   const data = imgData.data;
 
   // ESC * (Select bit-image mode)
-  // m = 1 (8-dot double density)
+  // m = 33 (24-dot double density)
   // n1 = width & 0xFF
   // n2 = (width >> 8) & 0xFF
   const n1 = width & 0xFF;
@@ -182,34 +182,37 @@ function canvasToEscposHex(canvas: HTMLCanvasElement): string {
 
   let hex = '';
 
-  // Set line spacing to 8 dots (ESC 3 8) -> 1B 33 08 to prevent vertical white gaps
-  hex += '1B3308';
+  // Set line spacing to 24 dots (ESC 3 24) -> 1B 33 18
+  hex += '1B3318';
 
-  // Process image in 8-dot vertical slices
-  for (let y = 0; y < height; y += 8) {
-    // Send ESC * command: 1B 2A 01 n1 n2
-    hex += '1B2A01' + n1Hex + n2Hex;
+  // Process image in 24-dot vertical slices
+  for (let y = 0; y < height; y += 24) {
+    // Send ESC * command: 1B 2A 21 n1 n2
+    hex += '1B2A21' + n1Hex + n2Hex;
 
     for (let x = 0; x < width; x++) {
-      let byteValue = 0;
-      for (let b = 0; b < 8; b++) {
-        const targetY = y + b;
-        if (targetY < height) {
-          const i = (targetY * width + x) * 4;
-          const r = data[i];
-          const g = data[i + 1];
-          const bVal = data[i + 2];
-          const a = data[i + 3];
-          const luminance = 0.299 * r + 0.587 * g + 0.114 * bVal;
-          const isBlack = (a > 50 && luminance < 200);
-          if (isBlack) {
-            byteValue |= (1 << (7 - b));
+      // 24 dots = 3 bytes per column x
+      for (let k = 0; k < 3; k++) {
+        let byteValue = 0;
+        for (let b = 0; b < 8; b++) {
+          const targetY = y + k * 8 + b;
+          if (targetY < height) {
+            const i = (targetY * width + x) * 4;
+            const r = data[i];
+            const g = data[i + 1];
+            const bVal = data[i + 2];
+            const a = data[i + 3];
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * bVal;
+            const isBlack = (a > 50 && luminance < 200);
+            if (isBlack) {
+              byteValue |= (1 << (7 - b));
+            }
           }
         }
+        hex += byteValue.toString(16).padStart(2, '0');
       }
-      hex += byteValue.toString(16).padStart(2, '0');
     }
-    // Line feed after each 8-dot row
+    // Line feed after each 24-dot row
     hex += '0A';
   }
 
@@ -266,10 +269,10 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         const total = `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
         
         itemsHtml += `
-          <div style="margin-bottom: 4px;">
+          <div style="margin-bottom: 6px;">
             <div>${itemName}</div>
-            ${item.sku ? `<div style="font-size: 7.5px; color: #555;">SKU: ${item.sku}</div>` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 8.5px;">
+            ${item.sku ? `<div style="font-size: 12px; color: #333;">SKU: ${item.sku}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 15px;">
               <div style="flex: 1;">${qtyPrice}</div>
               <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
             </div>
@@ -282,71 +285,71 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         position: "fixed",
         left: "-9999px",
         top: "0",
-        width: "380px", // Full 80mm printable area width (380px)
+        width: "512px", // Exact 512px (80mm thermal printable width = 512 dots)
         backgroundColor: "white",
         color: "#000000",
         fontFamily: "'Courier New', Courier, monospace",
-        fontSize: "11.5px",
+        fontSize: "15px",
         fontWeight: "600",
         lineHeight: "1.35",
         padding: "0"
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 4px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 45px; max-width: 65px; object-fit: contain; margin-top: 0;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 90px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
-        <div style="text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 4px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
-        <div style="text-align: center; font-size: 11px; margin-bottom: 6px;">
+        <div style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 6px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
+        <div style="text-align: center; font-size: 14px; margin-bottom: 8px;">
           ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
           ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
           ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
           ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
           ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
-        <div style="font-size: 11.5px; margin-bottom: 6px;">
+        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+        <div style="font-size: 15px; margin-bottom: 8px;">
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
           <div>Sale Type: ${saleType}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
           ${data.paymentMethod === "POS_CREDIT" ? `
-            <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #000;">
+            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted #000;">
               <div>Customer: ${data.customerName || "Walk-in Customer"}</div>
               <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
               <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
             </div>
           ` : ""}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
-        <div style="margin-bottom: 6px;">
+        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+        <div style="margin-bottom: 8px;">
           ${itemsHtml}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
+        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 15px;">
           <span>Subtotal:</span>
           <span style="font-weight: bold;">${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
         </div>
         ${data.billDiscountAmount && data.billDiscountAmount > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
+          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 15px;">
             <span>Discount:</span>
             <span style="font-weight: bold;">-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 13px; font-weight: bold;">
+        <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18px; font-weight: bold;">
           <span>Total:</span>
           <span>${curSymbol} ${data.total.toFixed(decimals)}</span>
         </div>
         ${data.changeDue > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
+          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 15px;">
             <span>Change Due:</span>
             <span style="font-weight: bold;">${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="text-align: center; margin-top: 12px; margin-bottom: 4px; font-size: 11.5px;">Thank you for your purchase!</div>
-        <div style="text-align: center; margin-top: 4px; font-size: 9px; color: #000; padding-bottom: 6px;">Powered by Nexova</div>
+        <div style="text-align: center; margin-top: 16px; margin-bottom: 6px; font-size: 15px;">Thank you for your purchase!</div>
+        <div style="text-align: center; margin-top: 6px; font-size: 12px; color: #000; padding-bottom: 10px;">Powered by Nexova</div>
       `;
 
       document.body.appendChild(container);
@@ -358,7 +361,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           }
           await new Promise(r => setTimeout(r, 50));
           const canvas = await html2canvas(container, {
-            scale: 2,
+            scale: 1,
             useCORS: true,
             logging: false
           });
