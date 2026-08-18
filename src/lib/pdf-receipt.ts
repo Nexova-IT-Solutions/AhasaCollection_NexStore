@@ -121,6 +121,36 @@ async function getResizedLogoBase64(imageUrl: string, targetWidth: number): Prom
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
         
+        // Auto-crop top/bottom white space
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        let minY = canvas.height, maxY = 0;
+        
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const i = (y * canvas.width + x) * 4;
+            const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+            const isNonWhite = a > 50 && (r < 240 || g < 240 || b < 240);
+            if (isNonWhite) {
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+        
+        if (minY < maxY) {
+          const cropH = maxY - minY + 1;
+          const croppedCanvas = document.createElement('canvas');
+          croppedCanvas.width = canvas.width;
+          croppedCanvas.height = cropH;
+          const croppedCtx = croppedCanvas.getContext('2d');
+          if (croppedCtx) {
+            croppedCtx.drawImage(canvas, 0, minY, canvas.width, cropH, 0, 0, canvas.width, cropH);
+            resolve(croppedCanvas.toDataURL('image/png'));
+            return;
+          }
+        }
+        
         resolve(canvas.toDataURL('image/png'));
       };
       img.onerror = () => resolve(origBase64);
@@ -534,7 +564,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                 if (logoCanvas) {
                   hexLines.push('1B6101'); // Center align before logo
                   hexLines.push(canvasToEscposHex(logoCanvas));
-                  hexLines.push('0A'); // Line feed after logo
                 }
               } catch (logoErr) {
                 console.warn('[QZ] Arabic logo conversion failed, skipping:', logoErr);
@@ -627,8 +656,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
                     img.src = logoBase64;
                   });
                   if (logoCanvas) {
-                    // Center align + raster image bytes + line feed
-                    const logoHex = '1B6101' + canvasToEscposHex(logoCanvas) + '0A';
+                    // Center align + raster image bytes (no extra line feed)
+                    const logoHex = '1B6101' + canvasToEscposHex(logoCanvas);
                     printData.push({ type: 'raw', format: 'command', flavor: 'hex', data: logoHex });
                     console.log('[QZ] English logo raster hex built, length:', logoHex.length);
                   }
