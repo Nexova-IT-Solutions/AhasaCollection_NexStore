@@ -257,8 +257,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       let itemsHtml = "";
       data.items.forEach(item => {
-        let itemName = item.name;
-        if (item.nameAr) itemName += ` - ${item.nameAr}`;
+        let cleanName = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+        let itemName = cleanName;
+        if (item.nameAr) {
+          const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+          itemName += ` - ${cleanAr}`;
+        }
         
         let qtyPrice = `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
           
@@ -296,7 +300,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 75px; max-width: 120px; object-fit: contain; margin-top: 0;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 100px; max-width: 156px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
@@ -453,8 +457,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       
       // Items — qty left aligned, price exact right aligned by padding to charWidth
       data.items.forEach((item, index) => {
-        let nameLine = item.name;
-        if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
+        let nameLine = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+        if (!isEnglish && item.nameAr) {
+          const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+          nameLine += ` - ${cleanAr}`;
+        }
 
         // Name line (left aligned)
         rawLines.push('\x1B\x61\x00'); // Left align
