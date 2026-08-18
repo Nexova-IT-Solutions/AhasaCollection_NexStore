@@ -255,27 +255,23 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       let itemsHtml = "";
       data.items.forEach(item => {
         let itemName = item.name;
-        if (!isEnglish && item.nameAr) itemName += ` - ${item.nameAr}`;
+        if (item.nameAr) itemName += ` - ${item.nameAr}`;
         
-        let qtyPrice = isEnglish 
-          ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
-          : `Qty/pramāṇaya: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
+        let qtyPrice = `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
           
         if (item.discountPercent && item.discountPercent > 0) {
-          qtyPrice += isEnglish 
-            ? ` (Disc ${item.discountPercent}%)`
-            : ` (Disc ${item.discountPercent}%)`;
+          qtyPrice += ` (Disc ${item.discountPercent}%)`;
         }
         
         const total = `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
         
         itemsHtml += `
-          <div style="margin-bottom: 6px;">
+          <div style="margin-bottom: 4px;">
             <div>${itemName}</div>
-            ${item.sku ? `<div>SKU: ${item.sku}</div>` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            ${item.sku ? `<div style="font-size: 7.5px; color: #555;">SKU: ${item.sku}</div>` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 8.5px;">
               <div style="flex: 1;">${qtyPrice}</div>
-              <div style="text-align: right; white-space: nowrap;">${total}</div>
+              <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
             </div>
           </div>
         `;
@@ -290,29 +286,30 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         backgroundColor: "white",
         color: "black",
         fontFamily: "'Courier New', Courier, monospace",
-        fontSize: "12px",
-        lineHeight: "1.25",
+        fontSize: "8.5px",
+        lineHeight: "1.2",
         padding: "0"
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 4px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 50px; max-width: 60px; object-fit: contain; margin-top: 0;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 2px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 36px; max-width: 45px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
-        <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 4px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
-        <div style="text-align: center; font-size: 11px; margin-bottom: 4px;">
+        <div style="text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 2px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
+        <div style="text-align: center; font-size: 8px; margin-bottom: 3px;">
           ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
           ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
           ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
           ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
           ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
-        <div style="font-size: 12px; margin-bottom: 4px;">
-          <div>Order / Order: ${data.orderNumber}</div>
-          <div>Date / Date: ${data.date}</div>
-          <div>Payment / Payment: ${data.paymentMethod.replace("POS_", "")}</div>
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="font-size: 8.5px; margin-bottom: 3px;">
+          <div>Order: ${data.orderNumber}</div>
+          <div>Date: ${data.date}</div>
+          <div>Sale Type: ${saleType}</div>
+          <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
           ${data.paymentMethod === "POS_CREDIT" ? `
             <div style="margin-top: 2px; padding-top: 2px; border-top: 1px dotted #ccc;">
@@ -322,33 +319,33 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             </div>
           ` : ""}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
-        <div style="margin-bottom: 4px;">
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="margin-bottom: 3px;">
           ${itemsHtml}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px;">
-          <span>Subtotal / Subtotal:</span>
+        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+          <span>Subtotal:</span>
           <span>${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
         </div>
         ${data.billDiscountAmount && data.billDiscountAmount > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px;">
-            <span>Discount / Discount:</span>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+            <span>Discount:</span>
             <span>-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-weight: bold;">
-          <span>Total / Total:</span>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 10px; font-weight: bold;">
+          <span>Total:</span>
           <span>${curSymbol} ${data.total.toFixed(decimals)}</span>
         </div>
         ${data.changeDue > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px;">
-            <span>Change Due / Change:</span>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+            <span>Change Due:</span>
             <span>${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="text-align: center; margin-top: 12px; margin-bottom: 4px;">Thank you / Thank you</div>
-        <div style="text-align: center; margin-top: 4px; font-size: 10px; color: #333; padding-bottom: 4px;">Powered by Nexova</div>
+        <div style="text-align: center; margin-top: 8px; margin-bottom: 2px; font-size: 8.5px;">Thank you for your purchase!</div>
+        <div style="text-align: center; margin-top: 2px; font-size: 7px; color: #333; padding-bottom: 4px;">Powered by Nexova</div>
       `;
 
       document.body.appendChild(container);
