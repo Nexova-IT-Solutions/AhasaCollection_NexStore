@@ -728,7 +728,7 @@ export default function CompanyDetailsPage() {
 
                     {/* Monospace formatting calculator */}
                     {(() => {
-                      const charW = form.watch("receiptCharWidth") || 42;
+                      const charW = Math.max(10, form.watch("receiptCharWidth") || 42);
                       const sep = "-".repeat(charW);
                       
                       // Calc Mock Item Padding
@@ -738,9 +738,9 @@ export default function CompanyDetailsPage() {
                       
                       let itemLine = "";
                       if (qtyText.length + priceText.length + 1 <= charW) {
-                        itemLine = qtyText + " ".repeat(charW - qtyText.length - priceText.length) + priceText;
+                        itemLine = qtyText + " ".repeat(Math.max(1, charW - qtyText.length - priceText.length)) + priceText;
                       } else {
-                        itemLine = qtyText + "\n" + " ".repeat(charW - priceText.length) + priceText;
+                        itemLine = qtyText + "\n" + " ".repeat(Math.max(0, charW - priceText.length)) + priceText;
                       }
 
                       // Calc Mock Totals Padding
