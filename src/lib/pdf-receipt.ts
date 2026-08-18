@@ -316,7 +316,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         <div style="font-size: 18.5px; margin-bottom: 8px;">
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
-          <div>Sale Type: ${saleType}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
           ${data.paymentMethod === "POS_CREDIT" ? `
@@ -444,7 +443,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `${SEP}\n`,
         `Order: ${data.orderNumber}\n`,
         `Date: ${data.date}\n`,
-        `Sale Type: ${saleType}\n`,
         `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
         data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
         data.paymentMethod === "POS_CREDIT"
@@ -693,10 +691,18 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       unit: "mm",
       format: "a4", // 210 x 297 mm
     });
-    doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
-    doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-    doc.addFileToVFS("NotoSansSinhala-Regular.ttf", notoBase64);
-    doc.addFont("NotoSansSinhala-Regular.ttf", "NotoSansSinhala", "normal");
+    try {
+      if (amiriBase64 && amiriBase64.length > 100) {
+        doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+      }
+      if (notoBase64 && notoBase64.length > 100 && notoBase64.startsWith("AAEAAA") || notoBase64.startsWith("AAAAA") || !notoBase64.includes("<html")) {
+        doc.addFileToVFS("NotoSansSinhala-Regular.ttf", notoBase64);
+        doc.addFont("NotoSansSinhala-Regular.ttf", "NotoSansSinhala", "normal");
+      }
+    } catch (fontErr) {
+      console.warn("Custom TTF font registration skipped, using standard fonts:", fontErr);
+    }
 
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
@@ -770,13 +776,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100, 100, 100);
     doc.text(data.date, pageWidth - 15, rightY, { align: "right" });
-    rightY += 8;
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(33, 33, 33);
-    doc.text("Sale Type:", pageWidth - 80, rightY);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100, 100, 100);
-    doc.text(saleType, pageWidth - 15, rightY, { align: "right" });
     
     rightY += 8;
     doc.setFont("helvetica", "bold");
@@ -850,8 +849,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "NotoSansSinhala", halign: "center" },
-      styles: { font: "NotoSansSinhala", fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "helvetica", halign: "center" },
+      styles: { font: "helvetica", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
         1: { cellWidth: 24, halign: "center" },
@@ -873,7 +872,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
     let totalY = currentY + 10;
-    doc.setFont("NotoSansSinhala", "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105); // Slate 600
     
@@ -888,7 +887,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     }
 
     totalY += 12;
-    doc.setFont("NotoSansSinhala", "normal");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106); // #A7066A Brand color
     doc.text("Total:", pageWidth - 110, totalY);
@@ -896,7 +895,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     if (data.changeDue > 0) {
       totalY += 10;
-      doc.setFont("Amiri", "normal");
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.text("Change Due:", pageWidth - 110, totalY);
