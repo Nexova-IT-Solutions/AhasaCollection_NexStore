@@ -201,7 +201,7 @@ function canvasToEscposHex(canvas: HTMLCanvasElement): string {
           const bVal = data[i + 2];
           const a = data[i + 3];
           const luminance = 0.299 * r + 0.587 * g + 0.114 * bVal;
-          const isBlack = (a > 128 && luminance < 160);
+          const isBlack = (a > 50 && luminance < 200);
           if (isBlack) {
             byteValue |= (1 << (7 - b));
           }
@@ -282,70 +282,71 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         position: "fixed",
         left: "-9999px",
         top: "0",
-        width: "280px", // 72mm printable area roughly maps to 280px
+        width: "380px", // Full 80mm printable area width (380px)
         backgroundColor: "white",
-        color: "black",
+        color: "#000000",
         fontFamily: "'Courier New', Courier, monospace",
-        fontSize: "8.5px",
-        lineHeight: "1.2",
+        fontSize: "11.5px",
+        fontWeight: "600",
+        lineHeight: "1.35",
         padding: "0"
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 2px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 36px; max-width: 45px; object-fit: contain; margin-top: 0;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 4px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 45px; max-width: 65px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
-        <div style="text-align: center; font-size: 11px; font-weight: bold; margin-bottom: 2px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
-        <div style="text-align: center; font-size: 8px; margin-bottom: 3px;">
+        <div style="text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 4px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
+        <div style="text-align: center; font-size: 11px; margin-bottom: 6px;">
           ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
           ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
           ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
           ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
           ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
-        <div style="font-size: 8.5px; margin-bottom: 3px;">
+        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
+        <div style="font-size: 11.5px; margin-bottom: 6px;">
           <div>Order: ${data.orderNumber}</div>
           <div>Date: ${data.date}</div>
           <div>Sale Type: ${saleType}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
           ${data.paymentMethod === "POS_CREDIT" ? `
-            <div style="margin-top: 2px; padding-top: 2px; border-top: 1px dotted #ccc;">
+            <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dotted #000;">
               <div>Customer: ${data.customerName || "Walk-in Customer"}</div>
               <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
               <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
             </div>
           ` : ""}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
-        <div style="margin-bottom: 3px;">
+        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
+        <div style="margin-bottom: 6px;">
           ${itemsHtml}
         </div>
-        <div style="border-bottom: 1px dashed #000; margin: 3px 0;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+        <div style="border-bottom: 1px dashed #000; margin: 8px 0; clear: both;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
           <span>Subtotal:</span>
-          <span>${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
+          <span style="font-weight: bold;">${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
         </div>
         ${data.billDiscountAmount && data.billDiscountAmount > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
             <span>Discount:</span>
-            <span>-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
+            <span style="font-weight: bold;">-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 10px; font-weight: bold;">
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 13px; font-weight: bold;">
           <span>Total:</span>
           <span>${curSymbol} ${data.total.toFixed(decimals)}</span>
         </div>
         ${data.changeDue > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 2px; font-size: 8.5px;">
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 3px; font-size: 11.5px;">
             <span>Change Due:</span>
-            <span>${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
+            <span style="font-weight: bold;">${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
           </div>
         ` : ''}
-        <div style="text-align: center; margin-top: 8px; margin-bottom: 2px; font-size: 8.5px;">Thank you for your purchase!</div>
-        <div style="text-align: center; margin-top: 2px; font-size: 7px; color: #333; padding-bottom: 4px;">Powered by Nexova</div>
+        <div style="text-align: center; margin-top: 12px; margin-bottom: 4px; font-size: 11.5px;">Thank you for your purchase!</div>
+        <div style="text-align: center; margin-top: 4px; font-size: 9px; color: #000; padding-bottom: 6px;">Powered by Nexova</div>
       `;
 
       document.body.appendChild(container);
