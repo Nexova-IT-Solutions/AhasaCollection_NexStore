@@ -272,7 +272,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           : `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
         
         itemsHtml += `
-          <div style="margin-bottom: 4px;">
+          <div style="margin-bottom: 12px;">
             <div>${itemName}</div>
             ${item.sku ? `<div style="font-size: 10px; color: #555;">SKU: ${item.sku}</div>` : ''}
             <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 11px;">
@@ -298,7 +298,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       });
 
       const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-bottom: 8px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px; object-fit: contain;" /></div>` : '';
+      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 4px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 60px; max-width: 60px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
       container.innerHTML = `
         ${logoHtml}
@@ -453,7 +453,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `${SEP}\n`
       );
       
-      // Items — qty/name left aligned, price right-aligned with hardware command \x1B\x61\x02
+      // Items — qty left aligned, price exact right aligned by padding to charWidth
       data.items.forEach((item, index) => {
         let nameLine = item.name;
         if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
@@ -463,7 +463,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
 
-        // Qty & Price Line
+        // Qty & Price Line padded to right edge
         const qtyPrice = isEnglish
           ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
           : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
@@ -471,10 +471,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
         const formattedTotal = `${curSymbol} ${lineTotal.toFixed(decimals)}`;
 
-        // Print qty left aligned, then total right aligned
-        rawLines.push('\x1B\x61\x00'); // Left align
-        rawLines.push(`${qtyPrice}\x1B\x61\x02 ${formattedTotal}\n`);
-        rawLines.push('\x1B\x61\x00'); // Back to left align
+        // Calculate exact whitespace padding for right alignment on thermal printer text mode
+        let itemQtyPriceLine = "";
+        if (qtyPrice.length + formattedTotal.length + 1 <= charWidth) {
+          const spaces = " ".repeat(charWidth - qtyPrice.length - formattedTotal.length);
+          itemQtyPriceLine = `${qtyPrice}${spaces}${formattedTotal}\n`;
+        } else {
+          const spaces = " ".repeat(Math.max(0, charWidth - formattedTotal.length));
+          itemQtyPriceLine = `${qtyPrice}\n${spaces}${formattedTotal}\n`;
+        }
+
+        rawLines.push(itemQtyPriceLine);
 
         // Discount line if applicable (left aligned)
         if (item.discountPercent && item.discountPercent > 0) {
@@ -484,7 +491,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           rawLines.push(`${discLine}\n`);
         }
 
-        // Add a newline after each item in the bill (item spacing)
+        // Add a new line after each item in the bill (item spacing)
         rawLines.push('\n');
       });
 
