@@ -130,7 +130,7 @@ async function getResizedLogoBase64(imageUrl: string, targetWidth: number): Prom
           for (let x = 0; x < canvas.width; x++) {
             const i = (y * canvas.width + x) * 4;
             const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-            const isNonWhite = a > 50 && (r < 240 || g < 240 || b < 240);
+            const isNonWhite = a > 20 && (r < 250 || g < 250 || b < 250);
             if (isNonWhite) {
               if (y < minY) minY = y;
               if (y > maxY) maxY = y;
@@ -437,7 +437,6 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
       
       const SEP = '-'.repeat(charWidth);
-      const COL = Math.max(30, charWidth - 6);
 
       // Switch to left align before first separator so it spans full width
       rawLines.push(
@@ -454,8 +453,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `${SEP}\n`
       );
       
-      // Items — qty/name left aligned, total always right-aligned by the printer hardware
-      data.items.forEach(item => {
+      // Items — qty/name left aligned, price right-aligned with hardware command \x1B\x61\x02
+      data.items.forEach((item, index) => {
         let nameLine = item.name;
         if (!isEnglish && item.nameAr) nameLine += ` - ${item.nameAr}`;
 
@@ -464,26 +463,29 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         rawLines.push(`${nameLine}\n`);
         if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
 
-        // Qty line (left aligned)
+        // Qty & Price Line
         const qtyPrice = isEnglish
           ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
           : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
-        rawLines.push(`${qtyPrice}\n`);
+        
+        const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
+        const formattedTotal = `${curSymbol} ${lineTotal.toFixed(decimals)}`;
+
+        // Print qty left aligned, then total right aligned
+        rawLines.push('\x1B\x61\x00'); // Left align
+        rawLines.push(`${qtyPrice}\x1B\x61\x02 ${formattedTotal}\n`);
+        rawLines.push('\x1B\x61\x00'); // Back to left align
 
         // Discount line if applicable (left aligned)
         if (item.discountPercent && item.discountPercent > 0) {
-          const discountedTotal = item.quantity * item.price * (1 - item.discountPercent / 100);
           const discLine = isEnglish
-            ? `Discount: ${item.discountPercent}% off -> ${curSymbol} ${discountedTotal.toFixed(decimals)}`
+            ? `Discount: ${item.discountPercent}% off`
             : `Discount / වට්ටම්: ${item.discountPercent}%`;
           rawLines.push(`${discLine}\n`);
         }
 
-        // Total — always right-aligned by the printer's own hardware command
-        const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
-        rawLines.push('\x1B\x61\x02'); // Right align
-        rawLines.push(`${curSymbol} ${lineTotal.toFixed(decimals)}\n`);
-        rawLines.push('\x1B\x61\x00'); // Back to left align
+        // Add a newline after each item in the bill (item spacing)
+        rawLines.push('\n');
       });
 
       // Separator then right-aligned totals
