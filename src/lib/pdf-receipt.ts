@@ -360,6 +360,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       if (data.companyDetails?.posPrinterName) {
         try {
+          initQZSecurity();
           if (!qz.websocket.isActive()) {
             await qz.websocket.connect({ retries: 0 });
           }
