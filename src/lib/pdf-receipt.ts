@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import qz from "qz-tray";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
+import { notoBase64 } from "./fonts/NotoSansSinhala-Regular";
 import html2canvas from "html2canvas";
 import { initQZSecurity } from "./qz-init";
 
@@ -664,6 +665,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     });
     doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
     doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
+    doc.addFileToVFS("NotoSansSinhala-Regular.ttf", notoBase64);
+    doc.addFont("NotoSansSinhala-Regular.ttf", "NotoSansSinhala", "normal");
 
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
@@ -817,8 +820,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "Amiri", halign: "center" },
-      styles: { font: "Amiri", fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "NotoSansSinhala", halign: "center" },
+      styles: { font: "NotoSansSinhala", fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
         1: { cellWidth: 24, halign: "center" },
@@ -840,7 +843,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
     let totalY = currentY + 10;
-    doc.setFont("Amiri", "normal");
+    doc.setFont("NotoSansSinhala", "normal");
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105); // Slate 600
     
@@ -855,7 +858,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     }
 
     totalY += 12;
-    doc.setFont("Amiri", "normal");
+    doc.setFont("NotoSansSinhala", "normal");
     doc.setFontSize(14);
     doc.setTextColor(167, 6, 106); // #A7066A Brand color
     doc.text("Total:", pageWidth - 110, totalY);
