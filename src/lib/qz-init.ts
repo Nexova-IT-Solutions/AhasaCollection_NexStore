@@ -129,3 +129,18 @@ export function initQZSecurity(): void {
   _securityConfigured = true;
   console.log("[QZ] Security configured — signed connection ready.");
 }
+
+/**
+ * Global QZ Tray connection helper.
+ * Guarantees initQZSecurity() is always invoked before qz.websocket.connect().
+ */
+export async function connectQZ(): Promise<void> {
+  initQZSecurity();
+  if (!qz.websocket.isActive()) {
+    console.log("[QZ] Connecting to websocket...");
+    await qz.websocket.connect({ retries: 0 });
+    console.log("[QZ] Connected successfully!");
+  } else {
+    console.log("[QZ] Websocket already active.");
+  }
+}

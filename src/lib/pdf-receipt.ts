@@ -4,7 +4,7 @@ import qz from "qz-tray";
 import { amiriBase64 } from "./fonts/Amiri-Regular";
 import { notoBase64 } from "./fonts/NotoSansSinhala-Regular";
 import html2canvas from "html2canvas";
-import { initQZSecurity } from "./qz-init";
+import { initQZSecurity, connectQZ } from "./qz-init";
 
 const arNum = (n: number | string) => {
   return String(n);
@@ -360,10 +360,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       if (data.companyDetails?.posPrinterName) {
         try {
-          initQZSecurity();
-          if (!qz.websocket.isActive()) {
-            await qz.websocket.connect({ retries: 0 });
-          }
+          await connectQZ();
           await new Promise(r => setTimeout(r, 50));
           const canvas = await html2canvas(container, {
             scale: 1,
@@ -524,15 +521,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
       if (data.companyDetails?.posPrinterName) {
         try {
-          console.log("[QZ] Checking websocket connection...");
-          initQZSecurity();
-          if (!qz.websocket.isActive()) {
-            console.log("[QZ] Connecting to websocket...");
-            await qz.websocket.connect({ retries: 0 });
-            console.log("[QZ] Connected successfully!");
-          } else {
-            console.log("[QZ] Websocket already active.");
-          }
+          await connectQZ();
 
           console.log("[QZ] Creating printer config for:", data.companyDetails.posPrinterName);
           const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
