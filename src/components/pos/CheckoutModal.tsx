@@ -240,7 +240,8 @@ export function CheckoutModal() {
       // Clear the cart so the success screen renders cleanly
       clearCart();
       toast.success(`Order ${data.data.orderNumber} completed!`);
-      fetchActiveShift();
+      // Run shift refresh asynchronously in background so UI completion screen is instant
+      Promise.resolve().then(() => fetchActiveShift());
     } catch (error) {
       console.error("Checkout error:", error);
       toast.error("Payment processing failed. Please try again.");

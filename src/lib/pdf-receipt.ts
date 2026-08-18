@@ -691,18 +691,22 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       unit: "mm",
       format: "a4", // 210 x 297 mm
     });
+    let hasSinhalaFont = false;
     try {
-      if (amiriBase64 && amiriBase64.length > 100) {
-        doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
-        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-      }
-      if (notoBase64 && notoBase64.length > 100 && notoBase64.startsWith("AAEAAA") || notoBase64.startsWith("AAAAA") || !notoBase64.includes("<html")) {
+      if (notoBase64 && notoBase64.length > 1000) {
         doc.addFileToVFS("NotoSansSinhala-Regular.ttf", notoBase64);
         doc.addFont("NotoSansSinhala-Regular.ttf", "NotoSansSinhala", "normal");
+        hasSinhalaFont = true;
+      }
+      if (amiriBase64 && amiriBase64.length > 1000) {
+        doc.addFileToVFS("Amiri-Regular.ttf", amiriBase64);
+        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
       }
     } catch (fontErr) {
       console.warn("Custom TTF font registration skipped, using standard fonts:", fontErr);
     }
+
+    const fontToUse = hasSinhalaFont ? "NotoSansSinhala" : "helvetica";
 
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
@@ -849,8 +853,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: "helvetica", halign: "center" },
-      styles: { font: "helvetica", fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: fontToUse, halign: "center" },
+      styles: { font: fontToUse, fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
         1: { cellWidth: 24, halign: "center" },
