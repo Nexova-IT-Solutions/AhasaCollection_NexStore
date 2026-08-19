@@ -141,7 +141,7 @@ export default function SignInPage() {
       ) : (
         <footer className="py-6 border-t border-brand-border/60 bg-slate-50 text-center text-xs text-[#6B5A64] mt-auto">
           <div className="max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
-            <p>© 2026 SPC. All rights reserved.</p>
+            <p>© 2026 Ahasa. All rights reserved.</p>
             <div className="flex items-center gap-2">
               <a 
                 href="https://nexovaitsolutions.com" 

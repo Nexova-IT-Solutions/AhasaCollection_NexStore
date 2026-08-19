@@ -75,7 +75,7 @@ export async function sendGiftCardEmail(giftCard: any) {
           
           <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #eee; font-size: 13px; color: #999; text-align: center;">
             <p>This gift card expires on: <strong>${expiryDate}</strong></p>
-            <p style="margin-top: 10px;">&copy; ${new Date().getFullYear()} SPC. All rights reserved.</p>
+            <p style="margin-top: 10px;">&copy; ${new Date().getFullYear()} Ahasa. All rights reserved.</p>
           </div>
         </div>
       </div>
