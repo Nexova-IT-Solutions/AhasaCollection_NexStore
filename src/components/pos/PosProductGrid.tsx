@@ -274,6 +274,8 @@ export function PosProductGrid() {
       if (targetProduct) {
         if (targetProduct.stock > 0) {
           handleAddToCart(targetProduct);
+          // Highlight/select input text so the next scan or keypress automatically replaces it
+          e.currentTarget.select();
         } else {
           toast.error(`${targetProduct.name} is out of stock`);
         }
