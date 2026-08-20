@@ -274,7 +274,6 @@ export function PosProductGrid() {
       if (targetProduct) {
         if (targetProduct.stock > 0) {
           handleAddToCart(targetProduct);
-          setSearchQuery("");
         } else {
           toast.error(`${targetProduct.name} is out of stock`);
         }
