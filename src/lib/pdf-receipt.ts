@@ -711,8 +711,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
 
-    // Header Background (#A7066A Brand color)
-    doc.setFillColor(167, 6, 106);
+    // Header Background (#1565C0 Brand Royal Blue)
+    doc.setFillColor(21, 101, 192);
     doc.rect(0, 0, pageWidth, 40, "F");
 
     // Header text
@@ -853,7 +853,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [167, 6, 106], textColor: 255, fontStyle: "normal", font: fontToUse, halign: "center" },
+      headStyles: { fillColor: [21, 101, 192], textColor: 255, fontStyle: "normal", font: fontToUse, halign: "center" },
       styles: { font: fontToUse, fontSize: 10, cellPadding: 4 },
       columnStyles: {
         0: { cellWidth: 70 },
@@ -871,8 +871,8 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     let boxHeight = 40;
     if (data.billDiscountAmount && data.billDiscountAmount > 0) boxHeight += 10;
 
-    doc.setFillColor(253, 242, 248); // #FDF2F8 (Light pink tint)
-    doc.setDrawColor(251, 207, 232); // #FBCFE8 (Soft border)
+    doc.setFillColor(239, 246, 255); // #EFF6FF (Light blue tint)
+    doc.setDrawColor(191, 219, 254); // #BFDBFE (Soft blue border)
     doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
     let totalY = currentY + 10;
@@ -893,7 +893,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     totalY += 12;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.setTextColor(167, 6, 106); // #A7066A Brand color
+    doc.setTextColor(21, 101, 192); // #1565C0 Brand Royal Blue
     doc.text("Total:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.total.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
 
