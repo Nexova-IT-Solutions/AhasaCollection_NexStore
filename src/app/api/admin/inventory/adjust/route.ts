@@ -12,8 +12,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Authorize: Strictly SUPER_ADMIN or DEV_ADMIN role
-  const isAuthorized = ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role);
+  // Authorize: Strictly SUPER_ADMIN or DEV_ADMIN role or user with Super Admin template
+  const isAuthorized =
+    ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
+    session.user.templateName === "Super Admin";
 
   if (!isAuthorized) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });

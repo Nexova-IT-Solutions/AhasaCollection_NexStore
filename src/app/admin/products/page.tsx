@@ -363,7 +363,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
             initialTotal={totalCount}
             initialTab={tab}
             hasStockAdmin={!!hasStockAdmin}
-            isSuperAdmin={session ? ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) : false}
+            isSuperAdmin={session ? (["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role as string) || session.user.templateName === "Super Admin") : false}
             initialFilters={{
               q,
               category,
