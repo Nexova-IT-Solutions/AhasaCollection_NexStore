@@ -26,6 +26,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useSWR from "swr";
 import { useCurrency } from "@/components/CurrencyProvider";
 
+import { useSession } from "next-auth/react";
+import { hasPermission } from "@/lib/permissions";
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const STATUS_BADGES: Record<string, { label: string; bg: string; text: string; icon: any }> = {
@@ -79,6 +82,13 @@ export default function PurchaseOrdersPage() {
   const [selectedTab, setSelectedTab] = useState("ALL");
   const [page, setPage] = useState(1);
 
+  const { data: session } = useSession();
+  const canCreate =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "purchase_orders.create") ||
+      hasPermission(session, "catalog.stock_admin"));
+
   const pageSize = 20;
 
   const buildUrl = useCallback(() => {
@@ -125,12 +135,14 @@ export default function PurchaseOrdersPage() {
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </Button>
-          <Link href="/admin/purchase-orders/new">
-            <Button size="sm" className="gap-1.5 bg-[#A7066A] hover:bg-[#8A0558] text-white font-bold">
-              <Plus className="w-4 h-4" />
-              New Purchase Order
-            </Button>
-          </Link>
+          {canCreate && (
+            <Link href="/admin/purchase-orders/new">
+              <Button size="sm" className="gap-1.5 bg-[#A7066A] hover:bg-[#8A0558] text-white font-bold">
+                <Plus className="w-4 h-4" />
+                New Purchase Order
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -194,12 +206,14 @@ export default function PurchaseOrdersPage() {
               <FileText className="w-12 h-12 mb-3 opacity-30" />
               <p className="font-semibold text-slate-700">No purchase orders found</p>
               <p className="text-sm mt-1">Try adjusting your status tab or search filter</p>
-              <Link href="/admin/purchase-orders/new" className="mt-4">
-                <Button size="sm" variant="outline" className="gap-1.5">
-                  <Plus className="w-4 h-4" />
-                  Create First Request
-                </Button>
-              </Link>
+              {canCreate && (
+                <Link href="/admin/purchase-orders/new" className="mt-4">
+                  <Button size="sm" variant="outline" className="gap-1.5">
+                    <Plus className="w-4 h-4" />
+                    Create First Request
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
