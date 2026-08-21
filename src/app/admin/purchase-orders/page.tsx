@@ -84,10 +84,11 @@ export default function PurchaseOrdersPage() {
 
   const { data: session } = useSession();
   const canCreate =
-    session &&
-    (["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
-      hasPermission(session, "purchase_orders.create") ||
-      hasPermission(session, "catalog.stock_admin"));
+    Boolean(
+      session &&
+        (["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
+          hasPermission(session, "purchase_orders.create"))
+    );
 
   const pageSize = 20;
 
