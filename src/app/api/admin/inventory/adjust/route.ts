@@ -12,11 +12,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Authorize: DEV_ADMIN, SUPER_ADMIN, or catalog.stock_admin / catalog.manage_inventory privilege
-  const isAuthorized =
-    ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
-    hasPermission(session, "catalog.stock_admin") ||
-    hasPermission(session, "catalog.manage_inventory");
+  // Authorize: Strictly SUPER_ADMIN or DEV_ADMIN role
+  const isAuthorized = ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role);
 
   if (!isAuthorized) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });

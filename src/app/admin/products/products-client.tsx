@@ -94,6 +94,7 @@ export function ProductsClient({
   initialFilters,
   hideOutOfStockConfig,
   hasStockAdmin,
+  isSuperAdmin = false,
 }: {
   initialProducts: ProductData[];
   initialPage: number;
@@ -117,6 +118,7 @@ export function ProductsClient({
   };
   hideOutOfStockConfig: boolean;
   hasStockAdmin: boolean;
+  isSuperAdmin?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -548,7 +550,7 @@ export function ProductsClient({
                         </Button>
                       )}
 
-                      {hasStockAdmin && (
+                      {isSuperAdmin && (
                         <Button
                           type="button"
                           variant="outline"
@@ -692,7 +694,7 @@ export function ProductsClient({
                       <Layers className="w-4 h-4 text-gray-500 hover:text-[#2563EB]" />
                     </Button>
                   )}
-                  {hasStockAdmin && (
+                  {isSuperAdmin && (
                     <Button
                       type="button"
                       variant="outline"
