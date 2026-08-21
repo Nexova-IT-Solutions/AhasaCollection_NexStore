@@ -775,9 +775,9 @@ export function AppSidebar() {
         {renderNavGroup("Operations", filteredOperationsItems)}
         {reportsEnabled && renderNavGroup("Reports & Analytics", filteredReportItems)}
 
-        {(isSuperAdmin || isDevAdmin) && renderNavGroup("System Users", [systemItems[0]])}
+        {renderNavGroup("System Users", [systemItems[0]])}
 
-        {(isDevAdmin || isSuperAdmin) && renderNavGroup("System", systemItems.slice(1))}
+        {renderNavGroup("System", systemItems.slice(1))}
 
         {isDevAdmin && renderNavGroup("Developer Tools", [
           {
