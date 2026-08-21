@@ -279,6 +279,8 @@ async function upsertAddressByType({
   });
 }
 
+import { hasPermission } from "@/lib/permissions";
+
 export async function GET(
   req: Request,
   props: { params: Promise<{ id: string }> }
@@ -286,7 +288,12 @@ export async function GET(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -376,7 +383,12 @@ export async function PATCH(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -545,7 +557,12 @@ export async function DELETE(
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 

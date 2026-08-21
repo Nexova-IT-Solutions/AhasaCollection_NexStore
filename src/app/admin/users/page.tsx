@@ -2,13 +2,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+import { hasPermission } from "@/lib/permissions";
 import { getUsersForAdmin, getPermissionTemplatesForAdmin } from "@/lib/queries/admin-users";
 import { UsersClient } from "./users-client";
 
 export default async function AdminUsersPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     redirect("/"); // unauthorized
   }
 

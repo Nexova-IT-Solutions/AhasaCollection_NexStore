@@ -4,11 +4,18 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+import { hasPermission } from "@/lib/permissions";
+
 export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_templates"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -41,7 +48,12 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_templates"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
@@ -69,7 +81,12 @@ export async function DELETE(_req: Request, props: { params: Promise<{ id: strin
   const { id } = await props.params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_templates"));
+
+  if (!canAccess) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
   }
 
