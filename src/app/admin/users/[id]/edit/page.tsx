@@ -16,11 +16,18 @@ function toDateInput(value: Date | null) {
   return `${year}-${month}-${day}`;
 }
 
+import { hasPermission } from "@/lib/permissions";
+
 export default async function AdminUserEditPage({ params }: PageProps) {
   const { locale, id } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     redirect("/");
   }
 

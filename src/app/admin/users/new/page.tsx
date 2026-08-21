@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { EmployeeForm } from "../employee-form";
 
+import { hasPermission } from "@/lib/permissions";
+
 type PageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ type?: string }>;
@@ -14,7 +16,12 @@ export default async function AdminUserCreatePage({ params, searchParams }: Page
   const query = await searchParams;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     redirect("/");
   }
 

@@ -53,11 +53,18 @@ function ProviderIcon({ provider }: { provider: string }) {
   return <Globe className="h-4 w-4 text-[#6B7280]" />;
 }
 
+import { hasPermission } from "@/lib/permissions";
+
 export default async function AdminUserProfilePage({ params }: PageProps) {
   const { locale, id } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user.role !== "SUPER_ADMIN" && session.user.role !== "DEV_ADMIN")) {
+  const canAccess =
+    session &&
+    (["SUPER_ADMIN", "DEV_ADMIN", "ADMIN"].includes(session.user.role) ||
+      hasPermission(session, "system.manage_users"));
+
+  if (!canAccess) {
     redirect("/");
   }
 
