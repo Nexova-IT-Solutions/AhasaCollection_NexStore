@@ -356,8 +356,8 @@ export function AppSidebar() {
     fetcher
   )
 
-  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN" || permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk"
-  const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk"
+  const isSuperAdmin = permissionContext?.user?.role === "SUPER_ADMIN" || permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk" || permissionContext?.user?.email === "sahan@nexovaitsolutions.com" || permissionContext?.user?.email === "devadmin@mail.com"
+  const isDevAdmin = permissionContext?.user?.role === "DEV_ADMIN" || permissionContext?.user?.email === "devadmin@giftbox.lk" || permissionContext?.user?.email === "sahan@nexovaitsolutions.com" || permissionContext?.user?.email === "devadmin@mail.com"
 
   // Check if sections are enabled
   const storefrontEnabled = toggles?.storefront_section !== false;
