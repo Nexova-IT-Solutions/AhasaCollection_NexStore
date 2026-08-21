@@ -154,13 +154,13 @@ const operationsItems: NavItem[] = [
   {
     title: "Purchase Orders",
     icon: FileText,
-    requiredPermission: "purchase_orders.create",
+    requiredPermission: "",
     children: [
       {
         title: "All Requests",
         url: "/admin/purchase-orders",
         icon: FileText,
-        requiredPermission: "purchase_orders.create",
+        requiredPermission: "",
       },
       {
         title: "New Purchase Order",

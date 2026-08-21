@@ -15,6 +15,9 @@ export async function GET(req: Request) {
     ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
     hasPermission(session, "purchase_orders.create") ||
     hasPermission(session, "purchase_orders.approve") ||
+    hasPermission(session, "purchase_orders.receive") ||
+    hasPermission(session, "purchase_orders.inventory_intake") ||
+    hasPermission(session, "purchase_orders.payment") ||
     hasPermission(session, "catalog.stock_admin");
 
   if (!isAuthorized) {
