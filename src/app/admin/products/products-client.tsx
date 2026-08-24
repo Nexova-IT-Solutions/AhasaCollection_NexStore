@@ -572,15 +572,6 @@ export function ProductsClient({
                           <Pencil className="w-3.5 h-3.5 text-gray-500" />
                         </Link>
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8.5 w-8.5"
-                        onClick={() => setDeleteTarget(product)}
-                        aria-label={`Delete ${product.name}`}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
