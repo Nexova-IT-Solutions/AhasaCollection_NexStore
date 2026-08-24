@@ -330,11 +330,8 @@ export default function AdminDashboardClient({ user, initialData, hasSalesSummar
         </div>
         )}
 
-        {/* --- MAIN PAGE RESPONSIVE 3-COLUMN CONTAINER --- */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          
-          {/* LEFT AREA: Charts & Product Information (Span 2) */}
-          <div className="xl:col-span-2 space-y-6">
+        {/* --- MAIN PAGE WIDGETS CONTAINER --- */}
+        <div className="space-y-6">
             
             {/* Orders Over Time Chart */}
             <Card className="border border-gray-100 shadow-xs rounded-xl bg-white p-6">
@@ -529,89 +526,6 @@ export default function AdminDashboardClient({ user, initialData, hasSalesSummar
                 </CardContent>
               </Card>
             </div>
-
-          </div>
-
-          {/* RIGHT AREA: Quick Actions & Recent Activity (Span 1) */}
-          <div className="xl:col-span-1 space-y-6">
-            
-            {/* Quick Actions */}
-            <Card className="border border-gray-100 shadow-xs rounded-xl bg-white p-6">
-              <CardHeader className="p-0 pb-4">
-                <CardTitle className="text-lg font-bold text-[#1F1720]">Quick Actions</CardTitle>
-                <CardDescription>Common store administrator actions</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 pt-2 grid grid-cols-2 gap-3">
-                <a href="/admin/products" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
-                  <Plus className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-slate-700">Add Product</span>
-                </a>
-                {showShipping && (
-                  <a href="/admin/settings/shipping" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
-                    <Settings className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-semibold text-slate-700">Shipping</span>
-                  </a>
-                )}
-                <a href="/admin/pos/shifts" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
-                  <ShoppingCart className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-slate-700">POS Shifts</span>
-                </a>
-                <a href="/admin/discounts" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-[#FCEAF4]/15 hover:border-[#A7066A]/30 transition-all text-center group">
-                  <Percent className="w-5 h-5 text-[#A7066A] mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-slate-700">Discounts</span>
-                </a>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card className="border border-gray-100 shadow-xs rounded-xl bg-white p-6">
-              <CardHeader className="p-0 pb-4">
-                <CardTitle className="text-lg font-bold text-[#1F1720]">Recent Activity</CardTitle>
-                <CardDescription>Live updates from store operations</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0 pt-2">
-                <div className="space-y-4">
-                  <div className="flex gap-3 items-start text-sm">
-                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 mt-0.5">
-                      <DollarSign className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-xs text-slate-800">Order #1042 Paid</p>
-                      <p className="text-[10px] text-muted-foreground">{symbol}4,200 via DirectPay • 5m ago</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start text-sm">
-                    <div className="p-2 bg-amber-50 rounded-lg text-amber-600 mt-0.5">
-                      <PackageX className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-xs text-slate-800">Low Stock Alert</p>
-                      <p className="text-[10px] text-muted-foreground">"Red Velvet Box Wrap" is low (2 left) • 12m ago</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start text-sm">
-                    <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600 mt-0.5">
-                      <UserIcon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-xs text-slate-800">Shift Register Closed</p>
-                      <p className="text-[10px] text-muted-foreground">Drawer closed by operator • 1h ago</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 items-start text-sm">
-                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600 mt-0.5">
-                      <Percent className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-xs text-slate-800">New Coupon Created</p>
-                      <p className="text-[10px] text-muted-foreground">"GIFTBOX10" active (10% Off) • 3h ago</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
 
         </div>
 
