@@ -187,7 +187,7 @@ export function PosCart() {
                         </div>
                         {item.sku && <p className="text-[10px] text-slate-400 mt-0.5">{item.sku}</p>}
                       </div>
-                      <button onClick={() => removeItem(item.id)} className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 transition-all p-0.5" title="Remove item">
+                      <button onClick={() => removeItem(item.id)} className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 rounded-md p-1 transition-all shrink-0" title="Remove item">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
