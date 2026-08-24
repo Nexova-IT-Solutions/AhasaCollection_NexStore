@@ -134,7 +134,7 @@ export default function PosTerminalPage() {
 
   useBarcodeScanner({
     onScan: handleBarcodeScan,
-    enabled: scannerActive,
+    enabled: false,
     allowInInputs: false,
     minLength: 3,
   });

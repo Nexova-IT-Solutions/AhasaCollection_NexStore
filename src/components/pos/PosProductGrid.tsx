@@ -218,6 +218,7 @@ export function PosProductGrid() {
       giftCardValue: product.giftCardValue,
     });
 
+    setSearchQuery("");
     toast.success(`Added ${product.name}`, { position: "top-center", duration: 1500 });
   };
 
@@ -243,6 +244,7 @@ export function PosProductGrid() {
       giftCardValue: null,
     });
 
+    setSearchQuery("");
     toast.success(
       `Added ${variantProduct.name} — ${variantLabel}`,
       { position: "top-center", duration: 2000 }
