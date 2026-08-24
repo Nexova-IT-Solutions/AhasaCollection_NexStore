@@ -51,14 +51,7 @@ export async function POST(req: Request) {
       // 7. Delete POS Shifts (since orders referencing them are gone)
       await tx.posShift.deleteMany();
 
-      // 8. Delete Product Catalog & Inventory Data
-      await tx.productSupply.deleteMany();
-      await tx.giftBoxItem.deleteMany();
-      await tx.productMood.deleteMany();
-      await tx.product.deleteMany();
-      await tx.category.deleteMany();
-
-      // 9. Delete Customer dependencies
+      // 8. Delete Customer dependencies
       await tx.customerLedger.deleteMany();
       await tx.cart.deleteMany();
       await tx.session.deleteMany();
