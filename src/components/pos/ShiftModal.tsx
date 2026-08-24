@@ -288,7 +288,7 @@ export function ShiftModal() {
           denominations: denominationsPayload,
           actualCredit: creditAmount,
           actualDebit: debitAmount,
-          notes: closeNotes || `Drawer counted actual cash: Rs. ${denominationTotal}. Credit Card: Rs. ${creditAmount}. Debit Card: Rs. ${debitAmount}. Gift cards: Rs. ${actualGiftCards}.`,
+          notes: closeNotes || `Drawer counted actual cash: Rs. ${denominationTotal}. Card Payments: Rs. ${creditAmount}.`,
         }),
       });
 
@@ -640,11 +640,11 @@ export function ShiftModal() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Credit Cards */}
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Card Payments */}
                   <div className="space-y-1.5">
                     <Label className="text-xs text-slate-500 flex items-center gap-1">
-                      <CreditCard className="h-3.5 w-3.5 text-slate-400" /> Credit Cards
+                      <CreditCard className="h-3.5 w-3.5 text-slate-400" /> Card Payments (Card Terminal Total)
                     </Label>
                     <Input
                       type="number"
@@ -662,75 +662,11 @@ export function ShiftModal() {
                       }`}>
                         {eodSummary.isFetching
                           ? "…"
-                          : formatPrice(eodSummary.systemCredit)
+                          : formatPrice(eodSummary.systemCredit + eodSummary.systemDebit)
                         }
                       </span>
                       {!eodSummary.isFetching &&
-                        Math.abs((parseFloat(actualCredit) || 0) - eodSummary.systemCredit) > 0.01 && (
-                          <span className="text-amber-600 font-bold ml-1">⚠ variance</span>
-                        )
-                      }
-                    </p>
-                  </div>
-
-                  {/* Debit Cards */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-slate-500 flex items-center gap-1">
-                      <CreditCard className="h-3.5 w-3.5 text-slate-400" /> Debit Cards
-                    </Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={actualDebit}
-                      onChange={(e) => setActualDebit(e.target.value)}
-                      className="h-9 font-semibold text-xs"
-                      placeholder="0.00"
-                    />
-                    <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                      System:
-                      <span className={`font-bold ${
-                        eodSummary.isFetching ? "text-slate-300" : "text-slate-600"
-                      }`}>
-                        {eodSummary.isFetching
-                          ? "…"
-                          : formatPrice(eodSummary.systemDebit)
-                        }
-                      </span>
-                      {!eodSummary.isFetching &&
-                        Math.abs((parseFloat(actualDebit) || 0) - eodSummary.systemDebit) > 0.01 && (
-                          <span className="text-amber-600 font-bold ml-1">⚠ variance</span>
-                        )
-                      }
-                    </p>
-                  </div>
-
-                  {/* Gift Cards Redeemed */}
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label className="text-xs text-slate-500 flex items-center gap-1">
-                      <Gift className="h-3.5 w-3.5 text-slate-400" /> Gift Cards Redeemed
-                    </Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={actualGiftCards}
-                      onChange={(e) => setActualGiftCards(e.target.value)}
-                      className="h-9 font-semibold text-xs"
-                      placeholder="0.00"
-                    />
-                    <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                      System:
-                      <span className={`font-bold ${
-                        eodSummary.isFetching ? "text-slate-300" : "text-slate-600"
-                      }`}>
-                        {eodSummary.isFetching
-                          ? "…"
-                          : formatPrice(eodSummary.systemGiftCard)
-                        }
-                      </span>
-                      {!eodSummary.isFetching &&
-                        Math.abs((parseFloat(actualGiftCards) || 0) - eodSummary.systemGiftCard) > 0.01 && (
+                        Math.abs((parseFloat(actualCredit) || 0) - (eodSummary.systemCredit + eodSummary.systemDebit)) > 0.01 && (
                           <span className="text-amber-600 font-bold ml-1">⚠ variance</span>
                         )
                       }
