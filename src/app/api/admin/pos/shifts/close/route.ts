@@ -112,12 +112,12 @@ export async function POST(req: NextRequest) {
 
     // Expected cash = opening cash + cash from sales
     const openingCashAmount = shift.openingCash || shift.startingCash || 0;
-    const expectedCash = openingCashAmount + expectedCashFromSales;
-    const expectedCredit = expectedCreditFromSales;
-    const expectedDebit = expectedDebitFromSales;
+    const expectedCash = Math.round((openingCashAmount + expectedCashFromSales) * 100) / 100;
+    const expectedCredit = Math.round(expectedCreditFromSales * 100) / 100;
+    const expectedDebit = Math.round(expectedDebitFromSales * 100) / 100;
 
     // Calculate variances
-    const cashVariance = actualCash - expectedCash;
+    const cashVariance = Math.round((actualCash - expectedCash) * 100) / 100;
     const creditVariance = (actualCredit || 0) - expectedCredit;
     const debitVariance = (actualDebit || 0) - expectedDebit;
 
@@ -263,7 +263,6 @@ export async function GET() {
       }
     }
 
-    // Use openingCash as primary, startingCash as backward-compat fallback
     const openingCashAmt = openShift.openingCash || openShift.startingCash || 0;
     const expectedCash = Math.round((openingCashAmt + cashSalesSum) * 100) / 100;
     const expectedCredit = Math.round(creditSalesSum * 100) / 100;

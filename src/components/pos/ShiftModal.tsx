@@ -315,7 +315,8 @@ export function ShiftModal() {
 
   const cashVarianceVal = useMemo(() => {
     if (!activeShift) return 0;
-    return Math.round((denominationTotal - activeShift.expectedCash) * 100) / 100;
+    const diff = denominationTotal - activeShift.expectedCash;
+    return Math.round(diff * 100) / 100;
   }, [denominationTotal, activeShift]);
 
   // Render denomination counter grid
