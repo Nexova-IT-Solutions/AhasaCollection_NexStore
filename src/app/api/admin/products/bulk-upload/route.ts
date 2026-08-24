@@ -239,6 +239,9 @@ export async function POST(req: Request) {
 
         createdCount++;
       }
+    }, {
+      maxWait: 15000,  // 15 seconds max wait to obtain DB connection
+      timeout: 120000, // 2 minutes max execution time for bulk imports
     });
 
     revalidatePath("/admin/products");
