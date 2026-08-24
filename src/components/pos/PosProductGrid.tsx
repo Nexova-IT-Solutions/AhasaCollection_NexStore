@@ -219,7 +219,7 @@ export function PosProductGrid() {
     });
 
     setSearchQuery("");
-    searchInputRef.current?.focus();
+    document.getElementById("pos-customer-search")?.focus();
     toast.success(`Added ${product.name}`, { position: "top-center", duration: 1500 });
   };
 
@@ -246,7 +246,7 @@ export function PosProductGrid() {
     });
 
     setSearchQuery("");
-    searchInputRef.current?.focus();
+    document.getElementById("pos-customer-search")?.focus();
     toast.success(
       `Added ${variantProduct.name} — ${variantLabel}`,
       { position: "top-center", duration: 2000 }
