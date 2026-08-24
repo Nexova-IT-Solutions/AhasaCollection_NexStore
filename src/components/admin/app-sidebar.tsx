@@ -160,7 +160,7 @@ const operationsItems: NavItem[] = [
         title: "All Requests",
         url: "/admin/purchase-orders",
         icon: FileText,
-        requiredPermission: "",
+        requiredPermission: "purchase_orders.view",
       },
       {
         title: "New Purchase Order",

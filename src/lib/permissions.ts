@@ -105,6 +105,14 @@ export function hasPermission(session: any, requiredPermission?: string): boolea
       return user.customPermissions[requiredPermission] === true;
     }
 
+    // Special check for purchase_orders.view: returns true if ANY purchase_orders sub-permission is enabled
+    if (requiredPermission === "purchase_orders.view") {
+      const poObj = user.customPermissions["purchase_orders"];
+      if (poObj && typeof poObj === "object") {
+        return Object.values(poObj).some((val) => val === true);
+      }
+    }
+
     // Nested dot notation match (e.g. "customers.add" or "pos.terminal_access")
     if (requiredPermission.includes(".")) {
       const [section, action] = requiredPermission.split(".");
@@ -118,6 +126,13 @@ export function hasPermission(session: any, requiredPermission?: string): boolea
   // 4. Fallback: Check template-level permissions
   const templatePermissions = user.template?.permissions;
   if (templatePermissions && typeof templatePermissions === "object") {
+    // Special check for purchase_orders.view in template permissions
+    if (requiredPermission === "purchase_orders.view") {
+      const poObj = (templatePermissions as any)["purchase_orders"];
+      if (poObj && typeof poObj === "object") {
+        return Object.values(poObj).some((val) => val === true);
+      }
+    }
     // Direct match inside template permissions
     if ((templatePermissions as any)[requiredPermission] !== undefined) {
       return (templatePermissions as any)[requiredPermission] === true;
