@@ -395,7 +395,7 @@ export function ShiftModal() {
                 {mode === "open" ? "Initialize POS Session" : "Finalize EOD Cash Close"}
               </span>
               <span className="text-xs text-slate-500 mt-0.5">
-                GiftBox Lanka Retail POS Terminal
+                Retail POS Terminal
               </span>
             </div>
           </DialogTitle>
