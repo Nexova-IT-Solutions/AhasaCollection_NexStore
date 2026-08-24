@@ -503,14 +503,13 @@ export default function NewPurchaseOrderPage() {
                   onValueChange={(val) => {
                     setBranchId(val);
                     const selected = repositories.find((r: any) => r.id === val);
-                    setBranchName(selected ? selected.name : "Main Warehouse");
+                    setBranchName(selected ? selected.name : "");
                   }}
                 >
                   <SelectTrigger className="h-11 border-brand-border">
                     <SelectValue placeholder="Select Warehouse" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="main">Main Warehouse</SelectItem>
                     {repositories.map((repo: any) => (
                       <SelectItem key={repo.id} value={repo.id}>
                         {repo.name}

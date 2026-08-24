@@ -570,7 +570,7 @@ export default function PurchaseOrderDetailPage({
                   Warehouse
                 </span>
                 <span className="font-bold text-slate-800 text-sm mt-0.5 block">
-                  {po.outletName || "Main Warehouse"}
+                  {po.outletName || "Unassigned"}
                 </span>
               </div>
               <div>

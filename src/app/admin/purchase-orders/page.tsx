@@ -284,7 +284,7 @@ export default function PurchaseOrdersPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3.5 text-slate-600 text-xs font-medium">
-                          {po.outletName || "Main Warehouse"}
+                          {po.outletName || "Unassigned"}
                         </td>
                         <td className="px-4 py-3.5 text-center">
                           <div className="flex flex-col items-center gap-1">
