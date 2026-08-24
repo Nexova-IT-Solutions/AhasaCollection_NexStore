@@ -264,22 +264,12 @@ export function PosProductGrid() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle Enter key press in search box to add top matching item to cart
+  // Handle Enter key press in search box to select text for instant replacement on next scan/typing
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (displayProducts.length === 0) return;
-
     if (e.key === "Enter") {
       e.preventDefault();
-      const targetProduct = displayProducts.find((p) => p.stock > 0) || displayProducts[0];
-      if (targetProduct) {
-        if (targetProduct.stock > 0) {
-          handleAddToCart(targetProduct);
-          // Highlight/select input text so the next scan or keypress automatically replaces it
-          e.currentTarget.select();
-        } else {
-          toast.error(`${targetProduct.name} is out of stock`);
-        }
-      }
+      // Highlight/select input text so the next scan or keypress automatically replaces it
+      e.currentTarget.select();
     }
   };
 
