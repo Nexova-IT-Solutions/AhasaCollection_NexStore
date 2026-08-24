@@ -377,7 +377,6 @@ export function CheckoutModal() {
               <DialogDescription>
                 <div className="flex items-center gap-1.5">
                   Total: <span className="font-bold text-[#A7066A]">{formatPrice(total)}</span>
-                  <span className="font-bold text-[#A7066A] text-xs">({arNum(formatPrice(total))})</span>
                   <span className="text-slate-400">·</span>
                   <span>{items.length} item{items.length !== 1 ? "s" : ""}</span>
                 </div>
