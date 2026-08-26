@@ -62,6 +62,7 @@ export function CheckoutModal() {
   const [splitEntries, setSplitEntries] = useState<SplitPaymentEntry[]>([]);
   const [courierTrackingId, setCourierTrackingId] = useState("");
   const [courierReference, setCourierReference] = useState("");
+  const [courierDeliveryFee, setCourierDeliveryFee] = useState<number | "">("");
   const [successOrder, setSuccessOrder] = useState<{
     orderNumber: string; total: number; subtotal: number; changeDue: number; billDiscountAmount?: number;
     paymentMethod: string;
@@ -73,8 +74,11 @@ export function CheckoutModal() {
   const subtotal = getSubtotal();
   const billDiscountAmount = getBillDiscountAmount();
   const total = getTotal();
+  const deliveryFeeNum = (payment.method === "COURIER_COD" || payment.method === "COURIER_OTHER") ? (Number(courierDeliveryFee) || 0) : 0;
+  const finalTotal = total + deliveryFeeNum;
+
   const changeDue = payment.method === "POS_CASH"
-    ? Math.max(0, payment.cashTendered - total) : 0;
+    ? Math.max(0, payment.cashTendered - finalTotal) : 0;
 
   const arNum = (n: number | string) => {
     return "";
@@ -87,6 +91,9 @@ export function CheckoutModal() {
       setGiftCardError(null);
       setGiftCardIsPhysical(false);
       setSplitEntries([]);
+      setCourierDeliveryFee("");
+      setCourierTrackingId("");
+      setCourierReference("");
     }
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -192,7 +199,8 @@ export function CheckoutModal() {
           recipientEmail: item.recipientEmail,
           personalMessage: item.personalMessage,
         })),
-        subtotal, total,
+        subtotal, total: finalTotal,
+        deliveryFee: deliveryFeeNum,
         paymentMethod: payment.method,
         cashTendered: payment.method === "POS_CASH" ? payment.cashTendered : 0,
         changeDue: payment.method === "POS_CASH" ? changeDue : 0,
@@ -476,12 +484,24 @@ export function CheckoutModal() {
                 <div className="space-y-4">
                   <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 text-center">
                     <Truck className="h-10 w-10 text-white/50 mx-auto mb-3" />
-                    <p className="text-2xl font-black text-white">{formatPrice(total)}</p>
+                    <p className="text-2xl font-black text-white">{formatPrice(finalTotal)}</p>
                     <p className="text-xs text-white/50 mt-1">
                       {payment.method === "COURIER_COD"
                         ? "Cash on Delivery (COD) order"
                         : "Other Payment (Bank Transfer, Online Payment)"}
                     </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">Delivery Fee (LKR)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={courierDeliveryFee}
+                      onChange={(e) => setCourierDeliveryFee(e.target.value === "" ? "" : Math.max(0, Number(e.target.value)))}
+                      placeholder="e.g. 350"
+                      className="h-10 text-sm font-semibold border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <p className="text-[11px] text-slate-400">Delivery fee will be added to the final total bill.</p>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-slate-600">Tracking ID (optional)</Label>

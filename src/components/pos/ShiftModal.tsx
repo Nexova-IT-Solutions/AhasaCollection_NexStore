@@ -458,7 +458,6 @@ export function ShiftModal() {
                   </Button>
                   <Button
                     onClick={() => setStep(3)}
-                    disabled={denominationTotal === 0}
                     className="flex-1 h-11 bg-[#A7066A] hover:bg-[#8A0558] text-white font-bold text-xs gap-1.5 rounded-xl shadow-md"
                   >
                     Next Phase <ChevronRight className="h-4 w-4" />
