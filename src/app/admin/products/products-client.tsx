@@ -137,7 +137,7 @@ export function ProductsClient({
   const [gridColumns, setGridColumns] = useState<number>(4);
   const [transferProduct, setTransferProduct] = useState<ProductData | null>(null);
   const [transferOutletId, setTransferOutletId] = useState("");
-  const [transferQty, setTransferQty] = useState(1);
+  const [transferQty, setTransferQty] = useState<number | "">(1);
   const [transferReason, setTransferReason] = useState("");
   const [outlets, setOutlets] = useState<{ id: string; name: string }[]>([]);
   const [repositories, setRepositories] = useState<{ id: string; name: string }[]>([]);
@@ -155,7 +155,7 @@ export function ProductsClient({
   }, []);
 
   const handleTransfer = async () => {
-    if (!transferProduct || !transferOutletId || transferQty <= 0 || !transferReason) {
+    if (!transferProduct || !transferOutletId || !transferQty || transferQty <= 0 || !transferReason) {
       toast({
         title: "Validation Error",
         description: "Please fill all transfer fields.",
@@ -183,7 +183,7 @@ export function ProductsClient({
       toast({ title: "Success", description: "Stock transferred successfully!" });
       // Optimistically update stock count in UI immediately
       setProducts((prev) =>
-        prev.map((p) => (p.id === transferProduct.id ? { ...p, stock: Math.max(0, p.stock - transferQty) } : p))
+        prev.map((p) => (p.id === transferProduct.id ? { ...p, stock: Math.max(0, p.stock - (Number(transferQty) || 0)) } : p))
       );
       setTransferProduct(null);
       setTransferOutletId("");
@@ -198,11 +198,11 @@ export function ProductsClient({
   };
 
   const [adjustProduct, setAdjustProduct] = useState<ProductData | null>(null);
-  const [adjustQty, setAdjustQty] = useState(1);
+  const [adjustQty, setAdjustQty] = useState<number | "">(1);
   const [adjustReason, setAdjustReason] = useState("");
 
   const handleAdjust = async () => {
-    if (!adjustProduct || adjustQty <= 0 || !adjustReason) {
+    if (!adjustProduct || !adjustQty || adjustQty <= 0 || !adjustReason) {
       toast({
         title: "Validation Error",
         description: "Please fill all fields.",
@@ -229,7 +229,7 @@ export function ProductsClient({
       toast({ title: "Success", description: "Stock removed successfully!" });
       // Optimistically update stock count in UI immediately
       setProducts((prev) =>
-        prev.map((p) => (p.id === adjustProduct.id ? { ...p, stock: Math.max(0, p.stock - adjustQty) } : p))
+        prev.map((p) => (p.id === adjustProduct.id ? { ...p, stock: Math.max(0, p.stock - (Number(adjustQty) || 0)) } : p))
       );
       setAdjustProduct(null);
       setAdjustQty(1);
@@ -858,7 +858,17 @@ export function ProductsClient({
                 min={1}
                 max={transferProduct?.stock || 1}
                 value={transferQty}
-                onChange={(e) => setTransferQty(Math.max(1, Math.min(transferProduct?.stock || 9999, Number(e.target.value))))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    setTransferQty("");
+                  } else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setTransferQty(Math.min(transferProduct?.stock || 9999, num));
+                    }
+                  }
+                }}
                 className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               />
             </div>
@@ -917,7 +927,17 @@ export function ProductsClient({
                 min={1}
                 max={adjustProduct?.stock || 1}
                 value={adjustQty}
-                onChange={(e) => setAdjustQty(Math.max(1, Math.min(adjustProduct?.stock || 9999, Number(e.target.value))))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    setAdjustQty("");
+                  } else {
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) {
+                      setAdjustQty(Math.min(adjustProduct?.stock || 9999, num));
+                    }
+                  }
+                }}
                 className="w-full h-10 rounded-xl border border-brand-border bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#A7066A]"
               />
             </div>
