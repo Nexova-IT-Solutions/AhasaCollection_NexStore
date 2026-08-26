@@ -484,6 +484,7 @@ export async function POST(req: NextRequest) {
           freeDeliveryThreshold: 0,
           total: total,
           orderStatus: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? "CONFIRMED" : "DELIVERED",
+          paymentMethod: paymentMethod,
           paymentStatus: (paymentMethod === "COURIER_COD" || paymentMethod === "POS_CREDIT") ? "PENDING" : "PAID",
           paymentConfirmedAt: (paymentMethod === "COURIER_COD" || paymentMethod === "POS_CREDIT") ? null : new Date(),
           trackingNumber: (paymentMethod === "COURIER_COD" || paymentMethod === "COURIER_OTHER") ? (courierTrackingId || null) : null,

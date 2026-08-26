@@ -32,6 +32,7 @@ type OrderPanelProps = {
     orderStatus: string;
     paymentStatus: string;
     paymentMethod: string;
+    orderSource?: string;
     internalNotes: string | null;
     customerName: string;
     customerEmail: string;
@@ -219,7 +220,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
         </Card>
       )}
 
-      {order.paymentMethod === "POS_CREDIT" && order.paymentStatus === "PENDING" && (
+      {(order.paymentMethod === "POS_CREDIT" || order.paymentMethod === "CREDIT" || (order.paymentMethod === "COD" && order.orderSource === "POS")) && order.paymentStatus === "PENDING" && (
         <Card className="overflow-hidden rounded-2xl border-2 border-purple-200 bg-purple-50 shadow-sm transition-all hover:shadow-md">
           <CardHeader className="bg-purple-100/50 pb-3">
             <CardTitle className="flex items-center gap-2 text-base font-bold text-purple-900">
