@@ -56,6 +56,36 @@ export async function GET(req: Request) {
       productWhere.stock = 0;
     }
 
+    // Fetch names for applied filter summary
+    const filterParts: string[] = [];
+    if (q) filterParts.push(`Search: "${q}"`);
+
+    let targetOutletId = outletFilter.effectiveOutletId || outlet;
+    if (targetOutletId) {
+      const oObj = await db.outlet.findUnique({ where: { id: targetOutletId }, select: { name: true } });
+      filterParts.push(`Outlet: ${oObj?.name || targetOutletId}`);
+    } else {
+      filterParts.push(`Outlet: All Outlets`);
+    }
+
+    if (repository) {
+      const rObj = await db.repository.findUnique({ where: { id: repository }, select: { name: true } });
+      filterParts.push(`Repository: ${rObj?.name || repository}`);
+    } else {
+      filterParts.push(`Repository: All Repositories`);
+    }
+
+    if (category) {
+      const cObj = await db.category.findUnique({ where: { id: category }, select: { name: true } });
+      filterParts.push(`Category: ${cObj?.name || category}`);
+    }
+
+    if (stock && stock !== "all") {
+      filterParts.push(`Stock: ${stock === "in" ? "In Stock" : "Out of Stock"}`);
+    }
+
+    const appliedFilterText = filterParts.join(" | ");
+
     const products = await db.product.findMany({
       where: productWhere,
       select: {
@@ -64,6 +94,9 @@ export async function GET(req: Request) {
         stock: true,
         price: true,
         productVariants: true,
+        category: {
+          select: { name: true },
+        },
         supplier: {
           select: { name: true },
         },
@@ -74,7 +107,7 @@ export async function GET(req: Request) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Inventory Backup");
 
-    const lastColLetter = "E";
+    const lastColLetter = "F";
 
     // 1. Merged Header Banner
     worksheet.mergeCells(`A1:${lastColLetter}1`);
@@ -94,10 +127,10 @@ export async function GET(req: Request) {
     bannerCell.alignment = { horizontal: "center", vertical: "middle" };
     worksheet.getRow(1).height = 36;
 
-    // 2. Merged Sub-banner
+    // 2. Merged Sub-banner (Generated time + Applied Filters)
     worksheet.mergeCells(`A2:${lastColLetter}2`);
     const metaCell = worksheet.getCell("A2");
-    metaCell.value = `Generated on: ${new Date().toLocaleString("en-LK", { timeZone: "Asia/Colombo" })} | Confidential Admin Report`;
+    metaCell.value = `Generated on: ${new Date().toLocaleString("en-LK", { timeZone: "Asia/Colombo" })}  |  ${appliedFilterText}`;
     metaCell.font = {
       name: "Segoe UI",
       size: 9,
@@ -123,7 +156,8 @@ export async function GET(req: Request) {
     const columnConfig = [
       { header: "Product Name", width: 40 },
       { header: "SKU", width: 20 },
-      { header: "Stock", width: 40 },
+      { header: "Category", width: 25 },
+      { header: "Stock", width: 35 },
       { header: "Supplier", width: 30 },
       { header: "Base Price (LKR)", width: 18 },
     ];
@@ -172,14 +206,15 @@ export async function GET(req: Request) {
       const row = worksheet.getRow(currentRowNumber);
       row.getCell(1).value = p.name;
       row.getCell(2).value = p.sku || "N/A";
-      row.getCell(3).value = stockDisplay;
-      row.getCell(4).value = p.supplier?.name || "N/A";
-      row.getCell(5).value = p.price;
+      row.getCell(3).value = p.category?.name || "Uncategorized";
+      row.getCell(4).value = stockDisplay;
+      row.getCell(5).value = p.supplier?.name || "N/A";
+      row.getCell(6).value = p.price;
 
       // Stripe effect and border
       const isEven = index % 2 === 0;
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-        if (colNumber <= 5) {
+        if (colNumber <= 6) {
           cell.font = { name: "Segoe UI", size: 10 };
           cell.alignment = { vertical: "middle" };
           cell.fill = {
