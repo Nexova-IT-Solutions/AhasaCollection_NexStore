@@ -61,21 +61,20 @@ export async function GET(req: Request) {
     if (q) filterParts.push(`Search: "${q}"`);
 
     let targetOutletId = outletFilter.effectiveOutletId || outlet;
-    if (targetOutletId) {
+    
+    // Only include location filters that are active/relevant
+    if (targetOutletId && targetOutletId !== "all") {
       const oObj = await db.outlet.findUnique({ where: { id: targetOutletId }, select: { name: true } });
       filterParts.push(`Outlet: ${oObj?.name || targetOutletId}`);
-    } else {
-      filterParts.push(`Outlet: All Outlets`);
-    }
-
-    if (repository) {
+    } else if (repository && repository !== "all") {
       const rObj = await db.repository.findUnique({ where: { id: repository }, select: { name: true } });
       filterParts.push(`Repository: ${rObj?.name || repository}`);
     } else {
+      filterParts.push(`Outlet: All Outlets`);
       filterParts.push(`Repository: All Repositories`);
     }
 
-    if (category) {
+    if (category && category !== "all") {
       const cObj = await db.category.findUnique({ where: { id: category }, select: { name: true } });
       filterParts.push(`Category: ${cObj?.name || category}`);
     }
