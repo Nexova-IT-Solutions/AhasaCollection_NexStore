@@ -63,6 +63,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
   const [draftOrderStatus, setDraftOrderStatus] = React.useState(order.orderStatus);
   const [draftPaymentStatus, setDraftPaymentStatus] = React.useState(order.paymentStatus);
   const [trackingNumber, setTrackingNumber] = React.useState(order.trackingNumber ?? "");
+  const [creditSettleMethod, setCreditSettleMethod] = React.useState("POS_CASH");
   const [isPending, startTransition] = React.useTransition();
   const [savingNotes, setSavingNotes] = React.useState(false);
   const [isCompleted, setIsCompleted] = React.useState(false);
@@ -214,6 +215,62 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
                 Please update the payment status to PAID to unlock this action.
               </p>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {order.paymentMethod === "POS_CREDIT" && order.paymentStatus === "PENDING" && (
+        <Card className="overflow-hidden rounded-2xl border-2 border-purple-200 bg-purple-50 shadow-sm transition-all hover:shadow-md">
+          <CardHeader className="bg-purple-100/50 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-bold text-purple-900">
+              <CheckCircle2 className="size-4 text-purple-600" />
+              Settle Credit Purchase
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4 space-y-3">
+            <p className="text-xs font-medium leading-relaxed text-purple-800">
+              This Credit order is currently <strong>UNPAID</strong>. Select the settlement method received from the customer to mark as paid.
+            </p>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-purple-900">Settlement Method</label>
+              <Select value={creditSettleMethod} onValueChange={setCreditSettleMethod}>
+                <SelectTrigger className="h-10 rounded-xl border-purple-200 bg-white font-medium text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="POS_CASH">💵 Cash Settlement</SelectItem>
+                  <SelectItem value="POS_CARD">💳 Card Settlement</SelectItem>
+                  <SelectItem value="POS_MOBILE_TRANSFER">📱 Mobile / Bank Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  const result = await updateOrderAction(order.id, {
+                    paymentStatus: "PAID",
+                  });
+                  if (result.success) {
+                    toast({
+                      title: "Credit Payment Settled",
+                      description: `Credit order settled successfully via ${creditSettleMethod.replace("POS_", "")}.`,
+                    });
+                    setDraftPaymentStatus("PAID");
+                    router.refresh();
+                  } else {
+                    toast({
+                      title: "Settlement Failed",
+                      description: result.message,
+                      variant: "destructive",
+                    });
+                  }
+                });
+              }}
+              className="h-11 w-full rounded-xl bg-[#A7066A] font-bold text-white shadow-lg shadow-[#A7066A]/20 hover:bg-[#8A0558] disabled:opacity-50 mt-2"
+            >
+              {isPending ? "Settling Credit..." : "Settle Credit Payment as Paid"}
+            </Button>
           </CardContent>
         </Card>
       )}
