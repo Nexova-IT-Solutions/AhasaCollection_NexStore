@@ -71,12 +71,11 @@ export async function PATCH(req: Request, { params }: PageProps) {
     if (action === "APPROVE") {
       const canApprove =
         ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
-        hasPermission(session, "purchase_orders.approve") ||
-        hasPermission(session, "catalog.stock_admin");
+        hasPermission(session, "purchase_orders.approve");
 
       if (!canApprove) {
         return NextResponse.json(
-          { message: "Forbidden: Stock Admin approval required" },
+          { message: "Forbidden: Purchase Order Approval permission required" },
           { status: 403 }
         );
       }
@@ -105,12 +104,11 @@ export async function PATCH(req: Request, { params }: PageProps) {
     if (action === "REJECT") {
       const canApprove =
         ["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role) ||
-        hasPermission(session, "purchase_orders.approve") ||
-        hasPermission(session, "catalog.stock_admin");
+        hasPermission(session, "purchase_orders.approve");
 
       if (!canApprove) {
         return NextResponse.json(
-          { message: "Forbidden: Stock Admin privilege required" },
+          { message: "Forbidden: Purchase Order Approval permission required" },
           { status: 403 }
         );
       }

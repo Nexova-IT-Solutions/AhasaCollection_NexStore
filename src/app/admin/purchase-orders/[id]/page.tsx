@@ -371,7 +371,7 @@ export default function PurchaseOrderDetailPage({
     }
   };
 
-  const canApprove = hasPermission(session, "purchase_orders.approve") || hasPermission(session, "catalog.stock_admin");
+  const canApprove = hasPermission(session, "purchase_orders.approve");
   const canReceive = hasPermission(session, "purchase_orders.receive") || hasPermission(session, "catalog.manage_inventory");
   const canIntake = hasPermission(session, "purchase_orders.inventory_intake") || hasPermission(session, "catalog.manage_products");
   const canPay = hasPermission(session, "purchase_orders.payment") || hasPermission(session, "catalog.stock_admin");
