@@ -178,6 +178,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     if (parsed.data.paymentStatus && parsed.data.paymentStatus !== existing.paymentStatus) {
       updateData.paymentStatus = parsed.data.paymentStatus;
+      // When a COD/Courier payment is marked as PAID, automatically set order status to DELIVERED
+      if (parsed.data.paymentStatus === "PAID" && !parsed.data.orderStatus && !["CANCELLED", "REFUNDED"].includes(existing.orderStatus)) {
+        updateData.orderStatus = "DELIVERED";
+      }
     }
 
     if (parsed.data.trackingNumber !== undefined) {
