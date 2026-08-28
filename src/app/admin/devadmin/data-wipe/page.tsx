@@ -3,12 +3,23 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { AlertTriangle, Trash2, Database, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Trash2, Database, ShieldAlert, CheckSquare, Square, Info } from "lucide-react";
 
 export default function DataWipePage() {
   const { data: session } = useSession();
   const [confirmation, setConfirmation] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Checkbox selections for selective wipe
+  const [targets, setTargets] = useState({
+    wipeOrders: true,
+    wipePurchaseOrders: false,
+    wipeProducts: false,
+    wipeCategories: false,
+    wipeOutlets: false,
+    wipeRepositories: false,
+    wipeUsers: true,
+  });
 
   // Only allow DEV_ADMIN
   if (!session || session.user?.role !== "DEV_ADMIN") {
@@ -20,9 +31,44 @@ export default function DataWipePage() {
     );
   }
 
+  const toggleTarget = (key: keyof typeof targets) => {
+    setTargets((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const selectAll = () => {
+    setTargets({
+      wipeOrders: true,
+      wipePurchaseOrders: true,
+      wipeProducts: true,
+      wipeCategories: true,
+      wipeOutlets: true,
+      wipeRepositories: true,
+      wipeUsers: true,
+    });
+  };
+
+  const selectNone = () => {
+    setTargets({
+      wipeOrders: false,
+      wipePurchaseOrders: false,
+      wipeProducts: false,
+      wipeCategories: false,
+      wipeOutlets: false,
+      wipeRepositories: false,
+      wipeUsers: false,
+    });
+  };
+
+  const hasAnySelected = Object.values(targets).some(Boolean);
+
   const handleWipe = async () => {
     if (confirmation !== "WIPE PRODUCTION DATA") {
       toast.error("Please type the exact confirmation text.");
+      return;
+    }
+
+    if (!hasAnySelected) {
+      toast.error("Please select at least one data category to wipe.");
       return;
     }
 
@@ -31,7 +77,7 @@ export default function DataWipePage() {
       const res = await fetch("/api/devadmin/wipe-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmation }),
+        body: JSON.stringify({ confirmation, targets }),
       });
 
       if (!res.ok) {
@@ -39,7 +85,7 @@ export default function DataWipePage() {
         throw new Error(error);
       }
 
-      toast.success("Production data wiped successfully!");
+      toast.success("Selected data wiped successfully!");
       setConfirmation("");
     } catch (error: any) {
       toast.error(error.message || "Failed to wipe data");
@@ -48,60 +94,108 @@ export default function DataWipePage() {
     }
   };
 
+  const options: Array<{ key: keyof typeof targets; label: string; desc: string; isDanger?: boolean }> = [
+    { key: "wipeOrders", label: "Orders & POS Sales", desc: "Order histories, items, returns, POS shifts, and gift card redemptions" },
+    { key: "wipePurchaseOrders", label: "Purchase Orders & Receipts", desc: "PO requests, supplier receipts, and supplier payment history" },
+    { key: "wipeProducts", label: "Product Catalog & Stock", desc: "All product listings, variants, images, and inventory stock counts", isDanger: true },
+    { key: "wipeCategories", label: "Categories", desc: "Category tree structure (requires wiping products first or together)", isDanger: true },
+    { key: "wipeOutlets", label: "Outlets", desc: "Store outlets (requires wiping products first or together)", isDanger: true },
+    { key: "wipeRepositories", label: "Warehouses / Repositories", desc: "Storage repositories (requires wiping products first or together)", isDanger: true },
+    { key: "wipeUsers", label: "Customer Accounts", desc: "User accounts with 'USER' role, addresses, and customer ledgers" },
+  ];
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-8">
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div>
         <h1 className="text-3xl font-bold text-gray-900 flex items-center">
           <Database className="mr-3 h-8 w-8 text-red-600" />
-          Production Data Wipe Tool
+          Selective Production Data Wipe Tool
         </h1>
         <p className="mt-2 text-gray-600">
-          Use this tool to completely wipe all test transactions and customer data before going live.
+          Select specific data components you wish to wipe before going live or resetting environments.
         </p>
       </div>
 
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 shadow-sm">
-        <h2 className="text-xl font-bold text-red-800 flex items-center mb-4">
-          <AlertTriangle className="mr-2 h-6 w-6" />
-          WARNING: DESTRUCTIVE ACTION
-        </h2>
-        
-        <div className="grid md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h3 className="font-bold text-red-900 border-b border-red-200 pb-2 mb-2">Will be DELETED forever:</h3>
-            <ul className="list-disc pl-5 text-red-700 space-y-1">
-              <li>All Orders, Order Items, and Order Histories</li>
-              <li>All Return Requests and Reviews</li>
-              <li>All Point-of-Sale Shifts and Cash Drawer logs</li>
-              <li>All Customer Accounts (Users with 'USER' role)</li>
-              <li>All Customer Addresses, Carts, and Ledgers</li>
-              <li>All Issued Gift Cards and Redemptions</li>
-            </ul>
+      {/* Target Selection Card */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <h2 className="text-base font-bold text-gray-800">Select Data Categories to Wipe</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={selectAll}
+              type="button"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded-md border border-blue-100"
+            >
+              Select All
+            </button>
+            <button
+              onClick={selectNone}
+              type="button"
+              className="text-xs font-semibold text-gray-600 hover:text-gray-800 bg-gray-50 px-3 py-1 rounded-md border border-gray-200"
+            >
+              Deselect All
+            </button>
           </div>
-          
-          <div>
-            <h3 className="font-bold text-green-900 border-b border-green-200 pb-2 mb-2">Will be KEPT safe:</h3>
-            <ul className="list-disc pl-5 text-green-700 space-y-1">
-              <li>Product Catalog, Inventory counts, Categories</li>
-              <li>Discounts, Suppliers, Occasions, Moods</li>
-              <li>Store Configurations, Shipping zones, Payment setups</li>
-              <li>All Staff/Admin Accounts (ADMIN, DEV_ADMIN, POS_ADMIN, etc.)</li>
-              <li>All Roles and Permission Templates</li>
-            </ul>
-          </div>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          {options.map((opt) => {
+            const isChecked = targets[opt.key];
+            return (
+              <div
+                key={opt.key}
+                onClick={() => toggleTarget(opt.key)}
+                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                  isChecked
+                    ? opt.isDanger
+                      ? "border-red-300 bg-red-50/40 text-red-950"
+                      : "border-blue-300 bg-blue-50/30 text-slate-900"
+                    : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                }`}
+              >
+                <div className="mt-0.5 shrink-0">
+                  {isChecked ? (
+                    <CheckSquare className={`h-5 w-5 ${opt.isDanger ? "text-red-600" : "text-blue-600"}`} />
+                  ) : (
+                    <Square className="h-5 w-5 text-gray-300" />
+                  )}
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold flex items-center gap-1.5">
+                    {opt.label}
+                    {opt.isDanger && isChecked && (
+                      <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-semibold">Destructive</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500 leading-snug">{opt.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+          <Info className="h-4 w-4 shrink-0 text-amber-600" />
+          <span>
+            Note: Database foreign keys require cascading. Selecting Products or Outlets will automatically clear related transactional records.
+          </span>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h3 className="font-semibold text-lg mb-2">Confirm Data Wipe</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          To proceed with the wipe, please type <strong>WIPE PRODUCTION DATA</strong> in the box below.
+      {/* Confirmation & Execution Card */}
+      <div className="bg-white border border-red-200 rounded-xl p-6 shadow-sm space-y-4">
+        <h3 className="font-bold text-lg text-red-900 flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-red-600" />
+          Confirm Data Wipe Action
+        </h3>
+        <p className="text-sm text-gray-600">
+          To confirm wiping the selected categories above, please type <strong>WIPE PRODUCTION DATA</strong> in the box below.
         </p>
-        
-        <div className="flex space-x-4">
+
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
-            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 px-4 py-2 border"
+            className="flex-1 rounded-xl border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 px-4 py-2.5 border text-sm"
             placeholder="WIPE PRODUCTION DATA"
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
@@ -109,8 +203,8 @@ export default function DataWipePage() {
           />
           <button
             onClick={handleWipe}
-            disabled={loading || confirmation !== "WIPE PRODUCTION DATA"}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading || confirmation !== "WIPE PRODUCTION DATA" || !hasAnySelected}
+            className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center">
@@ -120,7 +214,7 @@ export default function DataWipePage() {
             ) : (
               <span className="flex items-center">
                 <Trash2 className="mr-2 h-4 w-4" />
-                Execute Wipe
+                Execute Selected Wipe
               </span>
             )}
           </button>

@@ -16,60 +16,95 @@ export async function POST(req: Request) {
       return new NextResponse("Invalid confirmation", { status: 400 });
     }
 
+    const {
+      wipeOrders = true,
+      wipePurchaseOrders = false,
+      wipeProducts = false,
+      wipeCategories = false,
+      wipeOutlets = false,
+      wipeRepositories = false,
+      wipeUsers = true,
+    } = body.targets || {};
+
     // Execute the wipe in a transaction, safely ordering deletions to respect foreign keys
     await prisma.$transaction(async (tx) => {
-      // 1. Delete Stock Transfer logs
-      await tx.stockTransferLog.deleteMany();
+      // 1. Wipe Orders & POS Sales Data if selected (or required as dependency)
+      if (wipeOrders || wipeProducts || wipeOutlets || wipeRepositories) {
+        await tx.stockTransferLog.deleteMany();
+        await tx.shiftReconciliation.deleteMany();
+        await tx.shiftCashCount.deleteMany();
+        await tx.orderItemReturn.deleteMany();
+        await tx.returnRequest.deleteMany();
+        await tx.review.deleteMany();
+        await tx.orderItem.deleteMany();
+        await tx.orderStatusHistory.deleteMany();
+        await tx.giftCardRedemption.deleteMany();
 
-      // 2. Delete Purchase Order related data
-      await tx.purchaseOrderReceiptItem.deleteMany();
-      await tx.purchaseOrderReceipt.deleteMany();
-      await tx.supplierPayment.deleteMany();
-      await tx.purchaseOrderItem.deleteMany();
-      await tx.purchaseOrder.deleteMany();
+        await tx.order.updateMany({ data: { appliedGiftCardId: null } });
+        await tx.giftCard.updateMany({ data: { purchasedInOrderId: null, orderId: null, orderItemId: null } });
 
-      // 3. Delete deeply nested POS records
-      await tx.shiftReconciliation.deleteMany();
-      await tx.shiftCashCount.deleteMany();
-      
-      // 4. Delete Order dependencies (Returns, Reviews, Items, History)
-      await tx.orderItemReturn.deleteMany();
-      await tx.returnRequest.deleteMany();
-      await tx.review.deleteMany();
-      await tx.orderItem.deleteMany();
-      await tx.orderStatusHistory.deleteMany();
-      await tx.giftCardRedemption.deleteMany();
+        await tx.giftCard.deleteMany();
+        await tx.order.deleteMany();
+        await tx.posShift.deleteMany();
+      }
 
-      // 5. Break cyclical dependencies between Orders and GiftCards before deletion
-      await tx.order.updateMany({ data: { appliedGiftCardId: null } });
-      await tx.giftCard.updateMany({ data: { purchasedInOrderId: null, orderId: null, orderItemId: null } });
+      // 2. Wipe Purchase Orders & Supplier Payments if selected
+      if (wipePurchaseOrders || wipeProducts) {
+        await tx.purchaseOrderReceiptItem.deleteMany();
+        await tx.purchaseOrderReceipt.deleteMany();
+        await tx.supplierPayment.deleteMany();
+        await tx.purchaseOrderItem.deleteMany();
+        await tx.purchaseOrder.deleteMany();
+      }
 
-      // 6. Delete GiftCards and Orders
-      await tx.giftCard.deleteMany();
-      await tx.order.deleteMany();
-      
-      // 7. Delete POS Shifts (since orders referencing them are gone)
-      await tx.posShift.deleteMany();
+      // 3. Wipe Products (GiftBoxItems, ProductMood, ProductSupply, Product) if selected
+      if (wipeProducts || wipeCategories || wipeOutlets || wipeRepositories) {
+        await tx.giftBoxItem.deleteMany();
+        await tx.productSupply.deleteMany();
+        await tx.productMood.deleteMany();
+        await tx.product.deleteMany();
+      }
 
-      // 8. Delete Customer dependencies
-      await tx.customerLedger.deleteMany();
-      await tx.cart.deleteMany();
-      await tx.session.deleteMany();
-      await tx.account.deleteMany();
-      await tx.address.deleteMany();
+      // 4. Wipe Categories if selected
+      if (wipeCategories) {
+        // Disconnect parent categories first
+        await tx.category.updateMany({ data: { parentId: null } });
+        await tx.category.deleteMany();
+      }
 
-      // 10. Finally, delete all non-admin users
-      await tx.user.deleteMany({
-        where: {
-          role: "USER"
+      // 5. Wipe Outlets if selected
+      if (wipeOutlets) {
+        await tx.user.updateMany({ data: { outletId: null } });
+        await tx.outlet.deleteMany();
+      }
+
+      // 6. Wipe Repositories if selected
+      if (wipeRepositories) {
+        await tx.repository.deleteMany();
+      }
+
+      // 7. Wipe Customer Accounts & Sessions if selected
+      if (wipeUsers || wipeOrders) {
+        await tx.customerLedger.deleteMany();
+        await tx.cart.deleteMany();
+        await tx.session.deleteMany();
+        await tx.account.deleteMany();
+        await tx.address.deleteMany();
+
+        if (wipeUsers) {
+          await tx.user.deleteMany({
+            where: {
+              role: "USER"
+            }
+          });
         }
-      });
+      }
     }, {
-      maxWait: 10000, // 10 seconds max wait to start transaction
-      timeout: 45000, // 45 seconds max execution time for wiping
+      maxWait: 10000,
+      timeout: 60000,
     });
 
-    return NextResponse.json({ success: true, message: "Production data wiped successfully" });
+    return NextResponse.json({ success: true, message: "Selected data wiped successfully" });
   } catch (error: any) {
     console.error("Wipe Data Error:", error);
     return new NextResponse(error.message || "Internal Error", { status: 500 });
