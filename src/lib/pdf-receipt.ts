@@ -80,6 +80,7 @@ export interface ReceiptData {
     quantity: number;
     price: number;
     discountPercent?: number;
+    discountAmount?: number;
   }[];
   companyDetails?: {
     companyName?: string | null;
@@ -839,15 +840,27 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       if (item.sku) {
         itemName += `\nSKU: ${item.sku}`;
       }
-      
-      const discountText = item.discountPercent ? `${item.discountPercent}%` : "-";
+
+      // Compute item discount (supports percentage or fixed amount)
+      let itemDiscountVal = 0;
+      if (typeof item.discountAmount === "number" && item.discountAmount > 0) {
+        itemDiscountVal = item.discountAmount * item.quantity;
+      } else if (item.discountPercent && item.discountPercent > 0) {
+        itemDiscountVal = (item.price * item.quantity * item.discountPercent) / 100;
+      }
+
+      const discountText = itemDiscountVal > 0 
+        ? `${curSymbol} ${itemDiscountVal.toFixed(decimals)}${item.discountPercent ? ` (${item.discountPercent}%)` : ""}`
+        : "-";
+
+      const lineTotal = Math.max(0, (item.quantity * item.price) - itemDiscountVal);
 
       return [
         itemName,
         `${item.quantity}`,
         `${curSymbol} ${item.price.toFixed(decimals)}`,
         discountText,
-        `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`,
+        `${curSymbol} ${lineTotal.toFixed(decimals)}`,
       ];
     });
 
@@ -857,28 +870,48 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       body: tableData,
       theme: "striped",
       headStyles: { fillColor: [21, 101, 192], textColor: 255, fontStyle: "normal", font: fontToUse, halign: "center" },
-      styles: { font: fontToUse, fontSize: 10, cellPadding: 4 },
+      styles: { 
+        font: fontToUse, 
+        fontSize: 9.5, 
+        cellPadding: 5,
+        lineHeightFactor: 1.45 // Fix Sinhala vowel / diacritics clipping & baseline alignment
+      },
       columnStyles: {
         0: { cellWidth: 70 },
-        1: { cellWidth: 24, halign: "center" },
-        2: { cellWidth: 28, halign: "right" },
-        3: { cellWidth: 26, halign: "center" },
-        4: { cellWidth: 32, halign: "right" },
+        1: { cellWidth: 20, halign: "center" },
+        2: { cellWidth: 30, halign: "right" },
+        3: { cellWidth: 32, halign: "center" },
+        4: { cellWidth: 28, halign: "right" },
       },
       margin: { left: 15, right: 15 },
     });
 
     currentY = (doc as any).lastAutoTable.finalY + 15;
 
+    // Calculate total discount across items + order level
+    const totalItemDiscounts = data.items.reduce((acc, item) => {
+      if (typeof item.discountAmount === "number" && item.discountAmount > 0) {
+        return acc + (item.discountAmount * item.quantity);
+      } else if (item.discountPercent && item.discountPercent > 0) {
+        return acc + ((item.price * item.quantity * item.discountPercent) / 100);
+      }
+      return acc;
+    }, 0);
+
+    const overallDiscount = (data.billDiscountAmount && data.billDiscountAmount > 0)
+      ? data.billDiscountAmount
+      : totalItemDiscounts;
+
     // Totals Area (Right aligned box with clean brand background)
-    let boxHeight = 40;
-    if (data.billDiscountAmount && data.billDiscountAmount > 0) boxHeight += 10;
+    let boxHeight = 36;
+    if (overallDiscount > 0) boxHeight += 10;
+    if (data.changeDue > 0) boxHeight += 10;
 
     doc.setFillColor(239, 246, 255); // #EFF6FF (Light blue tint)
     doc.setDrawColor(191, 219, 254); // #BFDBFE (Soft blue border)
     doc.roundedRect(pageWidth - 115, currentY, 100, boxHeight, 3, 3, "FD");
 
-    let totalY = currentY + 10;
+    let totalY = currentY + 9;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.setTextColor(71, 85, 105); // Slate 600
@@ -886,16 +919,16 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     doc.text("Subtotal:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.subtotal.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     
-    if (data.billDiscountAmount && data.billDiscountAmount > 0) {
+    if (overallDiscount > 0) {
       totalY += 8;
       doc.setTextColor(225, 29, 72); // Rose 600 for discount
-      doc.text("Discount:", pageWidth - 110, totalY);
-      doc.text(`-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
+      doc.text("Total Discount:", pageWidth - 110, totalY);
+      doc.text(`-${curSymbol} ${overallDiscount.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
-    totalY += 12;
+    totalY += 11;
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
+    doc.setFontSize(13);
     doc.setTextColor(21, 101, 192); // #1565C0 Brand Royal Blue
     doc.text("Total:", pageWidth - 110, totalY);
     doc.text(`${curSymbol} ${data.total.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });

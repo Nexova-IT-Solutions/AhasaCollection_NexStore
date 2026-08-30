@@ -167,6 +167,19 @@ export default async function AdminOrderDetailsPage({ params }: PageProps) {
 
   const order = {
     ...orderData,
+    items: orderData.items.map((item) => {
+      const unitPrice = item.unitPrice || 0;
+      const salePrice = item.salePrice ?? unitPrice;
+      const discountPerUnit = Math.max(0, unitPrice - salePrice);
+      const discountPercent = unitPrice > 0 ? Math.round((discountPerUnit / unitPrice) * 100) : 0;
+      return {
+        ...item,
+        name: item.productName,
+        price: unitPrice,
+        discountAmount: discountPerUnit,
+        discountPercent: discountPercent > 0 ? discountPercent : undefined,
+      };
+    }),
     user: orderUser,
     giftWrapImage: giftWrap?.imageUrl || null,
   };
