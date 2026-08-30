@@ -88,6 +88,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
       orderNumber: order.orderNumber,
       total: order.total,
       subtotal: order.subtotal,
+      billDiscountAmount: order.billDiscountAmount,
       changeDue: 0, // Admin doesn't track change due
       paymentMethod: order.paymentMethod,
       date: format(new Date(order.createdAt), "PPpp"),
@@ -103,6 +104,7 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
       orderNumber: order.orderNumber,
       total: order.total,
       subtotal: order.subtotal,
+      billDiscountAmount: order.billDiscountAmount,
       changeDue: 0,
       paymentMethod: order.paymentMethod,
       date: format(new Date(order.createdAt), "PPpp"),
