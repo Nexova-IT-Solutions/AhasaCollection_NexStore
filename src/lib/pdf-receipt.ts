@@ -318,9 +318,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           <div>Date: ${data.date}</div>
           <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
           ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
+          ${data.customerName ? `<div>Customer: ${data.customerName}</div>` : ""}
           ${data.paymentMethod === "POS_CREDIT" ? `
             <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted #000;">
-              <div>Customer: ${data.customerName || "Walk-in Customer"}</div>
               <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
               <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
             </div>
@@ -445,8 +445,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         `Date: ${data.date}\n`,
         `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
         data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
+        data.customerName ? `Customer: ${data.customerName}\n` : "",
         data.paymentMethod === "POS_CREDIT"
-          ? `Customer: ${data.customerName || "Walk-in Customer"}\nPaid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}\nOutstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}\n`
+          ? `Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}\nOutstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}\n`
           : "",
         `${SEP}\n`
       );
@@ -799,15 +800,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.text(data.trackingNumber, pageWidth - 15, rightY, { align: "right" });
     }
 
-    if (data.paymentMethod === "POS_CREDIT") {
+    if (data.customerName) {
       rightY += 8;
       doc.setFont("helvetica", "bold");
       doc.setTextColor(33, 33, 33);
       doc.text("Customer:", pageWidth - 80, rightY);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(100, 100, 100);
-      doc.text(data.customerName || "Walk-in Customer", pageWidth - 15, rightY, { align: "right" });
+      doc.text(data.customerName, pageWidth - 15, rightY, { align: "right" });
+    }
 
+    if (data.paymentMethod === "POS_CREDIT") {
       rightY += 8;
       doc.setFont("helvetica", "bold");
       doc.setTextColor(33, 33, 33);

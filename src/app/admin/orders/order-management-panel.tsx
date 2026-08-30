@@ -91,6 +91,8 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
       changeDue: 0, // Admin doesn't track change due
       paymentMethod: order.paymentMethod,
       date: format(new Date(order.createdAt), "PPpp"),
+      customerName: order.customerName || null,
+      trackingNumber: order.trackingNumber,
       items: order.items,
       companyDetails: companyDetails,
     }, "download");
@@ -104,6 +106,8 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
       changeDue: 0,
       paymentMethod: order.paymentMethod,
       date: format(new Date(order.createdAt), "PPpp"),
+      customerName: order.customerName || null,
+      trackingNumber: order.trackingNumber,
       items: order.items,
       companyDetails: companyDetails,
     }, "print");
