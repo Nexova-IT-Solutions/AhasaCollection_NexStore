@@ -252,260 +252,287 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     const isRaster = mode.startsWith("raster");
     const isEnglish = mode.endsWith("_english");
 
-    if (isRaster) {
-      // 80mm THERMAL PRINTER RASTER FORMAT (html2canvas to PNG)
-
-
-      let itemsHtml = "";
-      data.items.forEach(item => {
-        let cleanName = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
-        let itemName = cleanName;
-        if (item.nameAr) {
-          const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
-          itemName += ` - ${cleanAr}`;
+      // Calculate total discount across items + order level
+      const totalItemDiscounts = data.items.reduce((acc, item) => {
+        if (typeof item.discountAmount === "number" && item.discountAmount > 0) {
+          return acc + (item.discountAmount * item.quantity);
+        } else if (item.discountPercent && item.discountPercent > 0) {
+          return acc + ((item.price * item.quantity * item.discountPercent) / 100);
         }
-        
-        let qtyPrice = `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
-          
-        if (item.discountPercent && item.discountPercent > 0) {
-          qtyPrice += ` (Disc ${item.discountPercent}%)`;
-        }
-        
-        const total = `${curSymbol} ${(item.quantity * item.price * (1 - (item.discountPercent || 0) / 100)).toFixed(decimals)}`;
-        
-        itemsHtml += `
-          <div style="margin-bottom: 6px;">
-            <div>${itemName}</div>
-            ${item.sku ? `<div style="font-size: 14px; color: #333;">SKU: ${item.sku}</div>` : ''}
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 17.5px;">
-              <div style="flex: 1;">${qtyPrice}</div>
-              <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
-            </div>
-          </div>
-        `;
-      });
+        return acc;
+      }, 0);
 
-      const container = document.createElement("div");
-      Object.assign(container.style, {
-        position: "fixed",
-        left: "-9999px",
-        top: "0",
-        width: "576px", // Full 80mm printable width (576 dots)
-        backgroundColor: "white",
-        color: "#000000",
-        fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-        fontSize: "18.5px",
-        fontWeight: "600",
-        lineHeight: "1.4",
-        padding: "0"
-      });
+      const overallDiscount = (data.billDiscountAmount && data.billDiscountAmount > 0)
+        ? data.billDiscountAmount
+        : totalItemDiscounts;
 
-      const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-      const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 100px; max-width: 156px; object-fit: contain; margin-top: 0;" /></div>` : '';
+      if (isRaster) {
+        // 80mm THERMAL PRINTER RASTER FORMAT (html2canvas to PNG)
 
-      container.innerHTML = `
-        ${logoHtml}
-        <div style="text-align: center; font-size: 25px; font-weight: bold; margin-bottom: 6px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
-        <div style="text-align: center; font-size: 17.5px; margin-bottom: 8px;">
-          ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
-          ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
-          ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
-          ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
-          ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
-        </div>
-        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
-        <div style="font-size: 18.5px; margin-bottom: 8px;">
-          <div>Order: ${data.orderNumber}</div>
-          <div>Date: ${data.date}</div>
-          <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
-          ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
-          ${data.customerName ? `<div>Customer: ${data.customerName}</div>` : ""}
-          ${data.paymentMethod === "POS_CREDIT" ? `
-            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted #000;">
-              <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
-              <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
-            </div>
-          ` : ""}
-        </div>
-        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
-        <div style="margin-bottom: 8px;">
-          ${itemsHtml}
-        </div>
-        <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
-          <span>Subtotal:</span>
-          <span style="font-weight: bold;">${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
-        </div>
-        ${data.billDiscountAmount && data.billDiscountAmount > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
-            <span>Discount:</span>
-            <span style="font-weight: bold;">-${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}</span>
-          </div>
-        ` : ''}
-        <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 23px; font-weight: bold;">
-          <span>Total:</span>
-          <span>${curSymbol} ${data.total.toFixed(decimals)}</span>
-        </div>
-        ${data.changeDue > 0 ? `
-          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
-            <span>Change Due:</span>
-            <span style="font-weight: bold;">${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
-          </div>
-        ` : ''}
-        <div style="text-align: center; margin-top: 16px; margin-bottom: 6px; font-size: 18.5px;">Thank you for your purchase!</div>
-        <div style="text-align: center; margin-top: 6px; font-size: 15px; color: #000; padding-bottom: 10px;">Powered by Nexova</div>
-      `;
-
-      document.body.appendChild(container);
-
-      if (data.companyDetails?.posPrinterName) {
-        try {
-          await connectQZ();
-          await new Promise(r => setTimeout(r, 50));
-          const canvas = await html2canvas(container, {
-            scale: 1,
-            useCORS: true,
-            logging: false
-          });
-          const hexImage = canvasToEscposHex(canvas);
-          const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
-          const config = qz.configs.create(qzTarget, { margins: 0 });
-          
-          // Enqueue the print job with a 500ms delay to allow the printer TCP socket to close safely
-          printQueue = printQueue.then(async () => {
-            await qz.print(config, [
-              {
-                type: 'raw',
-                format: 'command',
-                flavor: 'hex',
-                data: '1B40' + '1B6101' + hexImage + '1D564100'
-              }
-            ]);
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }).catch(e => {
-            console.error("QZ image print failed in queue", e);
-          });
-          
-          await printQueue;
-
-        } catch (e) {
-          console.error("QZ image print failed", e);
-        } finally {
-          if (document.body.contains(container)) {
-            document.body.removeChild(container);
+        let itemsHtml = "";
+        data.items.forEach(item => {
+          let cleanName = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+          let itemName = cleanName;
+          if (item.nameAr) {
+            const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+            itemName += ` - ${cleanAr}`;
           }
-        }
-      } else {
-        document.body.removeChild(container);
-      }
-      return;
-    } else {
-      // THERMAL PRINTER RAW TEXT FORMAT
-      const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-      const charWidth = data.companyDetails?.receiptCharWidth || 42;
-      const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
-      const logoHeight = data.companyDetails?.receiptLogoHeight || 80;
-      
-      const rawLines: any[] = [];
+          
+          let qtyPrice = `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
+          
+          let itemDiscountVal = 0;
+          if (typeof item.discountAmount === "number" && item.discountAmount > 0) {
+            itemDiscountVal = item.discountAmount * item.quantity;
+          } else if (item.discountPercent && item.discountPercent > 0) {
+            itemDiscountVal = (item.price * item.quantity * item.discountPercent) / 100;
+          }
 
-      rawLines.push(
-        '\x1B\x40', // Init printer
-        '\x1B\x4D\x01', // Select Font B (Small condensed font ~40% smaller)
-      );
+          if (itemDiscountVal > 0) {
+            qtyPrice += ` (Disc: -${curSymbol} ${itemDiscountVal.toFixed(decimals)}${item.discountPercent ? ` / ${item.discountPercent}%` : ''})`;
+          }
+          
+          const total = `${curSymbol} ${Math.max(0, (item.quantity * item.price) - itemDiscountVal).toFixed(decimals)}`;
+          
+          itemsHtml += `
+            <div style="margin-bottom: 6px;">
+              <div>${itemName}</div>
+              ${item.sku ? `<div style="font-size: 14px; color: #333;">SKU: ${item.sku}</div>` : ''}
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 17.5px;">
+                <div style="flex: 1;">${qtyPrice}</div>
+                <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
+              </div>
+            </div>
+          `;
+        });
 
-      if (!isEnglish) {
-        rawLines.push('\x1B\x74\x21'); // Select character code table 33 (WPC1256 for Arabic)
-      }
+        const container = document.createElement("div");
+        Object.assign(container.style, {
+          position: "fixed",
+          left: "-9999px",
+          top: "0",
+          width: "576px", // Full 80mm printable width (576 dots)
+          backgroundColor: "white",
+          color: "#000000",
+          fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          fontSize: "18.5px",
+          fontWeight: "600",
+          lineHeight: "1.4",
+          padding: "0"
+        });
 
-      rawLines.push(
-        '\x1B\x61\x01', // Center align
-      );
-      
-      // Logo will be sent as a real raster image via ESC/POS hex (built later, before qz.print)
+        const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
+        const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 100px; max-width: 156px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
-      rawLines.push(
-        '\x1B\x61\x01', // Ensure center align again just in case
-        '\x1B\x45\x01', // Bold on
-        `${companyName}\n`,
-        '\x1B\x45\x00', // Bold off
-      );
+        container.innerHTML = `
+          ${logoHtml}
+          <div style="text-align: center; font-size: 25px; font-weight: bold; margin-bottom: 6px;">${data.companyDetails?.companyName || "Ahasa Collection"}</div>
+          <div style="text-align: center; font-size: 17.5px; margin-bottom: 8px;">
+            ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
+            ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
+            ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
+            ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
+            ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
+          </div>
+          <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+          <div style="font-size: 18.5px; margin-bottom: 8px;">
+            <div>Order: ${data.orderNumber}</div>
+            <div>Date: ${data.date}</div>
+            <div>Payment: ${data.paymentMethod.replace("POS_", "")}</div>
+            ${data.trackingNumber ? `<div>Tracking ID: ${data.trackingNumber}</div>` : ""}
+            ${data.customerName ? `<div>Customer: ${data.customerName}</div>` : ""}
+            ${data.paymentMethod === "POS_CREDIT" ? `
+              <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted #000;">
+                <div>Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}</div>
+                <div>Outstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}</div>
+              </div>
+            ` : ""}
+          </div>
+          <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+          <div style="margin-bottom: 8px;">
+            ${itemsHtml}
+          </div>
+          <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
+          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
+            <span>Subtotal:</span>
+            <span style="font-weight: bold;">${curSymbol} ${data.subtotal.toFixed(decimals)}</span>
+          </div>
+          ${overallDiscount > 0 ? `
+            <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
+              <span>Total Discount:</span>
+              <span style="font-weight: bold;">-${curSymbol} ${overallDiscount.toFixed(decimals)}</span>
+            </div>
+          ` : ''}
+          <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 23px; font-weight: bold;">
+            <span>Total:</span>
+            <span>${curSymbol} ${data.total.toFixed(decimals)}</span>
+          </div>
+          ${data.changeDue > 0 ? `
+            <div style="display: flex; justify-content: flex-end; gap: 16px; margin-bottom: 4px; font-size: 18.5px;">
+              <span>Change Due:</span>
+              <span style="font-weight: bold;">${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
+            </div>
+          ` : ''}
+          <div style="text-align: center; margin-top: 16px; margin-bottom: 6px; font-size: 18.5px;">Thank you for your purchase!</div>
+          <div style="text-align: center; margin-top: 6px; font-size: 15px; color: #000; padding-bottom: 10px;">Powered by Nexova</div>
+        `;
 
-      if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
-      if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
-      if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
-      if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
-      if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
-      
-      const SEP = '-'.repeat(charWidth);
+        document.body.appendChild(container);
 
-      // Switch to left align before first separator so it spans full width
-      rawLines.push(
-        '\x1B\x61\x00', // Left align
-        `${SEP}\n`,
-        `Order: ${data.orderNumber}\n`,
-        `Date: ${data.date}\n`,
-        `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
-        data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
-        data.customerName ? `Customer: ${data.customerName}\n` : "",
-        data.paymentMethod === "POS_CREDIT"
-          ? `Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}\nOutstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}\n`
-          : "",
-        `${SEP}\n`
-      );
-      
-      // Items — qty left aligned, price exact right aligned by padding to charWidth
-      data.items.forEach((item, index) => {
-        let nameLine = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
-        if (!isEnglish && item.nameAr) {
-          const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
-          nameLine += ` - ${cleanAr}`;
-        }
+        if (data.companyDetails?.posPrinterName) {
+          try {
+            await connectQZ();
+            await new Promise(r => setTimeout(r, 50));
+            const canvas = await html2canvas(container, {
+              scale: 1,
+              useCORS: true,
+              logging: false
+            });
+            const hexImage = canvasToEscposHex(canvas);
+            const qzTarget = getQZPrinterConfig(data.companyDetails.posPrinterName);
+            const config = qz.configs.create(qzTarget, { margins: 0 });
+            
+            // Enqueue the print job with a 500ms delay to allow the printer TCP socket to close safely
+            printQueue = printQueue.then(async () => {
+              await qz.print(config, [
+                {
+                  type: 'raw',
+                  format: 'command',
+                  flavor: 'hex',
+                  data: '1B40' + '1B6101' + hexImage + '1D564100'
+                }
+              ]);
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }).catch(e => {
+              console.error("QZ image print failed in queue", e);
+            });
+            
+            await printQueue;
 
-        // Name line (left aligned)
-        rawLines.push('\x1B\x61\x00'); // Left align
-        rawLines.push(`${nameLine}\n`);
-        if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
-
-        // Qty & Price Line padded to right edge
-        const qtyPrice = isEnglish
-          ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
-          : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
-        
-        const lineTotal = item.quantity * item.price * (1 - (item.discountPercent || 0) / 100);
-        const formattedTotal = `${curSymbol} ${lineTotal.toFixed(decimals)}`;
-
-        // Calculate exact whitespace padding for right alignment on thermal printer text mode
-        let itemQtyPriceLine = "";
-        if (qtyPrice.length + formattedTotal.length + 1 <= charWidth) {
-          const spaces = " ".repeat(charWidth - qtyPrice.length - formattedTotal.length);
-          itemQtyPriceLine = `${qtyPrice}${spaces}${formattedTotal}\n`;
+          } catch (e) {
+            console.error("QZ image print failed", e);
+          } finally {
+            if (document.body.contains(container)) {
+              document.body.removeChild(container);
+            }
+          }
         } else {
-          const spaces = " ".repeat(Math.max(0, charWidth - formattedTotal.length));
-          itemQtyPriceLine = `${qtyPrice}\n${spaces}${formattedTotal}\n`;
+          document.body.removeChild(container);
+        }
+        return;
+      } else {
+        // THERMAL PRINTER RAW TEXT FORMAT
+        const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
+        const charWidth = data.companyDetails?.receiptCharWidth || 42;
+        const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
+        const logoHeight = data.companyDetails?.receiptLogoHeight || 80;
+        
+        const rawLines: any[] = [];
+
+        rawLines.push(
+          '\x1B\x40', // Init printer
+          '\x1B\x4D\x01', // Select Font B (Small condensed font ~40% smaller)
+        );
+
+        if (!isEnglish) {
+          rawLines.push('\x1B\x74\x21'); // Select character code table 33 (WPC1256 for Arabic)
         }
 
-        rawLines.push(itemQtyPriceLine);
+        rawLines.push(
+          '\x1B\x61\x01', // Center align
+        );
+        
+        // Logo will be sent as a real raster image via ESC/POS hex (built later, before qz.print)
 
-        // Discount line if applicable (left aligned)
-        if (item.discountPercent && item.discountPercent > 0) {
-          const discLine = isEnglish
-            ? `Discount: ${item.discountPercent}% off`
-            : `Discount / වට්ටම්: ${item.discountPercent}%`;
-          rawLines.push(`${discLine}\n`);
-        }
-      });
+        rawLines.push(
+          '\x1B\x61\x01', // Ensure center align again just in case
+          '\x1B\x45\x01', // Bold on
+          `${companyName}\n`,
+          '\x1B\x45\x00', // Bold off
+        );
 
-      // Separator then right-aligned totals
-      rawLines.push(
-        '\x1B\x61\x00', // Left align for separator
-        `${SEP}\n`,
-        '\x1B\x61\x02', // Right align for totals
-        isEnglish ? `Subtotal: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n` : `Subtotal / උප එකතුව: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n`,
-        data.billDiscountAmount && data.billDiscountAmount > 0
-          ? (isEnglish ? `Discount: -${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}\n` : `Discount / වට්ටම්: -${curSymbol} ${data.billDiscountAmount.toFixed(decimals)}\n`)
-          : '',
-        isEnglish ? `Total: ${curSymbol} ${data.total.toFixed(decimals)}\n` : `Total / මුළු මුදල: ${curSymbol} ${data.total.toFixed(decimals)}\n`
-      );
+        if (data.companyDetails?.address) rawLines.push(`${data.companyDetails.address}\n`);
+        if (data.companyDetails?.mobileNumber) rawLines.push(`Tel: ${data.companyDetails.mobileNumber}\n`);
+        if (data.companyDetails?.email) rawLines.push(`${data.companyDetails.email}\n`);
+        if (data.companyDetails?.website) rawLines.push(`${data.companyDetails.website}\n`);
+        if (data.companyDetails?.crNumber) rawLines.push(`CR: ${data.companyDetails.crNumber}\n`);
+        
+        const SEP = '-'.repeat(charWidth);
+
+        // Switch to left align before first separator so it spans full width
+        rawLines.push(
+          '\x1B\x61\x00', // Left align
+          `${SEP}\n`,
+          `Order: ${data.orderNumber}\n`,
+          `Date: ${data.date}\n`,
+          `Payment: ${data.paymentMethod.replace("POS_", "")}\n`,
+          data.trackingNumber ? `Tracking ID: ${data.trackingNumber}\n` : "",
+          data.customerName ? `Customer: ${data.customerName}\n` : "",
+          data.paymentMethod === "POS_CREDIT"
+            ? `Paid Amount: ${curSymbol} ${(data.paidAmount ?? 0).toFixed(decimals)}\nOutstanding Amount: ${curSymbol} ${(data.outstandingAmount ?? data.total).toFixed(decimals)}\n`
+            : "",
+          `${SEP}\n`
+        );
+        
+        // Items — qty left aligned, price exact right aligned by padding to charWidth
+        data.items.forEach((item, index) => {
+          let nameLine = item.name.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+          if (!isEnglish && item.nameAr) {
+            const cleanAr = item.nameAr.replace(/\|?\s*#[a-fA-F0-9]{3,6}/g, '').trim();
+            nameLine += ` - ${cleanAr}`;
+          }
+
+          // Name line (left aligned)
+          rawLines.push('\x1B\x61\x00'); // Left align
+          rawLines.push(`${nameLine}\n`);
+          if (item.sku) rawLines.push(`SKU: ${item.sku}\n`);
+
+          // Qty & Price Line padded to right edge
+          const qtyPrice = isEnglish
+            ? `Qty: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`
+            : `Qty / ප්‍රමාණය: ${item.quantity} x ${curSymbol} ${item.price.toFixed(decimals)}`;
+          
+          let itemDiscountVal = 0;
+          if (typeof item.discountAmount === "number" && item.discountAmount > 0) {
+            itemDiscountVal = item.discountAmount * item.quantity;
+          } else if (item.discountPercent && item.discountPercent > 0) {
+            itemDiscountVal = (item.price * item.quantity * item.discountPercent) / 100;
+          }
+
+          const lineTotal = Math.max(0, (item.quantity * item.price) - itemDiscountVal);
+          const formattedTotal = `${curSymbol} ${lineTotal.toFixed(decimals)}`;
+
+          // Calculate exact whitespace padding for right alignment on thermal printer text mode
+          let itemQtyPriceLine = "";
+          if (qtyPrice.length + formattedTotal.length + 1 <= charWidth) {
+            const spaces = " ".repeat(charWidth - qtyPrice.length - formattedTotal.length);
+            itemQtyPriceLine = `${qtyPrice}${spaces}${formattedTotal}\n`;
+          } else {
+            const spaces = " ".repeat(Math.max(0, charWidth - formattedTotal.length));
+            itemQtyPriceLine = `${qtyPrice}\n${spaces}${formattedTotal}\n`;
+          }
+
+          rawLines.push(itemQtyPriceLine);
+
+          // Discount line if applicable (left aligned)
+          if (itemDiscountVal > 0) {
+            const discLine = isEnglish
+              ? `Discount: -${curSymbol} ${itemDiscountVal.toFixed(decimals)}${item.discountPercent ? ` (${item.discountPercent}% off)` : ''}`
+              : `Discount / වට්ටම්: -${curSymbol} ${itemDiscountVal.toFixed(decimals)}`;
+            rawLines.push(`${discLine}\n`);
+          }
+        });
+
+        // Separator then right-aligned totals
+        rawLines.push(
+          '\x1B\x61\x00', // Left align for separator
+          `${SEP}\n`,
+          '\x1B\x61\x02', // Right align for totals
+          isEnglish ? `Subtotal: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n` : `Subtotal / උප එකතුව: ${curSymbol} ${data.subtotal.toFixed(decimals)}\n`,
+          overallDiscount > 0
+            ? (isEnglish ? `Total Discount: -${curSymbol} ${overallDiscount.toFixed(decimals)}\n` : `Total Discount / මුළු වට්ටම: -${curSymbol} ${overallDiscount.toFixed(decimals)}\n`)
+            : '',
+          isEnglish ? `Total: ${curSymbol} ${data.total.toFixed(decimals)}\n` : `Total / මුළු මුදල: ${curSymbol} ${data.total.toFixed(decimals)}\n`
+        );
       
       if (data.changeDue > 0) {
         rawLines.push(isEnglish ? `Change Due: ${curSymbol} ${data.changeDue.toFixed(decimals)}\n` : `Change Due / ඉතිරි මුදල: ${curSymbol} ${data.changeDue.toFixed(decimals)}\n`);
