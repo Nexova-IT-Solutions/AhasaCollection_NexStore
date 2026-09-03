@@ -60,10 +60,8 @@ function toW1256Hex(str: string): string {
 }
 
 function fixSinhalaText(text: string): string {
-  if (!text) return text;
-  // Reorder Kombuva (U+0DD9 / U+0DDA / U+0DDC / U+0DDD) to appear before consonant for non-complex canvas PDF layout engines
-  // Match: [Base Consonant][Optional Virama/Ra-karaya][Pre-vowel sign U+0DD9-U+0DDD]
-  return text.replace(/([\u0D85-\u0DC6])(\u0DCA\u0DBD|\u0DCA\u0DDE|\u0DCA\u0DAB)?([\u0DD9-\u0DDD])/g, '$3$1$2');
+  // Standard NotoSansSinhala font in jsPDF handles standard Unicode sequences natively.
+  return text;
 }
 
 export interface ReceiptData {
