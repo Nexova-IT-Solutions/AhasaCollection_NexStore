@@ -60,8 +60,10 @@ function toW1256Hex(str: string): string {
 }
 
 function fixSinhalaText(text: string): string {
-  // Standard NotoSansSinhala font in jsPDF handles standard Unicode sequences natively.
-  return text;
+  if (!text) return text;
+  // Reorder Kombuva (U+0DD9, U+0DDA, U+0DDC, U+0DDD) to precede its consonant for PDF canvas text engine
+  // Matches base consonant \u0D85-\u0DC6 + optional virama/rakaransaya + kombuva \u0DD9-\u0DDD
+  return text.replace(/([\u0D85-\u0DC6])(\u0DCA[\u0D85-\u0DC6])?([\u0DD9-\u0DDD])/g, '$3$1$2');
 }
 
 export interface ReceiptData {
@@ -932,7 +934,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       margin: { left: 15, right: 15 },
     });
 
-    currentY = (doc as any).lastAutoTable.finalY + 15;
+    currentY = (doc as any).lastAutoTable.finalY + 12;
 
     // Calculate total discount across items + order level
     const totalItemDiscounts = data.items.reduce((acc, item) => {
@@ -952,6 +954,13 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     let boxHeight = 36;
     if (overallDiscount > 0) boxHeight += 10;
     if (data.changeDue > 0) boxHeight += 10;
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+    // If totals box overflows page height (bottom 35mm), start a new page
+    if (currentY + boxHeight > pageHeight - 30) {
+      doc.addPage();
+      currentY = 20;
+    }
 
     doc.setFillColor(239, 246, 255); // #EFF6FF (Light blue tint)
     doc.setDrawColor(191, 219, 254); // #BFDBFE (Soft blue border)
@@ -988,11 +997,12 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.text(`${curSymbol} ${data.changeDue.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
-    // Footer
+    // Footer (Positioned safely near page bottom without overlapping totals box)
+    const footerY = Math.max(currentY + boxHeight + 15, pageHeight - 12);
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(150, 150, 150);
-    doc.text("Thank you for your purchase!", pageWidth / 2, 280, { align: "center" });
+    doc.text("Thank you for your purchase!", pageWidth / 2, footerY, { align: "center" });
 
     doc.save(`Receipt-${data.orderNumber}.pdf`);
   }
