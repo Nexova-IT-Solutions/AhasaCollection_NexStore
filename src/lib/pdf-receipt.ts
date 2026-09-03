@@ -59,6 +59,13 @@ function toW1256Hex(str: string): string {
   return hex;
 }
 
+function fixSinhalaText(text: string): string {
+  if (!text) return text;
+  // Reorder Kombuva (U+0DD9 / U+0DDA / U+0DDC / U+0DDD) to appear before consonant for non-complex canvas PDF layout engines
+  // Match: [Base Consonant][Optional Virama/Ra-karaya][Pre-vowel sign U+0DD9-U+0DDD]
+  return text.replace(/([\u0D85-\u0DC6])(\u0DCA\u0DBD|\u0DCA\u0DDE|\u0DCA\u0DAB)?([\u0DD9-\u0DDD])/g, '$3$1$2');
+}
+
 export interface ReceiptData {
   orderNumber: string;
   total: number;
@@ -866,7 +873,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
 
     // Items Table mapping
     const tableData = data.items.map((item) => {
-      let itemName = item.name;
+      let itemName = fixSinhalaText(item.name);
       if (item.nameAr) {
         itemName += `\n${item.nameAr}`;
       }
@@ -902,7 +909,15 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       head: [["Item Description", "Qty", "Unit Price", "Discount", "Total"]],
       body: tableData,
       theme: "striped",
-      headStyles: { fillColor: [21, 101, 192], textColor: 255, fontStyle: "normal", font: fontToUse, halign: "center" },
+      headStyles: { 
+        fillColor: [21, 101, 192], 
+        textColor: [255, 255, 255], 
+        fontStyle: "bold", 
+        font: fontToUse, 
+        fontSize: 10.5,
+        cellPadding: 6,
+        halign: "center" 
+      },
       styles: { 
         font: fontToUse, 
         fontSize: 9.5, 
