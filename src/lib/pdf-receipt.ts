@@ -997,11 +997,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       doc.text(`${curSymbol} ${data.changeDue.toFixed(decimals)}`, pageWidth - 20, totalY, { align: "right" });
     }
 
-    // Footer (Positioned safely near page bottom without overlapping totals box)
-    const footerY = Math.max(currentY + boxHeight + 15, pageHeight - 12);
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(150, 150, 150);
+    // Footer (Positioned safely below totals box with high contrast for B&W print)
+    const footerY = Math.min(currentY + boxHeight + 16, pageHeight - 15);
+    doc.setFontSize(10.5);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(51, 65, 85); // Slate 700 (#334155) for crisp B&W visibility
     doc.text("Thank you for your purchase!", pageWidth / 2, footerY, { align: "center" });
 
     doc.save(`Receipt-${data.orderNumber}.pdf`);
