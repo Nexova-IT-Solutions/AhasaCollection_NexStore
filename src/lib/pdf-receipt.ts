@@ -740,22 +740,28 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     const pageWidth = doc.internal.pageSize.getWidth();
     let currentY = 0;
 
-    // Header Background (#1565C0 Brand Royal Blue)
+    // Option 1: Clean Minimalist Top Accent Line (#1565C0 Brand Royal Blue)
     doc.setFillColor(21, 101, 192);
-    doc.rect(0, 0, pageWidth, 40, "F");
+    doc.rect(0, 0, pageWidth, 3.5, "F"); // Thin 3.5mm top accent line
 
-    // Header text
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28);
-    doc.setFont("helvetica", "bold");
-    doc.text("RECEIPT", pageWidth - 15, 25, { align: "right" });
-
-    // Logo
+    // Header Content (White background)
+    // Logo (Top-Left)
     if (logoBase64) {
-      doc.addImage(logoBase64, "PNG", 15, 8, 24, 24);
+      doc.addImage(logoBase64, "PNG", 15, 12, 28, 28);
     }
 
-    currentY = 50;
+    // RECEIPT Title (Top-Right)
+    doc.setTextColor(21, 101, 192); // Brand Royal Blue
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.text("RECEIPT", pageWidth - 15, 24, { align: "right" });
+
+    // Subtle horizontal divider below logo/title header section
+    doc.setDrawColor(226, 232, 240); // Soft Slate 200 divider line
+    doc.setLineWidth(0.4);
+    doc.line(15, 45, pageWidth - 15, 45);
+
+    currentY = 53;
 
     // Reset text color
     doc.setTextColor(33, 33, 33);
@@ -793,7 +799,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
     }
 
     // Receipt Info (Right)
-    let rightY = 50;
+    let rightY = 53;
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(33, 33, 33);
