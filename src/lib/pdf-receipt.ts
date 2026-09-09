@@ -338,7 +338,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
             ${data.companyDetails?.address ? `<div>${data.companyDetails.address}</div>` : ''}
             ${data.companyDetails?.mobileNumber ? `<div>Tel: ${data.companyDetails.mobileNumber}</div>` : ''}
             ${data.companyDetails?.email ? `<div>${data.companyDetails.email}</div>` : ''}
-            ${data.companyDetails?.website ? `<div>${data.companyDetails.website}</div>` : ''}
+            ${data.companyDetails?.website ? `<div style="font-weight: bold;">${data.companyDetails.website}</div>` : ''}
             ${data.companyDetails?.crNumber ? `<div>CR: ${data.companyDetails.crNumber}</div>` : ''}
           </div>
           <div style="border-bottom: 2px dashed #000; margin: 10px 0; clear: both;"></div>
@@ -380,8 +380,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
               <span style="font-weight: bold;">${curSymbol} ${data.changeDue.toFixed(decimals)}</span>
             </div>
           ` : ''}
-          <div style="text-align: center; margin-top: 16px; margin-bottom: 6px; font-size: 18.5px;">Thank you for your purchase!</div>
-          <div style="text-align: center; margin-top: 6px; font-size: 15px; color: #000; padding-bottom: 10px;">Powered by Nexova</div>
+          <div style="text-align: center; margin-top: 16px; margin-bottom: 4px; font-size: 18.5px;">Thank you for your purchase!</div>
+          ${data.companyDetails?.website ? `<div style="text-align: center; font-size: 16.5px; font-weight: bold; margin-bottom: 4px;">${data.companyDetails.website}</div>` : ''}
+          <div style="text-align: center; margin-top: 4px; font-size: 14.5px; color: #000; padding-bottom: 10px;">Powered by Nexova</div>
         `;
 
         document.body.appendChild(container);
