@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { ShieldAlert, Database, Plus, Trash2, Edit2, Check, X, AlertTriangle } from "lucide-react";
+import { ShieldAlert, Database, Plus, Trash2, Edit2, Check, X, AlertTriangle, Printer } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
