@@ -21,6 +21,13 @@ interface Outlet {
   id: string;
   name: string;
   isActive: boolean;
+  companyName?: string | null;
+  mobileNumber?: string | null;
+  address?: string | null;
+  website?: string | null;
+  email?: string | null;
+  crNumber?: string | null;
+  logoBase64?: string | null;
   posPrinterName?: string | null;
   posPrintMode?: string;
   receiptCharWidth?: number;
@@ -46,6 +53,13 @@ export default function OutletsPage() {
   // State for printer configuration modal
   const [printerTarget, setPrinterTarget] = useState<Outlet | null>(null);
   const [printerForm, setPrinterForm] = useState({
+    companyName: "",
+    mobileNumber: "",
+    address: "",
+    website: "",
+    email: "",
+    crNumber: "",
+    logoBase64: "",
     posPrinterName: "",
     posPrintMode: "raw",
     receiptCharWidth: 34,
@@ -99,6 +113,13 @@ export default function OutletsPage() {
   const openPrinterModal = (outlet: Outlet) => {
     setPrinterTarget(outlet);
     setPrinterForm({
+      companyName: outlet.companyName || "",
+      mobileNumber: outlet.mobileNumber || "",
+      address: outlet.address || "",
+      website: outlet.website || "",
+      email: outlet.email || "",
+      crNumber: outlet.crNumber || "",
+      logoBase64: outlet.logoBase64 || "",
       posPrinterName: outlet.posPrinterName || "",
       posPrintMode: outlet.posPrintMode || "raw",
       receiptCharWidth: outlet.receiptCharWidth ?? 34,
@@ -115,6 +136,17 @@ export default function OutletsPage() {
     }
   };
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPrinterForm((prev) => ({ ...prev, logoBase64: reader.result as string }));
+      toast.success("Branch logo uploaded successfully!");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSavePrinterSettings = async () => {
     if (!printerTarget) return;
     setIsSavingPrinter(true);
@@ -124,6 +156,13 @@ export default function OutletsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: printerTarget.id,
+          companyName: printerForm.companyName,
+          mobileNumber: printerForm.mobileNumber,
+          address: printerForm.address,
+          website: printerForm.website,
+          email: printerForm.email,
+          crNumber: printerForm.crNumber,
+          logoBase64: printerForm.logoBase64,
           posPrinterName: printerForm.posPrinterName,
           posPrintMode: printerForm.posPrintMode,
           receiptCharWidth: Number(printerForm.receiptCharWidth),
@@ -135,11 +174,11 @@ export default function OutletsPage() {
 
       if (!res.ok) throw new Error("Failed to save printer settings");
 
-      toast.success(`Printer settings for ${printerTarget.name} updated live!`);
+      toast.success(`Branch settings & logo for ${printerTarget.name} updated live!`);
       setPrinterTarget(null);
       fetchOutlets();
     } catch (error) {
-      toast.error("Failed to update printer settings");
+      toast.error("Failed to update branch printer settings");
     } finally {
       setIsSavingPrinter(false);
     }
@@ -164,11 +203,13 @@ export default function OutletsPage() {
           { name: "Branch Test Book Item", sku: "TEST-001", quantity: 1, price: 1250.00 }
         ],
         companyDetails: {
-          companyName: "Ahasa Mediaworks (Pvt) Ltd.",
-          address: "No 188, 8A High Level Rd, Maharagama 10280",
-          mobileNumber: "+94 76 058 8688",
-          email: "ahasabooks15@gmail.com",
-          website: "www.ahasabooks.lk",
+          companyName: printerForm.companyName || "Ahasa Mediaworks (Pvt) Ltd.",
+          address: printerForm.address || "No 188, 8A High Level Rd, Maharagama 10280",
+          mobileNumber: printerForm.mobileNumber || "+94 76 058 8688",
+          email: printerForm.email || "ahasabooks15@gmail.com",
+          website: printerForm.website || "www.ahasabooks.lk",
+          crNumber: printerForm.crNumber || "",
+          logoBase64: printerForm.logoBase64 || null,
           posPrinterName: printerForm.posPrinterName,
           posPrintMode: printerForm.posPrintMode,
           receiptCharWidth: printerForm.receiptCharWidth,
@@ -453,7 +494,113 @@ export default function OutletsPage() {
             </div>
           </AlertDialogHeader>
 
-          <div className="space-y-4 text-sm text-gray-700 max-h-[60vh] overflow-y-auto pr-1">
+          <div className="space-y-4 text-sm text-gray-700 max-h-[65vh] overflow-y-auto pr-1">
+            {/* Branch Header Details */}
+            <div className="space-y-3 pb-3 border-b border-gray-100">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-indigo-700">Branch Details (Printed on Receipt Header)</h4>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">Company / Branch Name</label>
+                  <input
+                    type="text"
+                    value={printerForm.companyName}
+                    onChange={(e) => setPrinterForm({ ...printerForm, companyName: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="e.g. Ahasa Mediaworks (Pvt) Ltd."
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">Mobile Number</label>
+                  <input
+                    type="text"
+                    value={printerForm.mobileNumber}
+                    onChange={(e) => setPrinterForm({ ...printerForm, mobileNumber: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="e.g. +94 76 058 8688"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">Email Address</label>
+                  <input
+                    type="email"
+                    value={printerForm.email}
+                    onChange={(e) => setPrinterForm({ ...printerForm, email: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="ahasabooks15@gmail.com"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">Website</label>
+                  <input
+                    type="text"
+                    value={printerForm.website}
+                    onChange={(e) => setPrinterForm({ ...printerForm, website: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="www.ahasabooks.lk"
+                  />
+                </div>
+
+                <div className="col-span-2 space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">Address</label>
+                  <input
+                    type="text"
+                    value={printerForm.address}
+                    onChange={(e) => setPrinterForm({ ...printerForm, address: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="No 188/8A, High Level Road, Maharagama 10280"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-xs text-slate-700">CR Number / Tax ID</label>
+                  <input
+                    type="text"
+                    value={printerForm.crNumber}
+                    onChange={(e) => setPrinterForm({ ...printerForm, crNumber: e.target.value })}
+                    className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="Enter CR or Tax Number"
+                  />
+                </div>
+              </div>
+
+              {/* Branch Receipt Logo Field */}
+              <div className="space-y-1.5 pt-2">
+                <label className="font-semibold text-xs text-slate-700 block">Branch Receipt Logo</label>
+                <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  {printerForm.logoBase64 ? (
+                    <div className="relative h-14 w-24 border rounded bg-white p-1 flex items-center justify-center">
+                      <img src={printerForm.logoBase64} alt="Branch Logo" className="max-h-full max-w-full object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => setPrinterForm((prev) => ({ ...prev, logoBase64: "" }))}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 hover:bg-red-700 shadow"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-14 w-24 border border-dashed border-slate-300 rounded bg-white flex items-center justify-center text-[10px] text-slate-400">
+                      No Logo Set
+                    </div>
+                  )}
+
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg"
+                      onChange={handleLogoUpload}
+                      className="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Upload PNG/JPG logo for receipts at this branch location.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Printer Selection */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">

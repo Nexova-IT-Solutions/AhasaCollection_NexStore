@@ -59,16 +59,23 @@ export function CheckoutModal() {
   const { data: rawCompanyDetails } = useSWR("/api/admin/company-details", fetcher);
   const { data: outletsData } = useSWR("/api/admin/outlets", fetcher);
 
-  // Dynamically resolve printer and alignment settings from logged-in user's assigned outlet/branch
+  // Dynamically resolve printer, logo, and branch details from logged-in user's assigned outlet/branch
   const companyDetails = useMemo(() => {
     if (!rawCompanyDetails) return null;
     const userOutletId = session?.user?.outletId;
     if (userOutletId && Array.isArray(outletsData)) {
       const userOutlet = outletsData.find((o: any) => o.id === userOutletId);
-      if (userOutlet && userOutlet.posPrinterName) {
+      if (userOutlet) {
         return {
           ...rawCompanyDetails,
-          posPrinterName: userOutlet.posPrinterName,
+          companyName: userOutlet.companyName || rawCompanyDetails.companyName,
+          mobileNumber: userOutlet.mobileNumber || rawCompanyDetails.mobileNumber,
+          address: userOutlet.address || rawCompanyDetails.address,
+          website: userOutlet.website || rawCompanyDetails.website,
+          email: userOutlet.email || rawCompanyDetails.email,
+          crNumber: userOutlet.crNumber || rawCompanyDetails.crNumber,
+          logoBase64: userOutlet.logoBase64 || rawCompanyDetails.logoBase64,
+          posPrinterName: userOutlet.posPrinterName || rawCompanyDetails.posPrinterName,
           posPrintMode: userOutlet.posPrintMode || rawCompanyDetails.posPrintMode || "raw",
           receiptCharWidth: userOutlet.receiptCharWidth ?? rawCompanyDetails.receiptCharWidth ?? 34,
           receiptLogoWidth: userOutlet.receiptLogoWidth ?? rawCompanyDetails.receiptLogoWidth ?? 200,

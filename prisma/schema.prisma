@@ -996,6 +996,13 @@ model Outlet {
   id                String    @id @default(cuid())
   name              String
   isActive          Boolean   @default(true)
+  companyName       String?
+  mobileNumber      String?
+  address           String?
+  website           String?
+  email             String?
+  crNumber          String?
+  logoBase64        String?
   posPrinterName    String?
   posPrintMode      String    @default("raw") // "raw" or "raster"
   receiptCharWidth  Int       @default(34)

@@ -70,6 +70,13 @@ export async function PATCH(req: Request) {
       id,
       name,
       isActive,
+      companyName,
+      mobileNumber,
+      address,
+      website,
+      email,
+      crNumber,
+      logoBase64,
       posPrinterName,
       posPrintMode,
       receiptCharWidth,
@@ -89,6 +96,14 @@ export async function PATCH(req: Request) {
     if (typeof isActive === "boolean") {
       updateData.isActive = isActive;
     }
+    if (companyName !== undefined) updateData.companyName = companyName ? String(companyName).trim() : null;
+    if (mobileNumber !== undefined) updateData.mobileNumber = mobileNumber ? String(mobileNumber).trim() : null;
+    if (address !== undefined) updateData.address = address ? String(address).trim() : null;
+    if (website !== undefined) updateData.website = website ? String(website).trim() : null;
+    if (email !== undefined) updateData.email = email ? String(email).trim() : null;
+    if (crNumber !== undefined) updateData.crNumber = crNumber ? String(crNumber).trim() : null;
+    if (logoBase64 !== undefined) updateData.logoBase64 = logoBase64 || null;
+
     if (posPrinterName !== undefined) {
       updateData.posPrinterName = posPrinterName ? String(posPrinterName).trim() : null;
     }
