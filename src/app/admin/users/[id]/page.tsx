@@ -99,6 +99,13 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
       commissionRate: true,
       commissionMethod: true,
       templateId: true,
+      outletId: true,
+      outlet: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
       customPermissions: true,
       accounts: {
         select: {
@@ -254,6 +261,22 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
                 <div className="md:col-span-2"><p className="text-muted-foreground">Comments</p><p className="font-medium">{profileValue(user.comments)}</p></div>
               </CardContent>
             </Card>
+
+            {!isStandardUser ? (
+              <Card className="border-brand-border">
+                <CardHeader>
+                  <CardTitle>Professional / HR</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+                  <div><p className="text-muted-foreground">Hire Date</p><p className="font-medium">{formatLongDate(user.hireDate)}</p></div>
+                  <div><p className="text-muted-foreground">Employee Number</p><p className="font-medium">{profileValue(user.employeeNumber)}</p></div>
+                  <div>
+                    <p className="text-muted-foreground">Assigned Outlet</p>
+                    <p className="font-semibold text-[#A7066A]">{profileValue(user.outlet?.name ?? "None / Not Tagged")}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
 
             {isStandardUser ? (
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
