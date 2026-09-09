@@ -317,9 +317,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         });
 
         const printAreaMm = data.companyDetails?.receiptPrintArea || 80;
-        // Convert print area mm to dots/px (e.g. 80mm -> 520px, 58mm -> 384px)
-        const containerPxWidth = Math.round((printAreaMm / 80) * 520);
-        const sidePaddingPx = Math.max(8, Math.round((printAreaMm / 80) * 18));
+        // Convert print area mm to dots/px (e.g. 80mm -> 560px full width, 58mm -> 384px)
+        const containerPxWidth = Math.round((printAreaMm / 80) * 560);
+        const sidePaddingPx = 2; // Minimal 2px safety padding for true edge-to-edge layout
         const baseFontSizePx = (printAreaMm < 70 ? 14 : 17.5);
 
         const container = document.createElement("div");
