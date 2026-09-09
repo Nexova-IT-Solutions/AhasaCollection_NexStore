@@ -570,8 +570,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         '\x1B\x61\x01', // Center align
         isEnglish ? '\nThank you for your purchase!\n' : '\nThank you for your purchase!\n',
         'Powered by Nexova\n',
-        '\n\n', // Compact 2x line feed (was 6x)
-        '\x1D\x56\x41\x10' // Full cut
+        '\x1D\x56\x41\x00' // Full cut without extra feeder advance
       );
 
       if (data.companyDetails?.posPrinterName) {
