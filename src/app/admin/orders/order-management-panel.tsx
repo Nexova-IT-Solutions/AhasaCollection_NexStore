@@ -24,6 +24,8 @@ import { formatOrderStatusLabel, ADMIN_ORDER_STATUS_OPTIONS, ADMIN_PAYMENT_STATU
 import { updateOrderAction, approveAndSendGiftCards } from "./[id]/actions";
 import useSWR from "swr";
 
+import { useSession } from "next-auth/react";
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 type OrderPanelProps = {
@@ -57,6 +59,7 @@ type OrderPanelProps = {
 };
 
 export function OrderManagementPanel({ order, customerOrderCount, customerProfileUrl }: OrderPanelProps) {
+  const { data: session } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
@@ -73,8 +76,37 @@ export function OrderManagementPanel({ order, customerOrderCount, customerProfil
     "/api/admin/feature-toggles",
     fetcher
   );
-  const { data: companyDetails } = useSWR("/api/admin/company-details", fetcher);
+  const { data: rawCompanyDetails } = useSWR("/api/admin/company-details", fetcher);
+  const { data: outletsData } = useSWR("/api/admin/outlets", fetcher);
   const isWebsiteEnabled = toggles?.storefront_website_enabled !== false;
+
+  // Dynamically resolve printer, logo, and branch details from logged-in user's assigned outlet/branch
+  const companyDetails = React.useMemo(() => {
+    if (!rawCompanyDetails) return null;
+    const userOutletId = session?.user?.outletId;
+    if (userOutletId && Array.isArray(outletsData)) {
+      const userOutlet = outletsData.find((o: any) => o.id === userOutletId);
+      if (userOutlet) {
+        return {
+          ...rawCompanyDetails,
+          companyName: userOutlet.companyName || rawCompanyDetails.companyName,
+          mobileNumber: userOutlet.mobileNumber || rawCompanyDetails.mobileNumber,
+          address: userOutlet.address || rawCompanyDetails.address,
+          website: userOutlet.website || rawCompanyDetails.website,
+          email: userOutlet.email || rawCompanyDetails.email,
+          crNumber: userOutlet.crNumber || rawCompanyDetails.crNumber,
+          logoBase64: userOutlet.logoBase64 || rawCompanyDetails.logoBase64,
+          posPrinterName: userOutlet.posPrinterName || rawCompanyDetails.posPrinterName,
+          posPrintMode: userOutlet.posPrintMode || rawCompanyDetails.posPrintMode || "raw",
+          receiptCharWidth: userOutlet.receiptCharWidth ?? rawCompanyDetails.receiptCharWidth ?? 34,
+          receiptLogoWidth: userOutlet.receiptLogoWidth ?? rawCompanyDetails.receiptLogoWidth ?? 200,
+          receiptLogoHeight: userOutlet.receiptLogoHeight ?? rawCompanyDetails.receiptLogoHeight ?? 80,
+          receiptPrintArea: userOutlet.receiptPrintArea ?? rawCompanyDetails.receiptPrintArea ?? 80,
+        };
+      }
+    }
+    return rawCompanyDetails;
+  }, [rawCompanyDetails, outletsData, session?.user?.outletId]);
 
   const repeatCustomer = customerOrderCount > 1;
 
