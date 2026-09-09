@@ -338,8 +338,11 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           padding: `0 ${sidePaddingPx}px`
         });
 
+        const logoMaxW = data.companyDetails?.receiptLogoWidth || 200;
+        const logoMaxH = data.companyDetails?.receiptLogoHeight || 80;
+
         const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-        const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: 100px; max-width: 156px; object-fit: contain; margin-top: 0;" /></div>` : '';
+        const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: ${logoMaxH}px; max-width: ${logoMaxW}px; object-fit: contain; margin-top: 0;" /></div>` : '';
 
         container.innerHTML = `
           ${logoHtml}
