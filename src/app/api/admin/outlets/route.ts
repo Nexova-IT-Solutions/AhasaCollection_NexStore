@@ -61,12 +61,22 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "DEV_ADMIN") {
-      return NextResponse.json({ message: "Unauthorized: DEV_ADMIN only" }, { status: 403 });
+    if (!session || !["SUPER_ADMIN", "DEV_ADMIN"].includes(session.user.role as string)) {
+      return NextResponse.json({ message: "Unauthorized: Admin privileges required" }, { status: 403 });
     }
 
     const body = await req.json();
-    const { id, name, isActive } = body;
+    const {
+      id,
+      name,
+      isActive,
+      posPrinterName,
+      posPrintMode,
+      receiptCharWidth,
+      receiptLogoWidth,
+      receiptLogoHeight,
+      receiptPrintArea,
+    } = body;
 
     if (!id) {
       return NextResponse.json({ message: "Missing outlet ID" }, { status: 400 });
@@ -78,6 +88,24 @@ export async function PATCH(req: Request) {
     }
     if (typeof isActive === "boolean") {
       updateData.isActive = isActive;
+    }
+    if (posPrinterName !== undefined) {
+      updateData.posPrinterName = posPrinterName ? String(posPrinterName).trim() : null;
+    }
+    if (typeof posPrintMode === "string") {
+      updateData.posPrintMode = posPrintMode;
+    }
+    if (typeof receiptCharWidth === "number") {
+      updateData.receiptCharWidth = receiptCharWidth;
+    }
+    if (typeof receiptLogoWidth === "number") {
+      updateData.receiptLogoWidth = receiptLogoWidth;
+    }
+    if (typeof receiptLogoHeight === "number") {
+      updateData.receiptLogoHeight = receiptLogoHeight;
+    }
+    if (typeof receiptPrintArea === "number") {
+      updateData.receiptPrintArea = receiptPrintArea;
     }
 
     const updated = await db.outlet.update({

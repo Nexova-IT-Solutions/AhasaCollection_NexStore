@@ -22,11 +22,14 @@ import useSWR from "swr";
 import { generateReceiptPdf } from "@/lib/pdf-receipt";
 import { format } from "date-fns";
 
+import { useSession } from "next-auth/react";
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const QUICK_CASH_AMOUNTS = [500, 1000, 2000, 3000, 5000, 10000];
 
 export function CheckoutModal() {
+  const { data: session } = useSession();
   const isOpen = usePosCart((s) => s.isCheckoutOpen);
   const items = usePosCart((s) => s.items);
   const customer = usePosCart((s) => s.customer);
@@ -53,7 +56,29 @@ export function CheckoutModal() {
   const { data: toggles } = useSWR<Record<string, boolean>>("/api/admin/feature-toggles", fetcher);
   const isGiftcardsEnabled = toggles?.storefront_giftcards !== false;
   const isSplitEnabled = toggles?.operations_split_payment !== false;
-  const { data: companyDetails } = useSWR("/api/admin/company-details", fetcher);
+  const { data: rawCompanyDetails } = useSWR("/api/admin/company-details", fetcher);
+  const { data: outletsData } = useSWR("/api/admin/outlets", fetcher);
+
+  // Dynamically resolve printer and alignment settings from logged-in user's assigned outlet/branch
+  const companyDetails = useMemo(() => {
+    if (!rawCompanyDetails) return null;
+    const userOutletId = session?.user?.outletId;
+    if (userOutletId && Array.isArray(outletsData)) {
+      const userOutlet = outletsData.find((o: any) => o.id === userOutletId);
+      if (userOutlet && userOutlet.posPrinterName) {
+        return {
+          ...rawCompanyDetails,
+          posPrinterName: userOutlet.posPrinterName,
+          posPrintMode: userOutlet.posPrintMode || rawCompanyDetails.posPrintMode || "raw",
+          receiptCharWidth: userOutlet.receiptCharWidth ?? rawCompanyDetails.receiptCharWidth ?? 34,
+          receiptLogoWidth: userOutlet.receiptLogoWidth ?? rawCompanyDetails.receiptLogoWidth ?? 200,
+          receiptLogoHeight: userOutlet.receiptLogoHeight ?? rawCompanyDetails.receiptLogoHeight ?? 80,
+          receiptPrintArea: userOutlet.receiptPrintArea ?? rawCompanyDetails.receiptPrintArea ?? 80,
+        };
+      }
+    }
+    return rawCompanyDetails;
+  }, [rawCompanyDetails, outletsData, session?.user?.outletId]);
 
   const [isValidatingGiftCard, setIsValidatingGiftCard] = useState(false);
   const [giftCardBalance, setGiftCardBalance] = useState<number | null>(null);

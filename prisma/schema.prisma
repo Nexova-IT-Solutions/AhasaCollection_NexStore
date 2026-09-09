@@ -993,13 +993,19 @@ model Repository {
 }
 
 model Outlet {
-  id        String    @id @default(cuid())
-  name      String
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  products  Product[]
-  staff     User[]
+  id                String    @id @default(cuid())
+  name              String
+  isActive          Boolean   @default(true)
+  posPrinterName    String?
+  posPrintMode      String    @default("raw") // "raw" or "raster"
+  receiptCharWidth  Int       @default(34)
+  receiptLogoWidth  Int       @default(200)
+  receiptLogoHeight Int       @default(80)
+  receiptPrintArea  Int       @default(80)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  products          Product[]
+  staff             User[]
 }
 
 model StockTransferLog {
