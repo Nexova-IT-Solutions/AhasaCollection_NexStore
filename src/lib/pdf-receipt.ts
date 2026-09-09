@@ -338,11 +338,17 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           padding: `0 ${sidePaddingPx}px`
         });
 
-        const logoMaxW = data.companyDetails?.receiptLogoWidth || 200;
-        const logoMaxH = data.companyDetails?.receiptLogoHeight || 80;
+        const rawLogoW = data.companyDetails?.receiptLogoWidth || 200;
+        const rawLogoH = data.companyDetails?.receiptLogoHeight || 80;
+        
+        // Scale logo size proportionally relative to printable paper width (520px container for 80mm roll)
+        // Cap max logo width to containerPxWidth - 36px so it never clips off printable margins
+        const maxAllowedLogoWidth = Math.max(100, containerPxWidth - 36);
+        const logoMaxW = Math.min(rawLogoW, maxAllowedLogoWidth);
+        const logoMaxH = Math.round((logoMaxW / rawLogoW) * rawLogoH);
 
         const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
-        const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: ${logoMaxH}px; max-width: ${logoMaxW}px; object-fit: contain; margin-top: 0;" /></div>` : '';
+        const logoHtml = originalLogo ? `<div style="margin-top: 0px; margin-bottom: 6px; width: 100%; display: flex; justify-content: center;"><img src="data:image/png;base64,${originalLogo}" style="max-height: ${logoMaxH}px; max-width: ${logoMaxW}px; width: ${logoMaxW}px; height: auto; object-fit: contain; margin-top: 0;" /></div>` : '';
 
         container.innerHTML = `
           ${logoHtml}
