@@ -42,6 +42,7 @@ export default async function AdminUserEditPage({ params }: PageProps) {
         role: true,
         privileges: true,
         templateId: true,
+        outletId: true,
         customPermissions: true,
         phoneNumber: true,
         comments: true,
@@ -165,6 +166,7 @@ export default async function AdminUserEditPage({ params }: PageProps) {
     commissionRate: user.commissionRate,
     commissionMethod: user.commissionMethod ?? "",
     templateId: user.templateId ?? "",
+    outletId: user.outletId ?? "",
     customPermissions:
       (user.customPermissions as Record<string, Record<string, boolean>> | null) ??
       ((user.template?.permissions as Record<string, Record<string, boolean>> | undefined)

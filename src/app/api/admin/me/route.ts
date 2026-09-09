@@ -18,6 +18,13 @@ export async function GET() {
       select: {
         email: true,
         role: true,
+        outletId: true,
+        outlet: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         customPermissions: true,
         template: {
           select: {
