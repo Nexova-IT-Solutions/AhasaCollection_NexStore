@@ -317,14 +317,15 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           position: "fixed",
           left: "-9999px",
           top: "0",
-          width: "576px", // Full 80mm printable width (576 dots)
+          width: "520px", // Safe 80mm printable width (prevents margin clipping on physical printers)
+          boxSizing: "border-box",
           backgroundColor: "white",
           color: "#000000",
           fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-          fontSize: "18.5px",
+          fontSize: "17.5px",
           fontWeight: "600",
           lineHeight: "1.4",
-          padding: "0"
+          padding: "0 18px" // 18px safe side padding for thermal paper feed margins
         });
 
         const originalLogo = logoBase64 ? logoBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
@@ -429,7 +430,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
       } else {
         // THERMAL PRINTER RAW TEXT FORMAT
         const companyName = data.companyDetails?.companyName || "STORE RECEIPT";
-        const charWidth = data.companyDetails?.receiptCharWidth || 42;
+        const charWidth = data.companyDetails?.receiptCharWidth || 34;
         const logoWidth = data.companyDetails?.receiptLogoWidth || 200;
         const logoHeight = data.companyDetails?.receiptLogoHeight || 80;
         
