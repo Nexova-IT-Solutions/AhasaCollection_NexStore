@@ -540,6 +540,7 @@ export function EmployeeForm({ locale, mode, user, templates, initialUserType = 
       }
     : {
         ...(user ?? EMPTY_DEFAULTS),
+        outletId: user?.outletId ?? "",
         templateId:
           user && user.role !== CUSTOMER_ROLE
             ? user.templateId || CUSTOM_TEMPLATE_OPTION
@@ -570,6 +571,7 @@ export function EmployeeForm({ locale, mode, user, templates, initialUserType = 
       ? initialValues
       : {
           ...(user ?? EMPTY_DEFAULTS),
+          outletId: user?.outletId ?? "",
           templateId:
             user && user.role !== CUSTOMER_ROLE
               ? user.templateId || CUSTOM_TEMPLATE_OPTION
