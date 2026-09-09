@@ -306,9 +306,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           
           itemsHtml += `
             <div style="margin-bottom: 6px;">
-              <div>${itemName}</div>
-              ${item.sku ? `<div style="font-size: 14px; color: #333;">SKU: ${item.sku}</div>` : ''}
-              <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 17.5px;">
+              <div style="font-size: 19.5px; font-weight: 600;">${itemName}</div>
+              ${item.sku ? `<div style="font-size: 16px; color: #333;">SKU: ${item.sku}</div>` : ''}
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; font-size: 19.5px;">
                 <div style="flex: 1;">${qtyPrice}</div>
                 <div style="font-weight: bold; text-align: right; white-space: nowrap;">${total}</div>
               </div>
