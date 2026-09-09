@@ -317,9 +317,9 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
         });
 
         const printAreaMm = data.companyDetails?.receiptPrintArea || 80;
-        // Convert print area mm to dots/px (e.g. 80mm -> 560px full width, 58mm -> 384px)
-        const containerPxWidth = Math.round((printAreaMm / 80) * 560);
-        const sidePaddingPx = 2; // Minimal 2px safety padding for true edge-to-edge layout
+        // Convert print area mm to dots/px (80mm head = 512 dots printable width, 58mm = 384 dots)
+        const containerPxWidth = Math.round((printAreaMm / 80) * 512);
+        const sidePaddingPx = 0; // 0px padding to utilize full paper width without side gaps or clipping
         const baseFontSizePx = (printAreaMm < 70 ? 14 : 17.5);
 
         const container = document.createElement("div");
@@ -334,7 +334,7 @@ export async function generateReceiptPdf(data: ReceiptData, format: "print" | "d
           fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
           fontSize: `${baseFontSizePx}px`,
           fontWeight: "600",
-          lineHeight: "1.4",
+          lineHeight: "1.3",
           padding: `0 ${sidePaddingPx}px`
         });
 
