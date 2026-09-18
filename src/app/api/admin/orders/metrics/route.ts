@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasPermission } from "@/lib/permissions";
+import { buildAdminOrderWhere } from "@/lib/admin-orders";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -21,8 +22,19 @@ export async function GET() {
     }
   }
 
-  const pendingOrders = await db.order.count({ where: { orderStatus: "PENDING" } });
-  const totalOrders = await db.order.count();
+  const userOutletId = session.user.outletId || null;
+  const scopedOutletId = hasFullAccess ? null : userOutletId;
+  const baseOutletWhere = buildAdminOrderWhere({ outletId: scopedOutletId });
+
+  const pendingOrders = await db.order.count({
+    where: {
+      ...baseOutletWhere,
+      orderStatus: "PENDING",
+    },
+  });
+  const totalOrders = await db.order.count({
+    where: baseOutletWhere,
+  });
 
   return NextResponse.json({ success: true, pendingOrders, totalOrders });
 }
