@@ -30,11 +30,13 @@ export function buildAdminOrderWhere({
   status,
   payment,
   type,
+  outletId,
 }: {
   q?: string;
   status?: string;
   payment?: string;
   type?: string;
+  outletId?: string | null;
 }): Prisma.OrderWhereInput {
   const trimmedQuery = q?.trim();
   const normalizedStatus = (status || "").trim().toUpperCase();
@@ -75,6 +77,17 @@ export function buildAdminOrderWhere({
     };
   }
 
+  let outletFilter: Prisma.OrderWhereInput = {};
+  if (outletId) {
+    outletFilter = {
+      OR: [
+        { posShift: { operator: { outletId } } },
+        { shift: { operator: { outletId } } },
+        { user: { outletId } },
+      ],
+    };
+  }
+
   return {
     ...(trimmedQuery
       ? {
@@ -88,6 +101,7 @@ export function buildAdminOrderWhere({
     ...(orderStatus ? { orderStatus } : {}),
     ...(paymentStatus ? { paymentStatus } : {}),
     ...typeFilter,
+    ...outletFilter,
   };
 }
 

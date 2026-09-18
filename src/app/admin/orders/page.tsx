@@ -41,7 +41,12 @@ export default async function AdminOrdersPage({ params, searchParams }: PageProp
   const { q, status, payment, type, page } = ordersSearchParamsCache.parse(query);
   const currentPage = Math.max(page, 1);
   const limit = parseInt(query.limit as string || "10") || ADMIN_ORDERS_PAGE_SIZE;
-  const where = buildAdminOrderWhere({ q, status, payment, type });
+
+  // Determine if we should scope orders by user's assigned outlet
+  const userOutletId = session.user.outletId || null;
+  const scopedOutletId = hasFullAccess ? null : userOutletId;
+
+  const where = buildAdminOrderWhere({ q, status, payment, type, outletId: scopedOutletId });
 
   const orders = await db.order.findMany({
     where,
@@ -59,15 +64,26 @@ export default async function AdminOrdersPage({ params, searchParams }: PageProp
     },
   });
 
+  const baseOutletWhere = buildAdminOrderWhere({ outletId: scopedOutletId });
+
   const totalCount = await db.order.count({ where });
-  const totalOrders = await db.order.count();
-  const pendingOrders = await db.order.count({ where: { orderStatus: "PENDING" } });
+  const totalOrders = await db.order.count({ where: baseOutletWhere });
+  const pendingOrders = await db.order.count({
+    where: {
+      ...baseOutletWhere,
+      orderStatus: "PENDING",
+    },
+  });
   const revenueAggregate = await db.order.aggregate({
-    where: { paymentStatus: "PAID" },
+    where: {
+      ...baseOutletWhere,
+      paymentStatus: "PAID",
+    },
     _sum: { total: true },
   });
   const todaysOrders = await db.order.count({
     where: {
+      ...baseOutletWhere,
       createdAt: {
         gte: startOfToday(),
       },
