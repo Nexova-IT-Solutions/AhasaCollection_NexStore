@@ -12,7 +12,7 @@ const productCreateSchema = z.object({
   name: z.string().trim().min(1, REQUIRED_FIELD_MESSAGE),
   nameAr: z.string().optional().nullable(),
   sku: z.string()
-    .max(20, 'SKU cannot exceed 20 characters')
+    .max(50, 'SKU cannot exceed 50 characters')
     .regex(/^[A-Z0-9-]*$/, 'SKU must be uppercase letters, numbers, and hyphens only')
     .optional()
     .or(z.literal('')),

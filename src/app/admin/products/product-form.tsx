@@ -45,7 +45,7 @@ const productFormSchema = z.object({
   name: z.string().trim().min(1, REQUIRED_FIELD_MESSAGE),
   nameAr: z.string().optional().or(z.literal('')),
   sku: z.string()
-    .max(20, 'SKU cannot exceed 20 characters')
+    .max(50, 'SKU cannot exceed 50 characters')
     .regex(/^[A-Z0-9-]*$/, 'SKU must be uppercase letters, numbers, and hyphens only')
     .optional()
     .or(z.literal('')),
@@ -1247,7 +1247,7 @@ export function ProductForm({ locale, mode, categories, occasions, recipients, m
                   </Button>
                 </div>
                 <p className="text-xs text-[#6B5A64]">
-                  Optional. Max 20 characters. Uppercase letters, numbers, and hyphens only.
+                  Optional. Max 50 characters. Uppercase letters, numbers, and hyphens only.
                 </p>
                 {fieldErrors.sku ? <p className="text-sm text-destructive font-semibold">{fieldErrors.sku}</p> : null}
               </div>
